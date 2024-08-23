@@ -1,0 +1,46 @@
+.input-group {
+  position: relative;
+  margin: 5rem 0;
+
+  .floating-label {
+    font-size: 1.7rem;
+    color: $color-black-light;
+    position: absolute;
+    pointer-events: none;
+    top: 0.9rem;
+    left: 1rem;
+    transition: all 0.1s ease;
+  }
+
+  input {
+    padding: 1rem 1.2rem;
+    width: 100%;
+    border: none;
+    border-bottom: 2px solid $color-black-light;
+    font-size: 1.6rem;
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  input:focus ~ .floating-label,
+  input:not(:focus):valid ~ .floating-label {
+    top: -20px;
+    bottom: 0px;
+    left: 0px;
+    font-size: 1.5rem;
+    opacity: 1;
+    color: $color-black;
+  }
+
+  &__icon {
+    position: absolute;
+    top: 40%;
+    right: .4rem;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: $color-black-light;
+    font-size: 2.5rem;
+  }
+}
