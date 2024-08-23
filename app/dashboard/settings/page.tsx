@@ -1,6 +1,5 @@
 "use client";
-import ClearFingerprintOnSensor from "@/components/Modals/ClearFingerprintsOnSensorModal";
-import DeactivateUserModal from "@/components/Modals/DeactivateUserModal";
+
 import OverlayModal from "@/components/Modals/OverlayModal";
 import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
 import Link from "next/link";
@@ -42,17 +41,7 @@ const Settings = () => {
       {/* Reset Modal */}
       {deactivateUser && (
         <OverlayModal onClose={() => setDeactivateUser(false)}>
-          <DeactivateUserModal
-            email={user?.email}
-            closeModal={() => setDeactivateUser(false)}
-          />
-        </OverlayModal>
-      )}
-      {clearAllFingerprints && (
-        <OverlayModal onClose={() => setClearFingerprints(false)}>
-          <ClearFingerprintOnSensor
-            closeModal={() => setClearFingerprints(false)}
-          />
+          <div>Deactivate user</div>
         </OverlayModal>
       )}
     </div>

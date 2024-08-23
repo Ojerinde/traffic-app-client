@@ -1,5 +1,3 @@
-import React from "react";
-
 interface PasswordModalProps {
   requirements: { text: string; isValid: boolean }[];
   show: boolean;

@@ -1,6 +1,5 @@
 import { useLogoutFunc } from "@/hooks/useLogout";
 import { usePathname } from "next/navigation";
-import React from "react";
 
 type LogoutModalProps = {
   onClose: () => void;
