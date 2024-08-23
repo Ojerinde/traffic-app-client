@@ -1,0 +1,18 @@
+.login {
+  &-box {
+    margin-top: -2.5rem;
+    margin-bottom: 3.5rem;
+    width: 100%;
+    text-align: right;
+  }
+  &-link {
+    text-decoration: none;
+    font-size: 1.6rem;
+    width: fit-content;
+    color: $text-color;
+
+    &:hover {
+      color: rgba($text-color, 0.7);
+    }
+  }
+}

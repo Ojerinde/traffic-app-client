@@ -78,7 +78,10 @@ const SignUpForm = () => {
     email: Yup.string()
       .required("Email is required")
       .email("Email is invalid")
-      .matches(/^[a-zA-Z0-9._%+-]+@unilorin\.edu\.ng$/, "Email must end with @unilorin.edu.ng"),
+      .matches(
+        /^[a-zA-Z0-9._%+-]+@unilorin\.edu\.ng$/,
+        "Email must end with @unilorin.edu.ng"
+      ),
     password: Yup.string()
       .required("Password is required")
       .min(6, "Password must be at least 6 characters")
@@ -220,9 +223,7 @@ const SignUpForm = () => {
           showPassword={showPassword}
           updatePasswordVisibility={updatePasswordVisibility}
         />
-        <Link href="/level_adviser/signup" className="login-link">
-          Level Adviser? Signup here
-        </Link>
+
         <div className="login-box">
           <Link href="/reactivate_account" className="login-link">
             Reactivate Account?

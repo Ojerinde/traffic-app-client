@@ -1,0 +1,15 @@
+.button {
+  background-color: $text-color;
+  color: $color-white;
+  letter-spacing: .3rem;
+  font-weight: 400;
+  border-radius: .5rem;
+  font-size: 2rem;
+  width: 100%;
+  padding: 1.3rem 0;
+  cursor: pointer;
+  &:disabled {
+    opacity: 0.5;
+    cursor: no-drop;
+  }
+}

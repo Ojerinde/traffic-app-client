@@ -1,15 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
-import courseReducer from "./courses/CoursesSlice";
-import studentReducer from "./studentss/StudentsSlice";
 import Esp32Reducer from "./esp32/Esp32Slice";
-import ArchivedReducer from "./archived/ArchivedSlice";
 
 export const store = configureStore({
   reducer: {
-    courses: courseReducer,
-    students: studentReducer,
     esp32: Esp32Reducer,
-    archived: ArchivedReducer,
   },
 });
 
