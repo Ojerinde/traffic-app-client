@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import { createExcelFile } from "./ExcelGenerator";
+
 const {
   generateStudentCourseReportHTML,
   generateLecturerReportHTML,
@@ -53,45 +53,8 @@ class Email {
     await this.send("Welcome to the Attendance System Website");
   }
 
-  async sendStudentCourseReport(courseCode, attendancePercentage) {
-    await this.send(
-      generateStudentCourseReportHTML(
-        this.firstName,
-        courseCode,
-        attendancePercentage
-      ),
-      `${courseCode} Attendance Report`
-    );
-  }
 
-  async sendCourseReportFile(courseCode, below50Percent, above50Percent) {
-    const excelStudents = {
-      belowOrEqualFiftyPercent: below50Percent,
-      aboveFiftyPercent: above50Percent,
-    };
-    const excelBuffer = createExcelFile(excelStudents, courseCode);
-    const attachments = [
-      {
-        filename: `Report for ${courseCode}.xlsx`,
-        content: excelBuffer,
-        contentType:
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      },
-    ];
-
-    const students = [...below50Percent, ...above50Percent];
-
-    await this.send(
-      generateLecturerReportHTML(
-        this.firstName,
-        this.role,
-        courseCode,
-        students
-      ),
-      `${courseCode} Attendance Report`,
-      attachments
-    );
-  }
+  
 }
 
 export default Email;
