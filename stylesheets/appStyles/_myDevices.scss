@@ -1,4 +1,39 @@
 .devices {
+  &-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    column-gap: 2rem;
+    & button {
+      all: unset;
+      display: flex;
+      align-items: center;
+      column-gap: 0.7rem;
+      font-size: 2rem;
+      padding: 0.7rem;
+      color: $color-black-light;
+      border-radius: 0.5rem;
+
+      box-shadow: rgba(0, 0, 0, 0.1) 1.95px 1.95px 2.6px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+
+      &:hover {
+        box-shadow: rgba(0, 0, 0, 0.04) 0px 3px 5px;
+      }
+      &:hover svg {
+        transform: rotate(90deg);
+      }
+      & svg {
+        font-size: 3rem;
+        color: rgba($color-yellow, 0.5);
+        transition: transform 0.3s ease;
+        @media screen and (max-width: 1200px) {
+          font-size: 6rem;
+        }
+      }
+    }
+  }
   &-nodevice {
     margin-top: 7rem;
     width: 100%;
@@ -13,7 +48,7 @@
     }
     & p {
       font-size: 2rem;
-      letter-spacing: 0.2rem;
+      letter-spacing: 0.1rem;
       color: rgba($color-yellow, 0.7);
       @media screen and (max-width: 1200px) {
         font-size: 1.5rem;

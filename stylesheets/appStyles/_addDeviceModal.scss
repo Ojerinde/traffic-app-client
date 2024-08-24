@@ -1,0 +1,36 @@
+.addDeviceOverlay {
+  width: 40vw;
+  background-color: rgba($color-white, 0.8);
+  padding: 5rem;
+  position: relative;
+  @media screen and (max-width: 1400px) {
+    width: 50vw;
+  }
+  @media screen and (max-width: 1200px) {
+    width: 60vw;
+  }
+  @media screen and (max-width: 700px) {
+    width: 70vw;
+  }
+  @media screen and (max-width: 500px) {
+    width: 85vw;
+  }
+  &-icon {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    font-size: 3rem;
+    color: $color-black;
+    transition: all 0.3s;
+
+    &:hover {
+      color: rgba($color-black, 0.5);
+      cursor: pointer;
+    }
+  }
+
+  &-text {
+    font-size: 2.3rem;
+    margin: 1rem 0 4rem;
+  }
+}

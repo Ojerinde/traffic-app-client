@@ -50,7 +50,7 @@ const VerifyEmail: React.FC<VerifyEmailProps> = ({ params }) => {
       if (!isLoading && seconds > 0) {
         setSeconds((prevSeconds) => prevSeconds - 1);
       } else if (seconds === 0 && !requestFailed) {
-        router.push("/");
+        router.push("/signup");
       }
     }, 1000);
 

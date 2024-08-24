@@ -20,16 +20,13 @@ const Settings = () => {
       <div>
         <button
           onClick={() => setClearAllDevices(true)}
-          className="coursePage-button"
+          className="page-button"
         >
           Clear All Devices
         </button>
       </div>
       <div>
-        <button
-          onClick={() => setDeactivateUser(true)}
-          className="coursePage-button"
-        >
+        <button onClick={() => setDeactivateUser(true)} className="page-button">
           Deactivate Account
         </button>
       </div>
