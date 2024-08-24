@@ -6,12 +6,12 @@
     font-size: 2.5rem;
     letter-spacing: 0.1rem;
     font-family: "Poetsen One", sans-serif;
-    color: rgba($text-color, 1);
+    color: rgba($color-yellow, 1);
     transition: all 0.3s;
     width: fit-content;
 
     &:hover {
-      color: rgba($text-color, 0.5);
+      color: rgba($color-yellow, 0.5);
     }
   }
   &_password {

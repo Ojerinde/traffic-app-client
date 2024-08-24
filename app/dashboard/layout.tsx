@@ -7,8 +7,7 @@ import { initializeWebSocket } from "./websocket";
 import MobileSideBar from "@/components/Dashboard/MobileSidebar";
 
 const sideBarLinks = [
-  { name: "My Courses", link: "/dashboard/my_courses", iconUrl: "my_courses" },
-  { name: "Device", link: "/dashboard/esp32", iconUrl: "esp32" },
+  { name: "My Devices", link: "/dashboard/devices", iconUrl: "devices" },
   { name: "Settings", link: "/dashboard/settings", iconUrl: "settings" },
 ];
 

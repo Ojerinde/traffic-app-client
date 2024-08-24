@@ -1,19 +1,12 @@
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Typewriter from "typewriter-effect";
 import OverlayModal from "../Modals/OverlayModal";
 import LogoutModal from "../Modals/LogoutModal";
 import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
 import { GiExitDoor } from "react-icons/gi";
 
 const Navigation = () => {
-  const url = usePathname();
-
-  const pathToNavigateTo = url.includes("/level_adviser")
-    ? "/level_adviser/dashboard/profile"
-    : "/update_profile";
-
   const router = useRouter();
   const [showLogoutVerificationModal, setShowLogoutVerificationModal] =
     useState<boolean>(false);
@@ -49,22 +42,19 @@ const Navigation = () => {
         style={{
           overflow: "hidden",
           cursor: "pointer",
-          boxShadow: "1px 1px 1px 1px rgba(0, 0, 0, 0.6)",
+          boxShadow: "rgba(0, 0, 0, 0.15) 2.4px 2.4px 3.2px",
         }}
-        onClick={() => router.push(pathToNavigateTo)}
+        onClick={() => router.push("/")}
       >
         <Image
           src="/images/logo.png"
           alt="Logo"
-          width={isSmallScreen ? 50 : 100}
-          height={isSmallScreen ? 40 : 80}
+          width={isSmallScreen ? 40 : 60}
+          height={isSmallScreen ? 40 : 60}
           style={{ objectFit: "cover" }}
         />
       </figure>
 
-      <div className="navigation-text">
-        {`Greetings, ${loggedInLecturer?.title} ${first} ${last?.[0]}.`}
-      </div>
       <div>
         <button
           type="button"

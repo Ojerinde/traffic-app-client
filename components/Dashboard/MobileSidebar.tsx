@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { usePathname } from "next/navigation";
-import Image from "next/image";
 import OverlayModal from "../Modals/OverlayModal";
 import LogoutModal from "../Modals/LogoutModal";
 import SideBarNavigationItem from "./SidebarNavigationItem";

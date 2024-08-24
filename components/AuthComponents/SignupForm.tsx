@@ -71,17 +71,10 @@ const SignUpForm = () => {
           if (!value) {
             return false;
           }
-          return value.trim().split(" ").length === 2;
+          return value.trim().split(" ").length >= 2;
         }
       ),
-    title: Yup.string().required("Title is required"),
-    email: Yup.string()
-      .required("Email is required")
-      .email("Email is invalid")
-      .matches(
-        /^[a-zA-Z0-9._%+-]+@unilorin\.edu\.ng$/,
-        "Email must end with @unilorin.edu.ng"
-      ),
+    email: Yup.string().required("Email is required").email("Email is invalid"),
     password: Yup.string()
       .required("Password is required")
       .min(6, "Password must be at least 6 characters")
@@ -91,14 +84,13 @@ const SignUpForm = () => {
         "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
       ),
     confirmPassword: Yup.string()
-      .required("Confirm Password is required")
+      .required("You need to confirm your password")
       .oneOf([Yup.ref("password"), ""], "Passwords does not match"),
   });
 
   // Formik validation configurations
   const formik = useFormik({
     initialValues: {
-      title: "",
       name: "",
       email: "",
       password: "",
@@ -109,11 +101,10 @@ const SignUpForm = () => {
     validateOnBlur: true,
     validateOnMount: true,
     async onSubmit(values, actions) {
-      const { confirmPassword, password, email, name, title } = values;
+      const { confirmPassword, password, email, name } = values;
       try {
         const response = await HttpRequest.post("/auth/signup", {
           name: name.trim(),
-          title,
           email,
           confirmPassword,
           password,
@@ -122,6 +113,7 @@ const SignUpForm = () => {
           "You have signup successfully, kindly check your mail for verification link"
         );
       } catch (error: any) {
+        console.log("error", error);
         setShowError(() => ({
           hasError: true,
           message: `${error?.response?.data.message}.`,
@@ -131,7 +123,7 @@ const SignUpForm = () => {
         setTimeout(() => {
           setShowError(() => ({ hasError: false, message: "" }));
           setSuccessMessage("");
-          router.push("/");
+          // router.push("/");
         }, 7000);
       }
     },
@@ -142,23 +134,12 @@ const SignUpForm = () => {
   };
 
   return (
-    <>
+    <section className="signup">
+      <h2 className="signup-title">Signup</h2>
       <form onSubmit={formik.handleSubmit}>
         <InputField
-          id="title"
-          label="Title (Engr, Dr, Prof, etc)"
-          type="text"
-          name="title"
-          invalid={formik.errors.title && formik.touched.title}
-          placeholder=""
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          value={formik.values.title}
-          inputErrorMessage={formik.errors.title}
-        />
-        <InputField
           id="name"
-          label="Name (Surname and firstname)"
+          label="Full Name"
           type="text"
           name="name"
           invalid={formik.errors.name && formik.touched.name}
@@ -170,7 +151,7 @@ const SignUpForm = () => {
         />
         <InputField
           id="email"
-          label="Email (School email)"
+          label="Email"
           type="email"
           name="email"
           invalid={formik.errors.email && formik.touched.email}
@@ -241,7 +222,10 @@ const SignUpForm = () => {
           </Button>
         </section>
       </form>
-    </>
+      <p className="signup-other">
+        Already have an account? <Link href="/login">Login</Link>
+      </p>
+    </section>
   );
 };
 export default SignUpForm;

@@ -3,7 +3,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: rgba($text-color, 0.8);
+  background-color: rgba($color-yellow, 0.8);
 
   @media screen and (max-width: 700px) {
     padding: 1rem 3rem;
@@ -32,7 +32,7 @@
   }
 
   &-logout {
-    background-color: rgba($text-color, 0.3);
+    background-color: rgba($color-yellow, 0.3);
     color: $color-white-dark;
     position: relative;
     width: 6rem;
@@ -44,7 +44,7 @@
     transition: all 0.3s;
 
     &:hover {
-      background-color: rgba($text-color, 1);
+      background-color: rgba($color-yellow, 1);
     }
     &:hover > .icon {
       color: $color-white;
@@ -61,29 +61,29 @@
     }
   }
 
-  &-title {
-    clip-path: polygon(
-      0% 10%,
-      3% 6%,
-      81% 6%,
-      83% 0%,
-      85% 6%,
-      97% 6%,
-      100% 10%,
-      100% 96%,
-      97% 100%,
-      3% 100%,
-      0% 96%
-    );
-    background-color: rgba($text-color, 0.7);
-    box-shadow: 0 1rem 2rem $color-black;
-    padding: 1.5rem 2rem 2rem;
-    color: $color-white;
-    font-size: 1.4rem;
-    letter-spacing: 0.1rem;
-    position: absolute;
-    bottom: -150%;
-    left: 48%;
-    transform: translate(-50%, -50%);
-  }
+  // &-title {
+  //   clip-path: polygon(
+  //     0% 10%,
+  //     3% 6%,
+  //     81% 6%,
+  //     83% 0%,
+  //     85% 6%,
+  //     97% 6%,
+  //     100% 10%,
+  //     100% 96%,
+  //     97% 100%,
+  //     3% 100%,
+  //     0% 96%
+  //   );
+  //   background-color: rgba($color-yellow, 0.7);
+  //   box-shadow: 0 1rem 2rem $color-yellow;
+  //   padding: 1.5rem 2rem 2rem;
+  //   color: $color-white;
+  //   font-size: 1.4rem;
+  //   letter-spacing: 0.1rem;
+  //   position: absolute;
+  //   bottom: -150%;
+  //   left: 48%;
+  //   transform: translate(-50%, -50%);
+  // }
 }

@@ -4,7 +4,7 @@
 
   .floating-label {
     font-size: 1.7rem;
-    color: $color-black-light;
+    color: $color-yellow-light;
     position: absolute;
     pointer-events: none;
     top: 0.9rem;
@@ -16,8 +16,9 @@
     padding: 1rem 1.2rem;
     width: 100%;
     border: none;
-    border-bottom: 2px solid $color-black-light;
+    border-bottom: 2px solid $color-yellow-light;
     font-size: 1.6rem;
+    color: $color-black-light;
 
     &:focus {
       outline: none;
@@ -31,16 +32,16 @@
     left: 0px;
     font-size: 1.5rem;
     opacity: 1;
-    color: $color-black;
+    color: $color-yellow;
   }
 
   &__icon {
     position: absolute;
     top: 40%;
-    right: .4rem;
+    right: 0.4rem;
     transform: translateY(-50%);
     cursor: pointer;
-    color: $color-black-light;
+    color: $color-yellow-light;
     font-size: 2.5rem;
   }
 }

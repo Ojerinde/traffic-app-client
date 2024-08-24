@@ -19,16 +19,6 @@
     }
   }
 
-  &-logout {
-    margin-top: 10rem;
-    width: 100%;
-    box-shadow: 0 0.1rem 0.1rem 0.2rem rgba($text-color, 0.5);
-
-    @media screen and (max-width: 900px) {
-      margin-top: 0 !important;
-    }
-  }
-
   &-item {
     padding: 1.5rem 1rem;
     width: 100%;
@@ -40,7 +30,7 @@
     letter-spacing: 0.2rem;
     text-decoration: none;
     text-transform: uppercase;
-    color: $text-color;
+    color: $color-yellow;
     margin: 1rem 0;
 
     @media screen and (max-width: 1200px) {
@@ -61,7 +51,7 @@
       text-decoration: none;
       text-transform: uppercase;
       color: $color-white;
-      background-color: rgba($text-color, 0.9);
+      background-color: rgba($color-yellow, 0.9);
 
       @media screen and (max-width: 1200px) {
         font-size: 1.4rem;
@@ -70,24 +60,31 @@
     }
   }
   &-icon {
-    color: $text-color;
+    color: $color-yellow;
     font-size: 3rem;
     &__active {
       color: $color-white;
       font-size: 3rem;
     }
   }
+
   &-logout {
+    margin-top: 20rem;
+    width: 100%;
+    box-shadow: 0 0.1rem 0.1rem 0.2rem rgba($color-yellow, 0.5);
     padding: 1.4rem 0;
-    margin-top: 10rem;
-    color: rgba($text-color, 0.7);
+    color: rgba($color-yellow, 0.7);
     letter-spacing: 0.2rem;
     border-radius: 0.1rem;
     font-size: 2rem;
-    border: 0.1rem solid $text-color;
+    border: 0.1rem solid $color-yellow;
     background-color: transparent;
     cursor: pointer;
     position: relative;
+
+    @media screen and (max-width: 900px) {
+      margin-top: 0 !important;
+    }
 
     &::after {
       content: "";
@@ -97,7 +94,7 @@
       height: 100%;
       width: 0.4rem;
       color: $color-white;
-      background-color: rgba($text-color, 0.5);
+      background-color: rgba($color-yellow, 0.5);
       transform: scaleY(0);
       transform-origin: top;
       transition: transform 0.2s, width 0.4s cubic-bezier(1, 0, 0, 1) 0.2s,
@@ -106,7 +103,7 @@
 
     &:hover::after {
       transform: scaleY(1);
-      background-color: rgba($text-color, 0.5);
+      background-color: rgba($color-yellow, 0.5);
       color: $color-white;
       width: 100%;
     }

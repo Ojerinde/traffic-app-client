@@ -7,7 +7,7 @@ import * as Yup from "yup";
 import HttpRequest from "@/store/services/HttpRequest";
 import LoadingSpinner from "@/components/UI/LoadingSpinner/LoadingSpinner";
 import Button from "@/components/UI/Button/Button";
-import bg from "@/public/images/f.jpeg";
+import bg from "@/public/images/tra.avif";
 import InformationInput from "@/components/UI/Input/InformationInput";
 
 interface ReactivateAccountProps {}

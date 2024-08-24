@@ -2,11 +2,11 @@
 const nextConfig = {
   async redirects() {
     return [
-      // {
-      //   source: "/dashboard",
-      //   destination: "/dashboard/my_courses",
-      //   permanent: true,
-      // },
+      {
+        source: "/dashboard",
+        destination: "/dashboard/devices",
+        permanent: true,
+      },
     ];
   },
   images: {

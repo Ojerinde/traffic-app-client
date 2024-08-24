@@ -29,14 +29,14 @@
       color: $text-success-color;
       line-height: 3rem;
       font-size: 2rem;
-      letter-spacing: .1rem;
+      letter-spacing: 0.1rem;
     }
 
     &__para {
-        color: $text-color;
-        font-size: 2rem;
-        letter-spacing: .1rem;
-      }
+      color: $color-yellow;
+      font-size: 2rem;
+      letter-spacing: 0.1rem;
+    }
 
     &__error {
       margin: 2rem 0 2rem;
@@ -44,7 +44,7 @@
       line-height: 3rem;
 
       font-size: 2rem;
-      letter-spacing: .1rem;
+      letter-spacing: 0.1rem;
     }
   }
 
@@ -58,5 +58,4 @@
       color: $text-success-color;
     }
   }
-
 }

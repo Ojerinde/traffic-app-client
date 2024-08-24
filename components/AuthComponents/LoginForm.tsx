@@ -63,7 +63,7 @@ const LoginForm = () => {
       setItemToCookie("token", token, +tokenExpiresIn);
       SetItemToLocalStorage("user", user);
 
-      router.push("/update_profile");
+      router.push("/dashboard");
     } catch (error: any) {
       console.log("login error", error);
       const errorMessage =
@@ -91,6 +91,7 @@ const LoginForm = () => {
 
   return (
     <section className="login">
+      <h2 className="login-title">Login</h2>
       <Formik
         initialValues={initialValues}
         onSubmit={signInHandler}
@@ -142,6 +143,9 @@ const LoginForm = () => {
           </form>
         )}
       </Formik>
+      <p className="login-other">
+        Do not have an account? <Link href="/signup">Signup</Link>
+      </p>
     </section>
   );
 };

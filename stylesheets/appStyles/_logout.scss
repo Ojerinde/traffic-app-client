@@ -20,7 +20,7 @@
   &-text {
     font-size: 2.5rem;
     text-align: center;
-    color: $text-color;
+    color: $color-yellow;
   }
 
   &-buttons {
@@ -35,23 +35,23 @@
       font-size: 2rem;
       letter-spacing: 0.1rem;
       font-weight: bold;
-      box-shadow: 0 0.1rem 0.1rem 0.1rem rgba($text-color, 0.5);
+      box-shadow: 0 0.1rem 0.1rem 0.1rem rgba($color-yellow, 0.5);
       transition: all 0.3s;
 
       &:hover {
         transform: translateY(2px);
-        box-shadow: 0 0.1rem 0.1rem 0.1rem rgba($text-color, 0.2);
+        box-shadow: 0 0.1rem 0.1rem 0.1rem rgba($color-yellow, 0.2);
       }
     }
 
     &__button1 {
-      background-color: $text-color;
+      background-color: $color-yellow;
       color: $color-white;
     }
     &__button2 {
       background-color: rgba($color-white, 0.8);
-      border: 0.2rem solid $text-color;
-      color: $text-color;
+      border: 0.2rem solid $color-yellow;
+      color: $color-yellow;
     }
   }
 }
