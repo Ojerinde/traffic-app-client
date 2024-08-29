@@ -52,7 +52,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ params }) => {
       const { password, confirmPassword } = values;
       try {
         const response = await HttpRequest.patch(
-          `/auth/resetPassword/${params.resetPasswordToken}`,
+          `/auth/admin/resetPassword/${params.resetPasswordToken}`,
           {
             password,
             confirmPassword,
@@ -138,7 +138,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ params }) => {
             className="forgot-card__button update-container__button"
             type="button"
             onClick={() => {
-              router.push("/login");
+              router.push("/admin/login");
             }}
           >
             Back to login

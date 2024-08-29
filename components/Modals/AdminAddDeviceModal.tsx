@@ -4,10 +4,9 @@ import InformationInput from "../UI/Input/InformationInput";
 import Button from "../UI/Button/Button";
 import { useEffect, useState } from "react";
 import { MdOutlineClose } from "react-icons/md";
-import { getWebSocket, initializeWebSocket } from "@/app/dashboard/websocket";
 import { emitToastMessage } from "@/utils/toastFunc";
 
-interface AddDeviceModalProps {
+interface AdminAddDeviceModalProps {
   closeModal: () => void;
 }
 
@@ -16,14 +15,12 @@ interface FormValuesType {
   deviceId: string;
 }
 
-const AddDeviceModal: React.FC<AddDeviceModalProps> = ({ closeModal }) => {
+const AdminAddDeviceModal: React.FC<AdminAddDeviceModalProps> = ({
+  closeModal,
+}) => {
   const [isAddingDevice, setisAddingDevice] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-
-  useEffect(() => {
-    initializeWebSocket();
-  }, []);
 
   const formik = useFormik<FormValuesType>({
     initialValues: {
@@ -57,9 +54,6 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({ closeModal }) => {
       const { deviceName, deviceId } = values;
       try {
       } catch (error) {
-        setisAddingDevice(false);
-        setErrorMessage("Unable to add device. Try again!");
-        emitToastMessage("Unable to add device. Try again!", "error");
       } finally {
         setTimeout(() => {
           setErrorMessage("");
@@ -67,18 +61,13 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({ closeModal }) => {
       }
     },
   });
-  const addingDeviceOptions = ["With ID", "QR", "Buy"];
 
   return (
     <div className="addDeviceOverlay">
       <div className="" onClick={closeModal}>
         <MdOutlineClose className="addDeviceOverlay-icon" />
       </div>
-      <ul>
-        {addingDeviceOptions.map((opt: string, index: number) => (
-          <li key={index}>{opt}</li>
-        ))}
-      </ul>
+   
       <h2 className="addDeviceOverlay-text">Add Device</h2>
       <form onSubmit={formik.handleSubmit}>
         <InformationInput
@@ -114,4 +103,4 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({ closeModal }) => {
     </div>
   );
 };
-export default AddDeviceModal;
+export default AdminAddDeviceModal;

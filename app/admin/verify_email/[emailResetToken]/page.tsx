@@ -29,7 +29,7 @@ const VerifyEmail: React.FC<VerifyEmailProps> = ({ params }) => {
     (async () => {
       try {
         const response = await HttpRequest.patch(
-          `/auth/verifyEmail/${emailResetToken}`,
+          `/auth/admin/verifyEmail/${emailResetToken}`,
           {}
         );
         console.log("verify response", response);
@@ -50,7 +50,7 @@ const VerifyEmail: React.FC<VerifyEmailProps> = ({ params }) => {
       if (!isLoading && seconds > 0) {
         setSeconds((prevSeconds) => prevSeconds - 1);
       } else if (seconds === 0 && !requestFailed) {
-        router.push("/signup");
+        router.push("/admin/signup");
       }
     }, 1000);
 
@@ -80,7 +80,7 @@ const VerifyEmail: React.FC<VerifyEmailProps> = ({ params }) => {
         <div className="verify-card">
           <BiSolidError className="verify-icon__error" />
           <h4 className="verify-card__error">{message}</h4>
-          <Button onClick={() => router.push("/signup")} type="button">
+          <Button onClick={() => router.push("/admin/signup")} type="button">
             Signup Again
           </Button>
         </div>
