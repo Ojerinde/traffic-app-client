@@ -119,9 +119,9 @@ const Devices = () => {
               {" "}
               Status:{" "}
               {status ? (
-                <FaToggleOn className="devices-icon_off" />
+                <FaToggleOn className="devices-icon_on" />
               ) : (
-                <FaToggleOff className="devices-icon_on" />
+                <FaToggleOff className="devices-icon_off" />
               )}{" "}
             </p>
             {/* <Toggle type="a" checked={status} /> */}
