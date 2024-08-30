@@ -13,6 +13,12 @@ import { RiCreativeCommonsZeroFill } from "react-icons/ri";
 import { initializeWebSocket } from "@/app/dashboard/websocket";
 import Toggle from "@/components/UI/Toggle/Toggle";
 
+interface Message {
+  event: string;
+  source: string;
+  timestamp: string;
+}
+
 const Devices = () => {
   const [devices, setDevices] = useState<any[]>([]);
   // const [statuses, setStatuses] = useState<{ [key: string]: string }>({});
@@ -46,6 +52,22 @@ const Devices = () => {
     getAlDevices();
   }, [deviceType?.department]);
 
+  let pingTimeout: any;
+
+  function handlePingReceived(message: Message) {
+    console.log("Ping received from hardware at:", message.timestamp);
+    setStatus(true);
+
+    if (pingTimeout) {
+      clearTimeout(pingTimeout);
+    }
+
+    pingTimeout = setTimeout(() => {
+      setStatus(false);
+      console.log("No ping received, status set to false");
+    }, 10000);
+  }
+
   useEffect(() => {
     const ws = initializeWebSocket();
 
@@ -53,12 +75,7 @@ const Devices = () => {
       const message = JSON.parse(event.data);
 
       if (message.event === "ping_received" && message.source === "hardware") {
-        console.log("Ping received from hardware at:", message.timestamp);
-        setStatus(true);
-        // setStatuses((prevStatuses) => ({
-        //   ...prevStatuses,
-        //   [message.deviceId]: "online",
-        // }));
+        handlePingReceived(message);
       }
     };
 
