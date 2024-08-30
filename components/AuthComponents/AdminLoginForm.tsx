@@ -144,7 +144,7 @@ const AdminLoginForm = () => {
         )}
       </Formik>
       <p className="login-other">
-        Do not have an account? <Link href="/signup">Signup</Link>
+        Do not have an account? <Link href="/admin/signup">Signup</Link>
       </p>
     </section>
   );

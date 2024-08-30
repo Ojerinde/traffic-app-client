@@ -17,14 +17,6 @@ export const initializeWebSocket = () => {
     ws_socket.onerror = (error) => {
       console.log("WebSocket error:", error);
     };
-
-    ws_socket.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      if (message.event === "ping") {
-        console.log("Ping even received");
-        ws_socket?.send(JSON.stringify({ event: "pong" }));
-      }
-    };
   }
 
   return ws_socket;

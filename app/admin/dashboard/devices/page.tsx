@@ -1,14 +1,21 @@
 "use client";
 
 import AddDeviceModal from "@/components/Modals/AddDeviceModal";
+import AdminAddDeviceModal from "@/components/Modals/AdminAddDeviceModal";
 import OverlayModal from "@/components/Modals/OverlayModal";
+import HttpRequest from "@/store/services/HttpRequest";
+import { deviceTypes } from "@/utils/deviceTypes";
+import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
-import { FaBook, FaPlus } from "react-icons/fa";
+import { useEffect, useState } from "react";
+import { FaPlus } from "react-icons/fa";
+import { BsDeviceSsd } from "react-icons/bs";
 import { RiCreativeCommonsZeroFill } from "react-icons/ri";
+import { getWebSocket, initializeWebSocket } from "@/app/dashboard/websocket";
 
 const Devices = () => {
-  const devices: [] = [];
+  const [devices, setDevices] = useState<any[]>([]);
+  const [statuses, setStatuses] = useState<{ [key: string]: string }>({});
   const pathname = usePathname();
   const router = useRouter();
   const [showAddDeviceModal, setShowAddDeviceModal] = useState<boolean>(false);
@@ -16,6 +23,55 @@ const Devices = () => {
   const handleRedirectionToDevicePage = (deviceId: string) => {
     router.push(`${pathname}/${deviceId}`);
   };
+
+  // Just for testing: Remeber to create a store for this.
+  const adminUser = GetItemFromLocalStorage("user");
+  const deviceType = deviceTypes.find(
+    (dev) => dev.department === adminUser.department
+  );
+
+  useEffect(() => {
+    const getAlDevices = async () => {
+      try {
+        const { data } = await HttpRequest.get(
+          `/admin/getDevice/${deviceType?.department}`
+        );
+        console.log("data", data);
+        setDevices(data.devices);
+      } catch (error) {
+        console.log("error", error);
+      }
+    };
+    getAlDevices();
+  }, [deviceType?.department]);
+
+  useEffect(() => {
+    const ws = initializeWebSocket();
+
+    const handleWebSocketMessage = (event: MessageEvent) => {
+      const message = JSON.parse(event.data);
+
+      if (message.event === "ping_received" && message.source === "hardware") {
+        console.log("Ping received from hardware at:", message.timestamp);
+
+        setStatuses((prevStatuses) => ({
+          ...prevStatuses,
+          [message.deviceId]: "online",
+        }));
+      }
+    };
+
+    if (ws) {
+      ws.onmessage = handleWebSocketMessage;
+    }
+
+    return () => {
+      if (ws) {
+        ws.close();
+      }
+    };
+  }, []);
+
   return (
     <aside>
       <div className="devices-header">
@@ -25,7 +81,9 @@ const Devices = () => {
         </button>
         {showAddDeviceModal && (
           <OverlayModal onClose={() => setShowAddDeviceModal(false)}>
-            <AddDeviceModal closeModal={() => setShowAddDeviceModal(false)} />
+            <AdminAddDeviceModal
+              closeModal={() => setShowAddDeviceModal(false)}
+            />
           </OverlayModal>
         )}
       </div>
@@ -46,15 +104,16 @@ const Devices = () => {
       <ul className="devices-list">
         {devices.map((device: any, index) => (
           <li key={index} className="devices-item">
-            <FaBook className="devices-item__icon" />
+            <BsDeviceSsd className="devices-item__icon" />
             <div className="devices-item__details">
               <h3
                 onClick={() => handleRedirectionToDevicePage(device.deviceId)}
               >
-                {device.type}
+                {device.deviceType}
               </h3>
-              <p>{device.name}</p>
+              <p>{device.deviceId}</p>
             </div>
+            <p> status: {statuses[device.deviceId] || "offline"} </p>
           </li>
         ))}
       </ul>

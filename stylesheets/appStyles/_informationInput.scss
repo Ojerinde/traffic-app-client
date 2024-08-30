@@ -24,6 +24,10 @@
     }
     &::placeholder {
       font-size: 1.4rem;
+      color: $color-black-light;
+    }
+    &:read-only {
+      cursor: no-drop;
     }
   }
 

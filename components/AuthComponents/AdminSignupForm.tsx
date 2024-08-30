@@ -103,10 +103,9 @@ const AdminSignUpForm = () => {
     async onSubmit(values, actions) {
       const { confirmPassword, password, email, name } = values;
       // TODO: Get the department from the admin email
-      const dummyEmail = "ojerindejoel@traffic.phirex.com";
-      const start = dummyEmail.lastIndexOf("@") + 1;
-      const end = dummyEmail.indexOf(".", start);
-      const department = dummyEmail.slice(start, end);
+      const start = email.lastIndexOf("@") + 1;
+      const end = email.indexOf(".", start);
+      const department = email.slice(start, end);
 
       try {
         const response = await HttpRequest.post("/auth/admin/signup", {
@@ -230,7 +229,7 @@ const AdminSignUpForm = () => {
         </section>
       </form>
       <p className="signup-other">
-        Already have an account? <Link href="/login">Login</Link>
+        Already have an account? <Link href="/admin/login">Login</Link>
       </p>
     </section>
   );
