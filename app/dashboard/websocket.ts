@@ -7,6 +7,17 @@ export const initializeWebSocket = () => {
 
     ws_socket.onopen = () => {
       console.log("WebSocket connection established");
+      console.log("WebSocket readyState:", ws_socket?.readyState);
+      if (ws_socket?.readyState === WebSocket.OPEN) {
+        ws_socket.send(
+          JSON.stringify({
+            event: "identify",
+            clientType: "web_app",
+          })
+        );
+      } else {
+        console.error("WebSocket connection is not open.");
+      }
     };
 
     ws_socket.onclose = () => {
