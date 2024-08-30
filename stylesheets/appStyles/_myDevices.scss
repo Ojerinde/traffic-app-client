@@ -84,6 +84,26 @@
   }
   &-list {
     list-style: none;
+    & p {
+      font-size: 1.7rem;
+      font-weight: bold;
+      margin-top: 0.4rem;
+      letter-spacing: 0.1rem;
+      color: rgba($color-yellow, 0.7);
+      display: flex;
+      align-items: center;
+    }
+  }
+  &-icon_off {
+    font-size: 3rem;
+    color: rgba(red, 0.5);
+    transition: transform 0.3s ease;
+  }
+
+  &-icon_on {
+    font-size: 3rem;
+    color: rgba(green, 0.5);
+    transition: transform 0.3s ease;
   }
   &-item {
     display: flex;
@@ -132,6 +152,14 @@
         margin-top: 0.4rem;
         letter-spacing: 0.1rem;
         color: rgba($color-yellow, 0.7);
+        svg {
+          font-size: 1rem;
+          color: rgba($color-yellow, 0.5);
+          transition: transform 0.3s ease;
+          @media screen and (max-width: 1200px) {
+            font-size: 6rem;
+          }
+        }
       }
     }
     &__actions {

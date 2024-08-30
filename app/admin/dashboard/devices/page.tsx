@@ -7,14 +7,16 @@ import { deviceTypes } from "@/utils/deviceTypes";
 import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaToggleOff, FaToggleOn } from "react-icons/fa";
 import { BsDeviceSsd } from "react-icons/bs";
 import { RiCreativeCommonsZeroFill } from "react-icons/ri";
 import { initializeWebSocket } from "@/app/dashboard/websocket";
+import Toggle from "@/components/UI/Toggle/Toggle";
 
 const Devices = () => {
   const [devices, setDevices] = useState<any[]>([]);
-  const [statuses, setStatuses] = useState<{ [key: string]: string }>({});
+  // const [statuses, setStatuses] = useState<{ [key: string]: string }>({});
+  const [status, setStatus] = useState<boolean>(false);
   const pathname = usePathname();
   const router = useRouter();
   const [showAddDeviceModal, setShowAddDeviceModal] = useState<boolean>(false);
@@ -52,11 +54,11 @@ const Devices = () => {
 
       if (message.event === "ping_received" && message.source === "hardware") {
         console.log("Ping received from hardware at:", message.timestamp);
-
-        setStatuses((prevStatuses) => ({
-          ...prevStatuses,
-          [message.deviceId]: "online",
-        }));
+        setStatus(true);
+        // setStatuses((prevStatuses) => ({
+        //   ...prevStatuses,
+        //   [message.deviceId]: "online",
+        // }));
       }
     };
 
@@ -112,7 +114,17 @@ const Devices = () => {
               </h3>
               <p>{device.deviceId}</p>
             </div>
-            <p> status: {statuses[device.deviceId] || "offline"} </p>
+            {/* <p> status: {statuses[device.deviceId] || "offline"} </p> */}
+            <p>
+              {" "}
+              Status:{" "}
+              {status ? (
+                <FaToggleOn className="devices-icon_off" />
+              ) : (
+                <FaToggleOff className="devices-icon_on" />
+              )}{" "}
+            </p>
+            {/* <Toggle type="a" checked={status} /> */}
           </li>
         ))}
       </ul>
