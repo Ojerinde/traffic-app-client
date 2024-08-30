@@ -1,6 +1,5 @@
 "use client";
 
-import AddDeviceModal from "@/components/Modals/AddDeviceModal";
 import AdminAddDeviceModal from "@/components/Modals/AdminAddDeviceModal";
 import OverlayModal from "@/components/Modals/OverlayModal";
 import HttpRequest from "@/store/services/HttpRequest";
@@ -11,7 +10,7 @@ import { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { BsDeviceSsd } from "react-icons/bs";
 import { RiCreativeCommonsZeroFill } from "react-icons/ri";
-import { getWebSocket, initializeWebSocket } from "@/app/dashboard/websocket";
+import { initializeWebSocket } from "@/app/dashboard/websocket";
 
 const Devices = () => {
   const [devices, setDevices] = useState<any[]>([]);
@@ -27,7 +26,7 @@ const Devices = () => {
   // Just for testing: Remeber to create a store for this.
   const adminUser = GetItemFromLocalStorage("user");
   const deviceType = deviceTypes.find(
-    (dev) => dev.department === adminUser.department
+    (dev) => dev.department === adminUser?.department
   );
 
   useEffect(() => {
