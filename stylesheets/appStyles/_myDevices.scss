@@ -84,27 +84,37 @@
   }
   &-list {
     list-style: none;
+  }
+  &_off,
+  &_on {
+    border-radius: 50%;
+    width: 5rem;
+    height: 5rem;
+    display: flex;
+    justify-content: center;
+    font-weight: bold;
+    align-items: center;
     & p {
-      font-size: 1.7rem;
-      font-weight: bold;
-      margin-top: 0.4rem;
-      letter-spacing: 0.1rem;
-      color: rgba($color-yellow, 0.7);
       display: flex;
+      justify-content: center;
       align-items: center;
+      width: 3.8rem;
+      height: 3.8rem;
+      border-radius: 50%;
+      background-color: rgba(rgb(215, 208, 208), 0.5);
+      font-size: 1.2rem;
+      box-shadow: rgba(50, 50, 93, 0.5) 0px 2px 5px -1px,
+        rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     }
   }
-  &-icon_off {
-    font-size: 3rem;
-    color: rgba(red, 0.5);
-    transition: transform 0.3s ease;
+  &_off {
+    background-color: rgba(red, 0.5);
   }
 
-  &-icon_on {
-    font-size: 3rem;
-    color: rgba(green, 0.5);
-    transition: transform 0.3s ease;
+  &_on {
+    background-color: rgba(green, 0.5);
   }
+
   &-item {
     display: flex;
     align-items: center;
@@ -113,6 +123,16 @@
     border: 0.1rem solid rgba($color-yellow, 0.2);
     border-radius: 0.5rem;
     box-shadow: 0 0.1rem 0.1rem 0.1rem rgba($color-yellow, 0.5);
+
+    &__status {
+      font-size: 1.7rem;
+      font-weight: bold;
+      letter-spacing: 0.1rem;
+      color: rgba($color-yellow, 0.7);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
 
     &__icon {
       font-size: 3.5rem;

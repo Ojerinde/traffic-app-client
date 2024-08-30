@@ -65,7 +65,7 @@ const Devices = () => {
     pingTimeout = setTimeout(() => {
       setStatus(false);
       console.log("No ping received, status set to false");
-    }, 10000);
+    }, 12000);
   }
 
   useEffect(() => {
@@ -131,17 +131,18 @@ const Devices = () => {
               </h3>
               <p>{device.deviceId}</p>
             </div>
-            {/* <p> status: {statuses[device.deviceId] || "offline"} </p> */}
-            <p>
-              {" "}
-              Status:{" "}
+            <p className="devices-item__status">
+              Status:
               {status ? (
-                <FaToggleOn className="devices-icon_on" />
+                <div className="devices_on">
+                  <p>ON</p>
+                </div>
               ) : (
-                <FaToggleOff className="devices-icon_off" />
-              )}{" "}
+                <div className="devices_off">
+                  <p>OFF</p>
+                </div>
+              )}
             </p>
-            {/* <Toggle type="a" checked={status} /> */}
           </li>
         ))}
       </ul>
