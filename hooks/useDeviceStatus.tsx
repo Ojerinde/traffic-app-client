@@ -27,7 +27,7 @@ export const useDeviceStatus = () => {
 
     const handleWebSocketMessage = (event: MessageEvent) => {
       const message = JSON.parse(event.data);
-
+      console.log("Event received", message);
       if (
         message.event === "ping_received" &&
         message?.source.type === "hardware"
