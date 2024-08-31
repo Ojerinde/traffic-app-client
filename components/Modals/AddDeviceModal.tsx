@@ -6,7 +6,6 @@ import { useState } from "react";
 import { MdOutlineClose } from "react-icons/md";
 import HttpRequest from "@/store/services/HttpRequest";
 import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
-import LoadingSpinner from "../UI/LoadingSpinner/LoadingSpinner";
 import { emitToastMessage } from "@/utils/toastFunc";
 import { getUserDevice } from "@/store/devices/UserDeviceSlice";
 import { useAppDispatch } from "@/hooks/reduxHook";
@@ -38,7 +37,7 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({ closeModal }) => {
   const user = GetItemFromLocalStorage("user");
 
   const getDeviceToBeAddedDetail = async (deviceId: string) => {
-    console.log("Triggered");
+    if (!deviceId) return;
     setIsFetchingDeviceToBeAddedDetails(true);
     try {
       const { data } = await HttpRequest.get(`/getDeviceDetail/${deviceId}`);
@@ -51,6 +50,7 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({ closeModal }) => {
       setIsFetchingDeviceToBeAddedDetails(false);
     } catch (error: any) {
       console.log("Confirm device Id eror", error);
+      setDeviceToBeAddedDetails(null);
       emitToastMessage(error?.response.data.message, "error");
       setIsFetchingDeviceToBeAddedDetails(false);
     }
@@ -106,30 +106,41 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({ closeModal }) => {
           <>
             <h2 className="addDeviceOverlay-text">Add Device With ID</h2>
             <form onSubmit={formik.handleSubmit}>
-              <InformationInput
-                id="deviceId"
-                type="text"
-                name="deviceId"
-                value={formik.values.deviceId}
-                onChange={(e) => {
-                  formik.handleChange(e);
-                  // if (
-                  //   !formik.errors.deviceId &&
-                  //   formik.touched.deviceId &&
-                  //   formik.values.deviceId.length > 6
-                  // )
-                  // getDeviceToBeAddedDetail(formik.values.deviceId);
-                }}
-                onBlur={(e) => {
-                  formik.handleBlur(e);
-                  if (!formik.errors.deviceId && formik.touched.deviceId)
-                    getDeviceToBeAddedDetail(formik.values.deviceId);
-                }}
-                inputErrorMessage={formik.errors.deviceId}
-                invalid={!!formik.errors.deviceId && formik.touched.deviceId}
-                placeholder="Enter the Device ID"
-              />
-              {isFetchingDeviceToBeAddedDetails && <LoadingSpinner />}
+              <div className="addDeviceOverlay__firstrow">
+                <InformationInput
+                  id="deviceId"
+                  type="text"
+                  name="deviceId"
+                  value={formik.values.deviceId}
+                  onChange={(e) => {
+                    formik.handleChange(e);
+                  }}
+                  onBlur={(e) => {
+                    formik.handleBlur(e);
+                    // if (!formik.errors.deviceId && formik.touched.deviceId) getDeviceToBeAddedDetail(formik.values.deviceId);
+                  }}
+                  inputErrorMessage={formik.errors.deviceId}
+                  invalid={!!formik.errors.deviceId && formik.touched.deviceId}
+                  placeholder="Enter the Device ID"
+                />
+                {
+                  <button
+                    className="addDeviceOverlay__verify"
+                    disabled={
+                      !!formik.errors.deviceId && formik.touched.deviceId
+                    }
+                    type="button"
+                    onClick={() =>
+                      getDeviceToBeAddedDetail(formik.values.deviceId)
+                    }
+                  >
+                    {isFetchingDeviceToBeAddedDetails
+                      ? "Verifying..."
+                      : "Verify ID"}
+                  </button>
+                }
+              </div>
+
               {deviceToBeAddedDetails?.type && (
                 <InformationInput
                   id="deviceType"
@@ -152,7 +163,11 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({ closeModal }) => {
               )}
               <Button
                 type="submit"
-                disabled={isAddingDevice || !formik.isValid}
+                disabled={
+                  isAddingDevice ||
+                  !formik.isValid ||
+                  !deviceToBeAddedDetails?.type
+                }
               >
                 {isAddingDevice ? "Adding..." : "Add"}
               </Button>
