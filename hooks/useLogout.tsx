@@ -1,13 +1,20 @@
 import { removeItemFromCookie } from "@/utils/cookiesFunc";
 import { RemoveItemFromLocalStorage } from "@/utils/localStorageFunc";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export const useLogoutFunc = () => {
   const router = useRouter();
+  const pathname = usePathname();
 
   const logout = (url: string) => {
-    removeItemFromCookie("token");
-    RemoveItemFromLocalStorage("user");
+    console.log("pathname from logout", pathname);
+    if (pathname.startsWith("/admin")) {
+      removeItemFromCookie("adminToken");
+      RemoveItemFromLocalStorage("adminUser");
+    } else {
+      removeItemFromCookie("token");
+      RemoveItemFromLocalStorage("user");
+    }
     router.push(url);
   };
 

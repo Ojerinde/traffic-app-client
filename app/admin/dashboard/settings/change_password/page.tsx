@@ -49,7 +49,7 @@ const ChangePasswordPage = () => {
       const { confirmNewPassword, newPassword, oldPassword } = values;
       try {
         const response = await HttpRequest.patch("/auth/admin/updatePassword", {
-          email: GetItemFromLocalStorage("user").email,
+          email: GetItemFromLocalStorage("adminUser").email,
           confirmNewPassword,
           newPassword,
           oldPassword,

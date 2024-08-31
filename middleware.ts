@@ -3,9 +3,13 @@ import { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
+  const adminToken = request.cookies.get("adminToken")?.value;
 
-  if (request.nextUrl.pathname.includes("/dashboard") && !token)
-    return NextResponse.redirect(new URL("/", request.url));
+  if (request.nextUrl.pathname.startsWith("/dashboard") && !token)
+    return NextResponse.redirect(new URL("/login", request.url));
+
+  if (request.nextUrl.pathname.startsWith("/admin") && !adminToken)
+    return NextResponse.redirect(new URL("/admin/login", request.url));
 
   return NextResponse.next();
 }

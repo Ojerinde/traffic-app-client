@@ -54,14 +54,14 @@ const AdminLoginForm = () => {
       console.log("login response", response);
       // Destructuring the response.data
       const {
-        data: { user },
-        token,
+        data: { adminUser },
+        adminToken,
         tokenExpiresIn,
       } = response.data;
 
       // Setting item to local strorage and cookies
-      setItemToCookie("token", token, +tokenExpiresIn);
-      SetItemToLocalStorage("user", user);
+      setItemToCookie("adminToken", adminToken, +tokenExpiresIn / 24);
+      SetItemToLocalStorage("adminUser", adminUser);
 
       router.push("/admin/dashboard");
     } catch (error: any) {
@@ -86,7 +86,7 @@ const AdminLoginForm = () => {
   };
 
   useEffect(() => {
-    RemoveItemFromLocalStorage("user");
+    RemoveItemFromLocalStorage("adminUser");
   }, []);
 
   return (

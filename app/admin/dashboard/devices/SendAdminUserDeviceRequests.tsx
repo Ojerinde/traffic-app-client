@@ -16,7 +16,7 @@ const SendAdminUserDeviceRequests: React.FC<
 > = ({ children }) => {
   const dispatch = useAppDispatch();
 
-  const adminUser = GetItemFromLocalStorage("user");
+  const adminUser = GetItemFromLocalStorage("adminUser");
   const deviceType = deviceTypes.find(
     (dev) => dev.department === adminUser?.department
   );

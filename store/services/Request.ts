@@ -1,7 +1,10 @@
 import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
 import axios from "axios";
 
-const token = GetItemFromLocalStorage("token");
+const userToken = GetItemFromLocalStorage("token");
+const adminToken = GetItemFromLocalStorage("adminToken");
+const token = userToken ? userToken : adminToken;
+
 const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 const instance = axios.create({

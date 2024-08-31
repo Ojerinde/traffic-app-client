@@ -60,7 +60,7 @@ const LoginForm = () => {
       } = response.data;
 
       // Setting item to local strorage and cookies
-      setItemToCookie("token", token, +tokenExpiresIn);
+      setItemToCookie("token", token, +tokenExpiresIn / 24);
       SetItemToLocalStorage("user", user);
 
       router.push("/dashboard");
