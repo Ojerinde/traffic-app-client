@@ -3,7 +3,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import OverlayModal from "../Modals/OverlayModal";
 import LogoutModal from "../Modals/LogoutModal";
-import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
 import { GiExitDoor } from "react-icons/gi";
 
 const Navigation = () => {
@@ -11,7 +10,6 @@ const Navigation = () => {
   const [showLogoutVerificationModal, setShowLogoutVerificationModal] =
     useState<boolean>(false);
   const [showLogoutText, setShowLogoutText] = useState(false);
-  const loggedInLecturer = GetItemFromLocalStorage("user");
 
   const [isSmallScreen, setIsSmallScreen] = useState(false);
 
@@ -28,13 +26,6 @@ const Navigation = () => {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
-
-  let first;
-  let last;
-
-  if (loggedInLecturer) {
-    [first, last] = loggedInLecturer?.name.split(" ");
-  }
 
   return (
     <nav className="navigation">

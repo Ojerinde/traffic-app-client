@@ -2,27 +2,22 @@
 
 import AdminAddDeviceModal from "@/components/Modals/AdminAddDeviceModal";
 import OverlayModal from "@/components/Modals/OverlayModal";
-import HttpRequest from "@/store/services/HttpRequest";
-import { deviceTypes } from "@/utils/deviceTypes";
-import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { FaPlus, FaToggleOff, FaToggleOn } from "react-icons/fa";
+import { useState } from "react";
+import { FaPlus } from "react-icons/fa";
 import { BsDeviceSsd } from "react-icons/bs";
 import { RiCreativeCommonsZeroFill } from "react-icons/ri";
-import { initializeWebSocket } from "@/app/dashboard/websocket";
-import Toggle from "@/components/UI/Toggle/Toggle";
 
-interface Message {
-  event: string;
-  source: string;
-  timestamp: string;
-}
+import { useAppSelector } from "@/hooks/reduxHook";
+import LoadingSpinner from "@/components/UI/LoadingSpinner/LoadingSpinner";
+import { useDeviceStatus } from "@/hooks/useDeviceStatus";
 
-const Devices = () => {
-  const [devices, setDevices] = useState<any[]>([]);
-  // const [statuses, setStatuses] = useState<{ [key: string]: string }>({});
-  const [status, setStatus] = useState<boolean>(false);
+const AdminDevices = () => {
+  const { devices, isFetchingDevices } = useAppSelector(
+    (state) => state.adminDevice
+  );
+  const status = useDeviceStatus();
+
   const pathname = usePathname();
   const router = useRouter();
   const [showAddDeviceModal, setShowAddDeviceModal] = useState<boolean>(false);
@@ -31,64 +26,7 @@ const Devices = () => {
     router.push(`${pathname}/${deviceId}`);
   };
 
-  // Just for testing: Remeber to create a store for this.
-  const adminUser = GetItemFromLocalStorage("user");
-  const deviceType = deviceTypes.find(
-    (dev) => dev.department === adminUser?.department
-  );
-
-  useEffect(() => {
-    const getAlDevices = async () => {
-      try {
-        const { data } = await HttpRequest.get(
-          `/admin/getDevice/${deviceType?.department}`
-        );
-        console.log("data", data);
-        setDevices(data.devices);
-      } catch (error) {
-        console.log("error", error);
-      }
-    };
-    getAlDevices();
-  }, [deviceType?.department]);
-
-  let pingTimeout: any;
-
-  function handlePingReceived(message: Message) {
-    console.log("Ping received from hardware at:", message.timestamp);
-    setStatus(true);
-
-    if (pingTimeout) {
-      clearTimeout(pingTimeout);
-    }
-
-    pingTimeout = setTimeout(() => {
-      setStatus(false);
-      console.log("No ping received, status set to false");
-    }, 12000);
-  }
-
-  useEffect(() => {
-    const ws = initializeWebSocket();
-
-    const handleWebSocketMessage = (event: MessageEvent) => {
-      const message = JSON.parse(event.data);
-
-      if (message.event === "ping_received" && message.source === "hardware") {
-        handlePingReceived(message);
-      }
-    };
-
-    if (ws) {
-      ws.onmessage = handleWebSocketMessage;
-    }
-
-    return () => {
-      if (ws) {
-        ws.close();
-      }
-    };
-  }, []);
+  if (isFetchingDevices) return <LoadingSpinner color="blue" height="big" />;
 
   return (
     <aside>
@@ -105,7 +43,7 @@ const Devices = () => {
           </OverlayModal>
         )}
       </div>
-      {devices.length === 0 && (
+      {devices?.length === 0 && (
         <div className="devices-nodevice">
           <RiCreativeCommonsZeroFill />
           <p>
@@ -120,7 +58,7 @@ const Devices = () => {
         </div>
       )}
       <ul className="devices-list">
-        {devices.map((device: any, index) => (
+        {devices?.map((device: any, index) => (
           <li key={index} className="devices-item">
             <BsDeviceSsd className="devices-item__icon" />
             <div className="devices-item__details">
@@ -149,4 +87,4 @@ const Devices = () => {
     </aside>
   );
 };
-export default Devices;
+export default AdminDevices;

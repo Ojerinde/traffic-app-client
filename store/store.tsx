@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
-import Esp32Reducer from "./esp32/Esp32Slice";
+import adminDeviceReducer from "./devices/AdminDeviceSlice";
+import userDeviceReducer from "./devices/UserDeviceSlice";
 
 export const store = configureStore({
   reducer: {
-    esp32: Esp32Reducer,
+    adminDevice: adminDeviceReducer,
+    userDevice: userDeviceReducer,
   },
 });
 

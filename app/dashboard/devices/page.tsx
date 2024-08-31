@@ -4,11 +4,21 @@ import AddDeviceModal from "@/components/Modals/AddDeviceModal";
 import OverlayModal from "@/components/Modals/OverlayModal";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { FaBook, FaPlus } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
+import { BsDeviceSsd } from "react-icons/bs";
 import { RiCreativeCommonsZeroFill } from "react-icons/ri";
 
-const Devices = () => {
-  const devices: [] = [];
+import { useAppSelector } from "@/hooks/reduxHook";
+import LoadingSpinner from "@/components/UI/LoadingSpinner/LoadingSpinner";
+import { useDeviceStatus } from "@/hooks/useDeviceStatus";
+
+const UserDevices = () => {
+  const { devices, isFetchingDevices } = useAppSelector(
+    (state) => state.userDevice
+  );
+  // console.log("devices", devices);
+  const status = useDeviceStatus();
+
   const pathname = usePathname();
   const router = useRouter();
   const [showAddDeviceModal, setShowAddDeviceModal] = useState<boolean>(false);
@@ -16,6 +26,9 @@ const Devices = () => {
   const handleRedirectionToDevicePage = (deviceId: string) => {
     router.push(`${pathname}/${deviceId}`);
   };
+
+  if (isFetchingDevices) return <LoadingSpinner color="blue" height="big" />;
+
   return (
     <aside>
       <div className="devices-header">
@@ -29,12 +42,11 @@ const Devices = () => {
           </OverlayModal>
         )}
       </div>
-      {devices.length === 0 && (
+      {devices?.length === 0 && (
         <div className="devices-nodevice">
           <RiCreativeCommonsZeroFill />
           <p>
-            You haven't register any device yet, kindly add a device to
-            continue.
+            You haven't created any device yet, kindly add a device to continue.
           </p>
           <button
             className="devices-button"
@@ -45,21 +57,33 @@ const Devices = () => {
         </div>
       )}
       <ul className="devices-list">
-        {devices.map((device: any, index) => (
+        {devices?.map((device: any, index) => (
           <li key={index} className="devices-item">
-            <FaBook className="devices-item__icon" />
+            <BsDeviceSsd className="devices-item__icon" />
             <div className="devices-item__details">
               <h3
                 onClick={() => handleRedirectionToDevicePage(device.deviceId)}
               >
-                {device.type}
+                {device.deviceType}
               </h3>
-              <p>{device.name}</p>
+              <p>{device.deviceId}</p>
             </div>
+            <p className="devices-item__status">
+              Status:
+              {status ? (
+                <div className="devices_on">
+                  <p>ON</p>
+                </div>
+              ) : (
+                <div className="devices_off">
+                  <p>OFF</p>
+                </div>
+              )}
+            </p>
           </li>
         ))}
       </ul>
     </aside>
   );
 };
-export default Devices;
+export default UserDevices;

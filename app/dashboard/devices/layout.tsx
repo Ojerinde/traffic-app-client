@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { IoArrowBack } from "react-icons/io5";
+import SendUserDeviceRequests from "./SendUserDeviceRequests";
 
 export default function Layout({
   children,
@@ -10,20 +11,21 @@ export default function Layout({
 }>) {
   const router = useRouter();
 
-  const handleBackRouting = () => {
-    router.back();
-  };
   return (
-    <div>
-      <button
-        className="dashboard-back__button"
-        type="button"
-        onClick={handleBackRouting}
-      >
-        <IoArrowBack />
-        <span>Back</span>
-      </button>
-      {children}
-    </div>
+    <SendUserDeviceRequests>
+      <div>
+        <button
+          className="dashboard-back__button"
+          type="button"
+          onClick={() => {
+            router.back();
+          }}
+        >
+          <IoArrowBack />
+          <span>Back</span>
+        </button>
+        {children}
+      </div>
+    </SendUserDeviceRequests>
   );
 }

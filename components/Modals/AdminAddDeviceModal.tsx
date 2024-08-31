@@ -2,9 +2,8 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import InformationInput from "../UI/Input/InformationInput";
 import Button from "../UI/Button/Button";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MdOutlineClose } from "react-icons/md";
-import { emitToastMessage } from "@/utils/toastFunc";
 import { deviceTypes } from "@/utils/deviceTypes";
 import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
 import HttpRequest from "@/store/services/HttpRequest";
@@ -46,7 +45,6 @@ const AdminAddDeviceModal: React.FC<AdminAddDeviceModalProps> = ({
       const { deviceType, deviceId } = values;
       try {
         setisAddingDevice(true);
-        console.log("Sending devcie");
         const {
           data: { data },
         } = await HttpRequest.post("/admin/addDevice", {
@@ -54,11 +52,11 @@ const AdminAddDeviceModal: React.FC<AdminAddDeviceModalProps> = ({
           deviceType,
           adminEmail: adminUser.email,
         });
-        console.log("response", data);
+        console.log("Admin add device sucess", data);
         setSuccessMessage(data.message);
         setisAddingDevice(false);
       } catch (error) {
-        console.log("error", error);
+        console.log("Admin add device error", error);
         setisAddingDevice(false);
       } finally {
         setTimeout(() => {
@@ -80,7 +78,7 @@ const AdminAddDeviceModal: React.FC<AdminAddDeviceModalProps> = ({
         <InformationInput
           id="deviceType"
           type="text"
-          name="name"
+          name="deviceType"
           value={deviceType?.type}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
