@@ -20,7 +20,7 @@ export const getUserDevice = createAsyncThunk(
       if (data.devices.length === 0) {
         return emitToastMessage("You have not added any device yet", "success");
       }
-      emitToastMessage("All devices fetched successfully", "success");
+      emitToastMessage("Your device(s) are fetched successfully", "success");
       return data;
     } catch (error: any) {
       emitToastMessage("Could not fetch your device(s)", "error");
