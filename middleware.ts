@@ -8,7 +8,11 @@ export function middleware(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/dashboard") && !token)
     return NextResponse.redirect(new URL("/login", request.url));
 
-  if (request.nextUrl.pathname.startsWith("/admin") && !adminToken)
+  if (
+    request.nextUrl.pathname.startsWith("/admin") &&
+    request.nextUrl.pathname.includes("/dashboard") &&
+    !adminToken
+  )
     return NextResponse.redirect(new URL("/admin/login", request.url));
 
   return NextResponse.next();
