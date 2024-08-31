@@ -2,8 +2,6 @@
 
 import SideBar from "@/components/Dashboard/Sidebar";
 import Navigation from "@/components/Navigation/Navigation";
-import { useEffect } from "react";
-import { initializeWebSocket } from "./websocket";
 import MobileSideBar from "@/components/Dashboard/MobileSidebar";
 
 const sideBarLinks = [
@@ -16,9 +14,6 @@ export default function HostLayout({
 }: {
   children: React.ReactNode;
 }) {
-  useEffect(() => {
-    initializeWebSocket();
-  }, []);
   return (
     <section>
       <Navigation />

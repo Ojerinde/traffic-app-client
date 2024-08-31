@@ -1,32 +1,46 @@
-"use client";
+import { getWebSocket } from "@/app/dashboard/websocket";
 import { useState, useEffect } from "react";
-import { initializeWebSocket } from "@/app/dashboard/websocket";
 
-interface Message {
-  event: string;
-  source: string;
-  timestamp: string;
+interface DeviceStatus {
+  id: string;
+  status: boolean;
 }
 
 export const useDeviceStatus = () => {
-  const [status, setStatus] = useState<boolean>(false);
+  const [statuses, setStatuses] = useState<DeviceStatus[]>([]);
 
   useEffect(() => {
-    const ws = initializeWebSocket();
-    let pingTimeout: NodeJS.Timeout;
+    const ws = getWebSocket();
+
+    const timeoutMap: { [key: string]: NodeJS.Timeout } = {};
+
+    const updateDeviceStatus = (id: string, status: boolean) => {
+      setStatuses((prevStatuses) => {
+        const existingStatus = prevStatuses.find((s) => s.id === id);
+        if (existingStatus) {
+          return prevStatuses.map((s) => (s.id === id ? { ...s, status } : s));
+        } else {
+          return [...prevStatuses, { id, status }];
+        }
+      });
+    };
 
     const handleWebSocketMessage = (event: MessageEvent) => {
-      const message: Message = JSON.parse(event.data);
+      const message = JSON.parse(event.data);
 
-      if (message.event === "ping_received" && message.source === "hardware") {
-        console.log("Ping received from hardware at:", message.timestamp);
-        setStatus(true);
+      if (
+        message.event === "ping_received" &&
+        message?.source.type === "hardware"
+      ) {
+        const deviceId = message.source.id;
 
-        clearTimeout(pingTimeout);
+        // Set the device status to online
+        updateDeviceStatus(deviceId, true);
 
-        pingTimeout = setTimeout(() => {
-          setStatus(false);
-          console.log("No ping received, status set to false");
+        // Clear the timeout and set a new one to mark the device as offline if no ping is received
+        clearTimeout(timeoutMap[deviceId]);
+        timeoutMap[deviceId] = setTimeout(() => {
+          updateDeviceStatus(deviceId, false);
         }, 12000);
       }
     };
@@ -39,9 +53,9 @@ export const useDeviceStatus = () => {
       if (ws) {
         ws.close();
       }
-      clearTimeout(pingTimeout);
+      Object.values(timeoutMap).forEach(clearTimeout);
     };
   }, []);
 
-  return status;
+  return statuses;
 };

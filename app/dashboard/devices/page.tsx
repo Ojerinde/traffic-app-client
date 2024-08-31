@@ -16,8 +16,8 @@ const UserDevices = () => {
   const { devices, isFetchingDevices } = useAppSelector(
     (state) => state.userDevice
   );
-  // console.log("devices", devices);
-  const status = useDeviceStatus();
+
+  const statuses = useDeviceStatus();
 
   const pathname = usePathname();
   const router = useRouter();
@@ -28,6 +28,11 @@ const UserDevices = () => {
   };
 
   if (isFetchingDevices) return <LoadingSpinner color="blue" height="big" />;
+
+  const getDeviceStatus = (deviceId: string) => {
+    const deviceStatus = statuses.find((status) => status.id === deviceId);
+    return deviceStatus ? deviceStatus.status : false;
+  };
 
   return (
     <aside>
@@ -70,7 +75,7 @@ const UserDevices = () => {
             </div>
             <p className="devices-item__status">
               Status:
-              {status ? (
+              {getDeviceStatus(device.deviceId) ? (
                 <div className="devices_on">
                   <p>ON</p>
                 </div>

@@ -34,7 +34,10 @@ export const initializeWebSocket = () => {
 
 export const getWebSocket = () => {
   if (!ws_socket || ws_socket.readyState !== WebSocket.OPEN) {
-    console.warn("WebSocket connection not established or is not open");
+    console.warn(
+      "WebSocket connection not established or is not open. Reinitializing..."
+    );
+    return initializeWebSocket();
   }
   return ws_socket;
 };

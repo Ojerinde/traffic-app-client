@@ -4,7 +4,7 @@ import InformationInput from "../UI/Input/InformationInput";
 import { useEffect, useState } from "react";
 import { MdOutlineClose } from "react-icons/md";
 import HttpRequest from "@/store/services/HttpRequest";
-import { getWebSocket, initializeWebSocket } from "@/app/dashboard/websocket";
+import { getWebSocket } from "@/app/dashboard/websocket";
 import { emitToastMessage } from "@/utils/toastFunc";
 
 interface ResetModalProps {
@@ -40,7 +40,6 @@ const ResetModal: React.FC<ResetModalProps> = ({ course, closeModal }) => {
           `/courses/${values?.courseCode}/reset`
         );
 
-        initializeWebSocket();
         const socket = getWebSocket();
 
         // Function to emit delete_fingerprint event
