@@ -12,7 +12,8 @@ interface Props {
   showPassword?: boolean | "";
   updatePasswordVisibility?: (e: any) => void;
   name: string;
-  value?: string;
+  value?: string ;
+  className?: string ;
   inputErrorMessage: string | undefined;
   passwordIcon?: boolean;
   onChange?: (e: any) => void;

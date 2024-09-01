@@ -40,7 +40,9 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({ closeModal }) => {
     if (!deviceId) return;
     setIsFetchingDeviceToBeAddedDetails(true);
     try {
-      const { data } = await HttpRequest.get(`/getDeviceDetail/${deviceId}`);
+      const { data } = await HttpRequest.get(
+        `/getDeviceDetail/${deviceId}/${user.email}`
+      );
       if (data.device === undefined) {
         return;
       }
@@ -83,6 +85,7 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({ closeModal }) => {
         console.log("User add device response", data);
         setSuccessMessage(data.message);
         emitToastMessage(data.message, "success");
+        closeModal();
         dispatch(getUserDevice(user.email));
         setisAddingDevice(false);
       } catch (error: any) {

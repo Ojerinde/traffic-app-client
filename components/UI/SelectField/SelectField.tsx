@@ -6,7 +6,7 @@ import React, { useState } from "react";
 import Select, { StylesConfig, ActionMeta } from "react-select";
 import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
 
-interface Option {
+export interface Option {
   value: string;
   label: string;
 }
@@ -32,12 +32,13 @@ const SelectField: React.FC<SelectFieldProps> = ({
   const customStyles: StylesConfig<Option, false> = {
     control: (provided, state) => ({
       ...provided,
-      fontSize: "1.5rem",
-      borderColor: state.isFocused ? "#181a40" : "#9D9D9D",
+      fontSize: "1.4rem",
+      marginBottom: "1.4rem",
+      borderColor: state.isFocused ? "#514604" : "#2a2a29",
       borderWidth: state.isFocused ? "1.5px" : "1px",
       "&:hover": {
         cursor: "pointer",
-        borderColor: state.isFocused ? " #10601f" : "#44607c",
+        borderColor: state.isFocused ? " #3b3302" : "#6c6128",
       },
     }),
     dropdownIndicator: (provided) => ({
@@ -48,8 +49,8 @@ const SelectField: React.FC<SelectFieldProps> = ({
     option: (provided, state) => ({
       ...provided,
       fontSize: "1.4rem",
-      color: "#181a40",
-      backgroundColor: state.isSelected ? "#e7e9ea" : "#848282",
+      color: "#f2f2f2",
+      backgroundColor: state.isSelected ? "#2a2a29" : "#010100",
       "&:hover": {
         cursor: "pointer",
         backgroundColor: "#F2F2F2",
@@ -58,7 +59,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
     }),
     menu: (provided) => ({
       ...provided,
-      background: "#fff",
+      background: "#6c6128",
       boxShadow: "0px 0px 24px 0px rgba(0, 0, 0, 0.20)",
     }),
   };

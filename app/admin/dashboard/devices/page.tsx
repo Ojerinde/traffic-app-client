@@ -75,7 +75,7 @@ const AdminDevices = () => {
               </h3>
               <p>{device.deviceId}</p>
             </div>
-            <p className="devices-item__status">
+            <div className="devices-item__status">
               Status:
               {getDeviceStatus(device.deviceId) ? (
                 <div className="devices_on">
@@ -86,7 +86,7 @@ const AdminDevices = () => {
                   <p>OFF</p>
                 </div>
               )}
-            </p>
+            </div>
           </li>
         ))}
       </ul>
