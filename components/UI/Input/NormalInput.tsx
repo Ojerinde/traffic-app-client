@@ -12,8 +12,8 @@ interface Props {
   showPassword?: boolean | "";
   updatePasswordVisibility?: (e: any) => void;
   name: string;
-  value?: string ;
-  className?: string ;
+  value?: string;
+  className?: string;
   inputErrorMessage?: string | undefined;
   passwordIcon?: boolean;
   onChange?: (e: any) => void;
@@ -22,7 +22,7 @@ interface Props {
   readOnly?: boolean;
 }
 
-const InformationInput: React.FC<Props> = ({
+const NormalInput: React.FC<Props> = ({
   label,
   type,
   inputErrorMessage,
@@ -33,16 +33,11 @@ const InformationInput: React.FC<Props> = ({
   ...others
 }) => {
   return (
-    <div className="information-group">
+    <div className="normalInput">
+      <label className="normalInput__label">{label}</label>
       <input {...others} type={type} required />
-      <label className="floating-label">{label}</label>
       {passwordIcon && (
-        <div
-          className={`${
-            invalid ? "information-group__icon2" : "information-group__icon"
-          }`}
-          onClick={updatePasswordVisibility}
-        >
+        <div className="normalInput__icon" onClick={updatePasswordVisibility}>
           {showPassword ? <VscEye /> : <VscEyeClosed />}
         </div>
       )}
@@ -50,4 +45,4 @@ const InformationInput: React.FC<Props> = ({
     </div>
   );
 };
-export default InformationInput;
+export default NormalInput;

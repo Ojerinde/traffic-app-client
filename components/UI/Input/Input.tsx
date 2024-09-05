@@ -13,7 +13,7 @@ interface Props {
   updatePasswordVisibility?: (e: any) => void;
   name: string;
   value?: string;
-  inputErrorMessage: string | undefined;
+  inputErrorMessage?: string | undefined;
   passwordIcon?: boolean;
   onChange?: (e: any) => void;
   onBlur?: (e: any) => void;

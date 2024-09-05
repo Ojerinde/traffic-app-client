@@ -1,0 +1,95 @@
+.intersectionConfigPage {
+  &__header {
+    font-size: 2.5rem;
+    padding: 0.5rem;
+    letter-spacing: 0.2rem;
+    margin-bottom: 1rem;
+    font-family: "Pacifico", Courier, monospace;
+    border-bottom: 1px solid $color-yellow;
+    border-left: 1px solid $color-yellow;
+    border-radius: 0.7rem;
+    width: fit-content;
+  }
+  &__box {
+    display: flex;
+    justify-content: space-between;
+
+    &--left {
+      flex-basis: 48%;
+    }
+    &--right {
+      flex-basis: 50%;
+
+      & ul {
+        display: flex;
+        list-style: none;
+        width: 100%;
+        justify-content: space-evenly;
+
+        & li {
+          font-size: 1.7rem;
+          letter-spacing: 0.1rem;
+          font-weight: bold;
+          padding: 0.8rem;
+          cursor: pointer;
+          transition: all 0.3s;
+          border-bottom: 2px solid transparent;
+
+          &:hover {
+            background-color: $color-white-light;
+          }
+        }
+      }
+    }
+    &--active {
+      color: $color-yellow;
+      border-bottom: 2px solid $color-yellow !important;
+    }
+  }
+  &__buttons {
+    margin-bottom: 4rem;
+    display: flex;
+    justify-content: space-between;
+
+    & button {
+      flex-basis: 18%;
+      padding: 0.6rem 0.5rem;
+      gap: 0.3rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+
+      & svg {
+        color: $color-black-light;
+      }
+      & span {
+        font-size: 1.1rem;
+      }
+    }
+  }
+
+  &__patterns {
+    margin-top: 1rem;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px,
+      rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
+    padding: 3rem 2rem 2rem;
+    &--header {
+      font-size: 1.7rem;
+      color: $color-black-light;
+      margin-bottom: 1.3rem;
+    }
+  }
+
+  &__schedules {
+    margin-top: 1rem;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px,
+      rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
+    padding: 3rem 2rem 2rem;
+    &--header {
+      font-size: 1.7rem;
+      color: $color-black-light;
+      margin-bottom: 1.3rem;
+    }
+  }
+}

@@ -1,11 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
 import adminDeviceReducer from "./devices/AdminDeviceSlice";
 import userDeviceReducer from "./devices/UserDeviceSlice";
-
+import signalConfigReducer from "./signals/SignalConfigSlice";
 export const store = configureStore({
   reducer: {
     adminDevice: adminDeviceReducer,
     userDevice: userDeviceReducer,
+    signalConfig: signalConfigReducer,
   },
 });
 
