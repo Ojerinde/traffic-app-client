@@ -4,18 +4,16 @@ interface SignalState {
   left: "R" | "A" | "G";
   straight: "R" | "A" | "G";
   right: "R" | "A" | "G";
-  bike: "R" | "G";
-  pedestrian: "R" | "G";
+  bike: "R" | "G" | "A";
+  pedestrian: "R" | "G" | "A";
 }
 
 interface SignalConfigState {
-  signalString: string;
   signals: Record<"N" | "E" | "S" | "W", SignalState>;
   warning: string | null;
 }
 
 const initialConfig: SignalConfigState = {
-  signalString: "*EGRARRWAAARGSGRARRNAAARG#",
   signals: {
     N: { left: "R", straight: "R", right: "R", bike: "R", pedestrian: "R" },
     E: { left: "R", straight: "R", right: "R", bike: "R", pedestrian: "R" },
@@ -31,58 +29,33 @@ const signalConfigSlice = createSlice({
   reducers: {
     setSignalState(
       state,
-      action: PayloadAction<{
-        direction: "N" | "E" | "S" | "W";
-        field: keyof SignalState;
-        value: "R" | "A" | "G";
-      }>
+      action: PayloadAction<string> // Payload is the full signal string like "*EGRARRWAAARGSGRARRNAAARG#"
     ) {
-      const { direction, field, value } = action.payload;
+      const signalString = action.payload;
 
-      if (field === "bike" || field === "pedestrian") {
-        if (value !== "R" && value !== "G") {
-          state.warning = `${field} can only be "R" (Red) or "G" (Green)`;
-          return;
-        }
-      }
+      const trimmedString = signalString.slice(1, -1);
 
-      state.signals[direction][field] = value;
-    },
+      const signals = trimmedString.match(/.{6}/g);
 
-    validateConfig(state) {
-      const greenStraight = Object.values(state.signals).filter(
-        (config) => config.straight === "G"
-      );
-      const conflictingLeftRight = Object.values(state.signals).filter(
-        (config) => config.left === "G" || config.right === "G"
-      );
+      if (signals && signals.length === 4) {
+        const directions = ["E", "W", "S", "N"];
 
-      // Check if more than one direction is straight green
-      if (greenStraight.length > 1) {
-        state.warning =
-          "Only one direction can have a green straight signal at a time.";
-      }
-      // Check if conflicting left/right directions have green
-      else if (conflictingLeftRight.length > 1) {
-        state.warning =
-          "Conflicting directions cannot have both left or right green signals.";
-      } else {
-        state.warning = null;
+        directions.forEach((direction, index) => {
+          const signalBlock = signals[index];
+          const dir = direction as keyof typeof state.signals;
+
+          state.signals[dir].left = signalBlock[1] as "R" | "A" | "G";
+          state.signals[dir].straight = signalBlock[2] as "R" | "A" | "G";
+          state.signals[dir].right = signalBlock[3] as "R" | "A" | "G";
+          state.signals[dir].bike = signalBlock[4] as "R" | "A" | "G";
+          state.signals[dir].pedestrian = signalBlock[5] as "R" | "A" | "G";
+        });
       }
     },
 
-    setSignalString(state) {
-      let signalString = "*";
-      Object.keys(state.signals).forEach((direction) => {
-        const config = state.signals[direction as "N" | "E" | "S" | "W"];
-        signalString += `${direction}${config.left}${config.straight}${config.right}${config.bike}${config.pedestrian}`;
-      });
-      signalString += "#";
-      state.signalString = signalString;
-    },
+    validateConfig(state) {},
   },
 });
 
-export const { setSignalState, validateConfig, setSignalString } =
-  signalConfigSlice.actions;
+export const { setSignalState, validateConfig } = signalConfigSlice.actions;
 export default signalConfigSlice.reducer;

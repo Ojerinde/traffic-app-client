@@ -16,7 +16,6 @@ export const getUserDevice = createAsyncThunk(
   async (email: string) => {
     try {
       const { data } = await HttpRequest.get(`/getDevice/${email}`);
-      console.log("data:", data);
       if (data.devices.length === 0) {
         return emitToastMessage("You have not added any device yet", "success");
       }

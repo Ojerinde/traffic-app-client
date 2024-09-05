@@ -12,7 +12,6 @@ import {
   FaTrash,
 } from "react-icons/fa";
 import FourWayIntersection from "@/components/IntersectionComponent/FourWayIntersection";
-import SignalConfigurator from "@/components/IntersectionComponent/SignalConfigurator";
 
 interface IntersectionConfigurationPageProps {
   params: any;
@@ -61,11 +60,9 @@ const IntersectionConfigurationPage: React.FC<
       <h2 className="intersectionConfigPage__header">Traffic Flow Design</h2>
       <div className="intersectionConfigPage__box">
         <div className="intersectionConfigPage__box--left">
-          <FourWayIntersection />
+          <FourWayIntersection editable />
         </div>
         <div className="intersectionConfigPage__box--right">
-          <SignalConfigurator />
-
           {/* <div className="intersectionConfigPage__buttons">
             <button>
               <FaPlus size={15} />

@@ -57,7 +57,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
   return (
     <section className="device">
       <div className="device__left">
-        <FourWayIntersection />
+        <FourWayIntersection editable={false} />
       </div>
       <div className="device__right">
         <div className="device__right--top">
