@@ -1,7 +1,7 @@
 "use client";
 
 import { useAppDispatch } from "@/hooks/reduxHook";
-import { getUserDevice } from "@/store/devices/UserDeviceSlice";
+import { getUserDevice, getUserPhase } from "@/store/devices/UserDeviceSlice";
 import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
 import React, { useEffect } from "react";
 import { initializeWebSocket } from "../websocket";
@@ -20,6 +20,7 @@ const SendUserDeviceRequests: React.FC<SendUserDeviceRequestsProps> = ({
   useEffect(() => {
     (async () => {
       dispatch(getUserDevice(user.email));
+      dispatch(getUserPhase(user.email));
     })();
   }, [dispatch]);
 

@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
+import { ImManWoman } from "react-icons/im";
 import styled from "styled-components";
 
 type Direction = "N" | "E" | "S" | "W";
-type LightColor = "R" | "A" | "G";
+type LightColor = "R" | "A" | "G"; // Include Amber (A)
 
 interface TrafficSignalProps {
   direction: Direction;
@@ -46,15 +47,14 @@ const SignalLight = styled.div<{ color: LightColor }>`
   cursor: pointer;
 `;
 
-const PedestrianSignalLight = styled.div<{
-  color: LightColor;
-}>`
-  width: 1.8rem;
-  height: 1.8rem;
-  background-color: ${({ color }) =>
-    color === "R" ? "red" : color === "A" ? "orange" : "green"};
-  margin: 1px;
-  border-radius: 10%;
+const PedestrianSignalLight = styled.div<{ color: LightColor }>`
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+  color: ${({ color }) => (color === "R" ? "red" : "green")};
   cursor: pointer;
 `;
 
@@ -63,41 +63,6 @@ const SignalGroup = styled.div<{ orientation: "horizontal" | "vertical" }>`
   flex-direction: ${({ orientation }) =>
     orientation === "horizontal" ? "column" : "row"};
   margin: 0 2px;
-`;
-
-const ColorModal = styled.div<{
-  top: number;
-  left: number;
-  direction: Direction;
-}>`
-  position: absolute;
-  top: ${({ top, direction }) =>
-    direction === "S"
-      ? `${top + 20}px`
-      : direction === "N"
-      ? `${top - 70}px`
-      : `${top}px`};
-  left: ${({ left, direction }) =>
-    direction === "E"
-      ? `${left + 20}px`
-      : direction === "W"
-      ? `${left - 80}px`
-      : `${left}px`};
-  background: white;
-  width: 10rem;
-  height: 5rem;
-  padding: 10px;
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-`;
-
-const ColorSelect = styled.select`
-  width: 100%;
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
 `;
 
 const TrafficSignal: React.FC<TrafficSignalProps> = ({
@@ -113,14 +78,6 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
   editable,
   onSignalClick,
 }) => {
-  const [modalPosition, setModalPosition] = useState<{
-    top: number;
-    left: number;
-  } | null>(null);
-  const [currentSignal, setCurrentSignal] = useState<{
-    type: string;
-    color: LightColor;
-  } | null>(null);
   const [signalColors, setSignalColors] = useState({
     left,
     straight,
@@ -128,43 +85,19 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
     bike,
     pedestrian,
   });
-  const modalRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-        setModalPosition(null);
-        setCurrentSignal(null);
-      }
-    };
+  // Toggle only between Red and Green on click
+  const handleSignalClick = (signalType: string) => {
+    if (!editable) return;
+    const currentColor = signalColors[signalType as keyof typeof signalColors];
+    const newColor = currentColor === "R" ? "G" : "R"; // Toggle R <-> G
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+    setSignalColors((prevColors) => ({
+      ...prevColors,
+      [signalType]: newColor,
+    }));
 
-  const handleSignalClick = (
-    signalType: string,
-    color: LightColor,
-    e: React.MouseEvent,
-    position: { top: number; left: number }
-  ) => {
-    e.stopPropagation();
-    setModalPosition({ top: position.top, left: position.left });
-    setCurrentSignal({ type: signalType, color });
-    onSignalClick(direction, signalType, color);
-  };
-
-  const handleColorChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const newColor = event.target.value as LightColor;
-    if (currentSignal) {
-      const updatedColors = { ...signalColors, [currentSignal.type]: newColor };
-      setSignalColors(updatedColors);
-      onSignalClick(direction, currentSignal.type, newColor);
-      setModalPosition(null);
-      setCurrentSignal(null);
-    }
+    onSignalClick(direction, signalType, newColor);
   };
 
   return (
@@ -177,117 +110,73 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
                 position: "absolute",
                 top: pedestrianPosition.top,
                 left: pedestrianPosition.left,
+                backgroundColor: "#2a2a29",
+                padding: ".7rem",
+                borderRadius: "50%",
               }}
             >
               <PedestrianSignalLight
                 color={signalColors.pedestrian}
-                onClick={(e) =>
-                  handleSignalClick(
-                    "pedestrian",
-                    signalColors.pedestrian,
-                    e,
-                    position
-                  )
-                }
-              />
+                onClick={() => handleSignalClick("pedestrian")}
+              >
+                <ImManWoman fontSize={20} />
+              </PedestrianSignalLight>
             </div>
             <SignalLight
               color={signalColors.bike}
-              onClick={(e) =>
-                handleSignalClick("bike", signalColors.bike, e, position)
-              }
+              onClick={() => handleSignalClick("bike")}
             />
             <SignalLight
               color={signalColors.right}
-              onClick={(e) =>
-                handleSignalClick("right", signalColors.right, e, position)
-              }
+              onClick={() => handleSignalClick("right")}
             />
             <SignalLight
               color={signalColors.straight}
-              onClick={(e) =>
-                handleSignalClick(
-                  "straight",
-                  signalColors.straight,
-                  e,
-                  position
-                )
-              }
+              onClick={() => handleSignalClick("straight")}
             />
             <SignalLight
               color={signalColors.left}
-              onClick={(e) =>
-                handleSignalClick("left", signalColors.left, e, position)
-              }
+              onClick={() => handleSignalClick("left")}
             />
           </>
         ) : (
           <>
             <SignalLight
               color={signalColors.left}
-              onClick={(e) =>
-                handleSignalClick("left", signalColors.left, e, position)
-              }
+              onClick={() => handleSignalClick("left")}
             />
             <SignalLight
               color={signalColors.straight}
-              onClick={(e) =>
-                handleSignalClick(
-                  "straight",
-                  signalColors.straight,
-                  e,
-                  position
-                )
-              }
+              onClick={() => handleSignalClick("straight")}
             />
             <SignalLight
               color={signalColors.right}
-              onClick={(e) =>
-                handleSignalClick("right", signalColors.right, e, position)
-              }
+              onClick={() => handleSignalClick("right")}
             />
             <SignalLight
               color={signalColors.bike}
-              onClick={(e) =>
-                handleSignalClick("bike", signalColors.bike, e, position)
-              }
+              onClick={() => handleSignalClick("bike")}
             />
             <div
               style={{
                 position: "absolute",
                 top: pedestrianPosition.top,
                 left: pedestrianPosition.left,
+                backgroundColor: "#2a2a29",
+                padding: ".7rem",
+                borderRadius: "50%",
               }}
             >
               <PedestrianSignalLight
                 color={signalColors.pedestrian}
-                onClick={(e) =>
-                  handleSignalClick(
-                    "pedestrian",
-                    signalColors.pedestrian,
-                    e,
-                    position
-                  )
-                }
-              />
+                onClick={() => handleSignalClick("pedestrian")}
+              >
+                <ImManWoman size={20} />
+              </PedestrianSignalLight>
             </div>
           </>
         )}
       </SignalGroup>
-      {modalPosition && currentSignal && editable && (
-        <ColorModal
-          top={modalPosition.top}
-          left={modalPosition.left}
-          direction={direction}
-          ref={modalRef}
-        >
-          <ColorSelect value={currentSignal.color} onChange={handleColorChange}>
-            <option value="R">Red</option>
-            <option value="A">Amber</option>
-            <option value="G">Green</option>
-          </ColorSelect>
-        </ColorModal>
-      )}
     </SignalWrapper>
   );
 };

@@ -6,7 +6,7 @@ import MobileSideBar from "@/components/Dashboard/MobileSidebar";
 
 const sideBarLinks = [
   { name: "My Devices", link: "/dashboard/devices", iconUrl: "devices" },
-  { name: "Settings", link: "/dashboard/settings", iconUrl: "settings" },
+  { name: "Account", link: "/dashboard/settings", iconUrl: "settings" },
 ];
 
 export default function HostLayout({

@@ -1,9 +1,8 @@
 "use client";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import Image from "next/image";
 import SelectField, { Option } from "@/components/UI/SelectField/SelectField";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FaArrowLeft,
   FaArrowRight,
@@ -12,17 +11,26 @@ import {
   FaTrash,
 } from "react-icons/fa";
 import FourWayIntersection from "@/components/IntersectionComponent/FourWayIntersection";
-
+import NewPattern from "@/components/IntersectionComponent/NewPattern";
+import EditPattern from "@/components/IntersectionComponent/EditPattern";
+import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
+import { setSignalState } from "@/store/signals/SignalConfigSlice";
 interface IntersectionConfigurationPageProps {
   params: any;
 }
+
 const IntersectionConfigurationPage: React.FC<
   IntersectionConfigurationPageProps
 > = ({ params }) => {
+  const dispatch = useAppDispatch();
+  const { signals: trafficSignals, signalString } = useAppSelector(
+    (state) => state.signalConfig
+  );
+
   const [selectedBox, setSelectedBox] = useState<"patterns" | "schedules">(
     "patterns"
   );
-  console.log("Intersection ID Config Page", params);
+  const [clickedButton, setClickedButton] = useState<"new" | "edit" | "">("");
 
   const patternOptions: Option[] = [
     { value: "pattern1", label: "Pattern 1 - N,E,W,S,P1,P2" },
@@ -55,6 +63,10 @@ const IntersectionConfigurationPage: React.FC<
     },
   });
 
+  useEffect(() => {
+    dispatch(setSignalState());
+  }, [dispatch, signalString]);
+
   return (
     <section className="intersectionConfigPage">
       <h2 className="intersectionConfigPage__header">Traffic Flow Design</h2>
@@ -63,8 +75,8 @@ const IntersectionConfigurationPage: React.FC<
           <FourWayIntersection editable />
         </div>
         <div className="intersectionConfigPage__box--right">
-          {/* <div className="intersectionConfigPage__buttons">
-            <button>
+          <div className="intersectionConfigPage__buttons">
+            <button onClick={() => setClickedButton("new")}>
               <FaPlus size={15} />
               <span>New Pattern</span>
             </button>
@@ -84,7 +96,20 @@ const IntersectionConfigurationPage: React.FC<
               <FaTrash size={15} />
               <span>Delete Pattern</span>
             </button>
-          </div> */}
+          </div>
+
+          {clickedButton === "new" && (
+            <NewPattern
+              onSavePattern={(pattern) => console.log("Saved pattern", pattern)}
+            />
+          )}
+          {/* Fetch the pattern and pass the phases for the pattern to this */}
+          {clickedButton === "edit" && (
+            <EditPattern
+              initialPhases={[]}
+              onSavePattern={(pattern) => console.log("Saved pattern", pattern)}
+            />
+          )}
           <ul>
             <li
               onClick={() => setSelectedBox("patterns")}

@@ -1,6 +1,14 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import TrafficSignal from "./TrafficSignal";
+import { IoMdAddCircle } from "react-icons/io";
+import { motion } from "framer-motion";
+import HttpRequest from "@/store/services/HttpRequest";
+import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
+import { emitToastMessage } from "@/utils/toastFunc";
+import { MdCancel } from "react-icons/md";
+import { getUserPhase } from "@/store/devices/UserDeviceSlice";
+import { useAppDispatch } from "@/hooks/reduxHook";
 
 interface SignalState {
   left: "R" | "A" | "G";
@@ -23,37 +31,72 @@ interface IntersectionDisplayProps {
   editable: boolean;
 }
 
-const Background = styled.div<{ backgroundImage: string }>`
+const Background = styled.div<{ $backgroundImage: string }>`
   position: relative;
   width: 100%;
   height: 80vh;
   margin-top: 3rem;
   border: none;
-  background-image: url(${({ backgroundImage }) => backgroundImage});
+  background-image: url(${({ $backgroundImage }) => $backgroundImage});
   box-shadow: rgba(0, 0, 0, 0.06) 0px 2px 4px 0px inset;
   background-size: cover;
   background-position: center;
 `;
 
-const AddPhaseButton = styled.button`
+const AddPhaseIcon = styled(motion.div)`
   position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
+  top: 44.8%;
+  right: 45%;
+  color: black;
   border: none;
-  border-radius: 4px;
   cursor: pointer;
+  border-radius: 50%;
+`;
+
+const PhaseContainer = styled.div`
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 40%;
+  background-color: grey;
+  padding: 0.4rem;
+  border-radius: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
 `;
 
 const PhaseNameInput = styled.input`
-  position: absolute;
-  top: 10px;
-  right: 100px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 0.5rem;
+  border: 0.1rem solid #ccc;
+  border-radius: 0.4rem;
+  font-size: 1.4rem;
+  width: 100%;
+
+  &:focus {
+    outline: none;
+    border-color: #514604;
+  }
+
+  &:hover {
+    border-color: #2a2a29;
+  }
+`;
+
+const AddPhaseButton = styled.button`
+  padding: 0.8rem 1rem;
+  background-color: #514604;
+  color: white;
+  border: none;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  font-size: 1.4rem;
+  width: 100%;
+
+  &:hover {
+    border-color: #2a2a29;
+  }
 `;
 
 const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
@@ -61,8 +104,12 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
   backgroundImage,
   editable,
 }) => {
+  console.log("Initial Signals", initialSignals);
   const [signals, setSignals] = useState<Signal[]>(initialSignals);
+  const [showInputModal, setShowInputModal] = useState<boolean>(false);
   const [phaseName, setPhaseName] = useState<string>("");
+
+  const dispatch = useAppDispatch();
 
   const handleSignalClick = (
     direction: "N" | "E" | "S" | "W",
@@ -86,16 +133,39 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
       alert("Please enter a name for the phase.");
       return;
     }
-
+    const user = GetItemFromLocalStorage("user");
+    console.log("Sending Phase Data:", phaseName, user);
     try {
-      console.log("Sending Phase Data:", phaseName, signals);
-    } catch (error) {
+      const encodeSignals = () => {
+        return (
+          "*" +
+          signals
+            .map((signal) => {
+              return `${signal.direction}${signal.left}${signal.straight}${signal.right}${signal.bike}${signal.pedestrian}`;
+            })
+            .join("") +
+          "#"
+        );
+      };
+
+      const encodedSignals = encodeSignals();
+
+      const { data } = await HttpRequest.post("/phase", {
+        email: user.email,
+        phaseName,
+        phaseData: encodedSignals,
+      });
+      console.log("response", data);
+      emitToastMessage(data.message, "success");
+      dispatch(getUserPhase(user.email));
+    } catch (error: any) {
       console.error("Error adding phase:", error);
+      emitToastMessage(error?.response.data.message, "error");
     }
   };
 
   return (
-    <Background backgroundImage={backgroundImage}>
+    <Background $backgroundImage={backgroundImage}>
       {signals.map((signal, index) => (
         <TrafficSignal
           key={index}
@@ -107,15 +177,29 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
         />
       ))}
       {editable && (
-        <>
+        <AddPhaseIcon
+          whileHover={{ scale: 1.2 }}
+          whileTap={{ scale: 0.9 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          onClick={() => setShowInputModal((prev) => !prev)}
+        >
+          {!showInputModal ? (
+            <IoMdAddCircle size={48} />
+          ) : (
+            <MdCancel size={48} />
+          )}
+        </AddPhaseIcon>
+      )}
+      {showInputModal && (
+        <PhaseContainer>
           <PhaseNameInput
             type="text"
             placeholder="Enter phase name"
             value={phaseName}
             onChange={(e) => setPhaseName(e.target.value)}
           />
-          <AddPhaseButton onClick={handleAddPhase}>Add Phase</AddPhaseButton>
-        </>
+          <AddPhaseButton onClick={handleAddPhase}>Create</AddPhaseButton>
+        </PhaseContainer>
       )}
     </Background>
   );

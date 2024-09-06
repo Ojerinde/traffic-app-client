@@ -87,7 +87,7 @@ const AdminAddDeviceModal: React.FC<AdminAddDeviceModalProps> = ({
         values;
       try {
         setisAddingDevice(true);
-        const { data } = await HttpRequest.post("/admin/addDevice", {
+        const { data } = await HttpRequest.post("/admin/device", {
           deviceId,
           deviceType,
           adminEmail: adminUser.email,

@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useMemo } from "react";
 import IntersectionDisplay from "./Intersection";
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
-import { setSignalState } from "@/store/signals/SignalConfigSlice";
 
 const getPosition = (direction: "N" | "E" | "S" | "W") => {
   switch (direction) {
@@ -22,13 +21,13 @@ const getPosition = (direction: "N" | "E" | "S" | "W") => {
 const getPedestrianPosition = (direction: "N" | "E" | "S" | "W") => {
   switch (direction) {
     case "N":
-      return { top: 22.5, left: -23 };
+      return { top: 22.5, left: -30 };
     case "E":
-      return { top: -24, left: -25 };
+      return { top: -36, left: -35 };
     case "S":
-      return { top: -25, left: 79 };
+      return { top: -40, left: 76 };
     case "W":
-      return { top: 76, left: 22 };
+      return { top: 74, left: 27 };
     default:
       return { top: 0, left: 0 };
   }
@@ -42,40 +41,33 @@ const getOrientation = (
 
 const FourWayIntersection = ({ editable }: { editable: boolean }) => {
   const dispatch = useAppDispatch();
-  const trafficSignals = useAppSelector((state) => state.signalConfig.signals);
+  const { signals: trafficSignals, signalString } = useAppSelector(
+    (state) => state.signalConfig
+  );
 
-  useEffect(() => {
-    const updateSignals = () => {
-      dispatch(setSignalState("*ERRRRRWAAARGSGGGGGNAAAAA#"));
-    };
-
-    // Initial update
-    updateSignals();
-
-    const interval = setInterval(updateSignals, 5000);
-
-    return () => clearInterval(interval);
-  }, [dispatch]);
-
-  const signalsArray = Object.keys(trafficSignals).map((direction) => {
-    const signalState =
-      trafficSignals[direction as keyof typeof trafficSignals];
-    return {
-      direction: direction as "N" | "E" | "S" | "W",
-      ...signalState,
-      position: getPosition(direction as "N" | "E" | "S" | "W"),
-      pedestrianPosition: getPedestrianPosition(
-        direction as "N" | "E" | "S" | "W"
-      ),
-      orientation: getOrientation(direction as "N" | "E" | "S" | "W"),
-    };
-  });
+  const signalsArray = useMemo(
+    () =>
+      Object.keys(trafficSignals).map((direction) => {
+        const signalState =
+          trafficSignals[direction as keyof typeof trafficSignals];
+        return {
+          direction: direction as "N" | "E" | "S" | "W",
+          ...signalState,
+          position: getPosition(direction as "N" | "E" | "S" | "W"),
+          pedestrianPosition: getPedestrianPosition(
+            direction as "N" | "E" | "S" | "W"
+          ),
+          orientation: getOrientation(direction as "N" | "E" | "S" | "W"),
+        };
+      }),
+    [trafficSignals] // Recompute only when trafficSignals changes
+  );
 
   return (
     <div>
       <IntersectionDisplay
         initialSignals={signalsArray}
-        backgroundImage="/images/cross.jpg"
+        backgroundImage="/images/cross.png"
         editable={editable}
       />
     </div>

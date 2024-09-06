@@ -16,7 +16,7 @@ export const getAdminDevice = createAsyncThunk(
   async (deviceType: any) => {
     try {
       const { data } = await HttpRequest.get(
-        `/admin/getDevice/${deviceType?.department}`
+        `/admin/device/${deviceType?.department}`
       );
       if (data.devices.length === 0) {
         return emitToastMessage("You have not added any device yet", "success");

@@ -11,6 +11,7 @@ interface SignalState {
 interface SignalConfigState {
   signals: Record<"N" | "E" | "S" | "W", SignalState>;
   warning: string | null;
+  signalString: string;
 }
 
 const initialConfig: SignalConfigState = {
@@ -21,29 +22,32 @@ const initialConfig: SignalConfigState = {
     W: { left: "R", straight: "R", right: "R", bike: "R", pedestrian: "R" },
   },
   warning: null,
+  signalString: "*NRRRRREGGGGGSGGGGGWRRRRR#",
 };
 
 const signalConfigSlice = createSlice({
   name: "signalConfig",
   initialState: initialConfig,
   reducers: {
-    setSignalState(
-      state,
-      action: PayloadAction<string> // Payload is the full signal string like "*EGRARRWAAARGSGRARRNAAARG#"
-    ) {
-      const signalString = action.payload;
+    setSignalString(state, action: PayloadAction<string>) {
+      console.log("Updating signalString", action.payload);
+      state.signalString = action.payload;
+      console.log("Updated signalString", state.signalString);
+    },
+    setSignalState(state) {
+      console.log("Updating signal", state.signalString);
+      const trimmedString = state.signalString.slice(1, -1);
 
-      const trimmedString = signalString.slice(1, -1);
-
+      // Extract signals in blocks of 6 characters
       const signals = trimmedString.match(/.{6}/g);
 
       if (signals && signals.length === 4) {
-        const directions = ["E", "W", "S", "N"];
+        signals.forEach((signalBlock) => {
+          const direction = signalBlock[0]; // Get the first character as the direction (N, S, E, W)
 
-        directions.forEach((direction, index) => {
-          const signalBlock = signals[index];
           const dir = direction as keyof typeof state.signals;
 
+          // Update the signal state for the corresponding direction
           state.signals[dir].left = signalBlock[1] as "R" | "A" | "G";
           state.signals[dir].straight = signalBlock[2] as "R" | "A" | "G";
           state.signals[dir].right = signalBlock[3] as "R" | "A" | "G";
@@ -57,5 +61,6 @@ const signalConfigSlice = createSlice({
   },
 });
 
-export const { setSignalState, validateConfig } = signalConfigSlice.actions;
+export const { setSignalState, setSignalString, validateConfig } =
+  signalConfigSlice.actions;
 export default signalConfigSlice.reducer;

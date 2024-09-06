@@ -41,7 +41,7 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({ closeModal }) => {
     setIsFetchingDeviceToBeAddedDetails(true);
     try {
       const { data } = await HttpRequest.get(
-        `/getDeviceDetail/${deviceId}/${user.email}`
+        `/device/${deviceId}/${user.email}`
       );
       if (data.device === undefined) {
         return;
@@ -77,7 +77,7 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({ closeModal }) => {
       }
       try {
         setisAddingDevice(true);
-        const { data } = await HttpRequest.post("/addDevice", {
+        const { data } = await HttpRequest.post("/device", {
           deviceId,
           deviceType: deviceToBeAddedDetails?.type,
           email: user.email,
