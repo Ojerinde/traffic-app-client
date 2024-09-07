@@ -14,15 +14,40 @@ interface SignalConfigState {
   signalString: string;
 }
 
-const initialConfig: SignalConfigState = {
-  signals: {
+const initializeSignals = (
+  signalString: string
+): Record<"N" | "E" | "S" | "W", SignalState> => {
+  const signals: Record<"N" | "E" | "S" | "W", SignalState> = {
     N: { left: "R", straight: "R", right: "R", bike: "R", pedestrian: "R" },
     E: { left: "R", straight: "R", right: "R", bike: "R", pedestrian: "R" },
     S: { left: "R", straight: "R", right: "R", bike: "R", pedestrian: "R" },
     W: { left: "R", straight: "R", right: "R", bike: "R", pedestrian: "R" },
-  },
+  };
+
+  const trimmedString = signalString.slice(1, -1);
+
+  // Extract signals in blocks of 6 characters
+  const signalBlocks = trimmedString.match(/.{6}/g);
+
+  if (signalBlocks && signalBlocks.length === 4) {
+    signalBlocks.forEach((signalBlock) => {
+      const direction = signalBlock[0] as keyof typeof signals;
+
+      signals[direction].left = signalBlock[1] as "R" | "A" | "G";
+      signals[direction].straight = signalBlock[2] as "R" | "A" | "G";
+      signals[direction].right = signalBlock[3] as "R" | "A" | "G";
+      signals[direction].bike = signalBlock[4] as "R" | "A" | "G";
+      signals[direction].pedestrian = signalBlock[5] as "R" | "A" | "G";
+    });
+  }
+
+  return signals;
+};
+
+const initialConfig: SignalConfigState = {
+  signals: initializeSignals("*NRRRRREGGGGRSGGGGRWRRRRR#"),
   warning: null,
-  signalString: "*NRRRRREGGGGGSGGGGGWRRRRR#",
+  signalString: "*NRRRRREGGGGRSGGGGRWRRRRR#",
 };
 
 const signalConfigSlice = createSlice({
@@ -30,31 +55,10 @@ const signalConfigSlice = createSlice({
   initialState: initialConfig,
   reducers: {
     setSignalString(state, action: PayloadAction<string>) {
-      console.log("Updating signalString", action.payload);
       state.signalString = action.payload;
-      console.log("Updated signalString", state.signalString);
     },
     setSignalState(state) {
-      console.log("Updating signal", state.signalString);
-      const trimmedString = state.signalString.slice(1, -1);
-
-      // Extract signals in blocks of 6 characters
-      const signals = trimmedString.match(/.{6}/g);
-
-      if (signals && signals.length === 4) {
-        signals.forEach((signalBlock) => {
-          const direction = signalBlock[0]; // Get the first character as the direction (N, S, E, W)
-
-          const dir = direction as keyof typeof state.signals;
-
-          // Update the signal state for the corresponding direction
-          state.signals[dir].left = signalBlock[1] as "R" | "A" | "G";
-          state.signals[dir].straight = signalBlock[2] as "R" | "A" | "G";
-          state.signals[dir].right = signalBlock[3] as "R" | "A" | "G";
-          state.signals[dir].bike = signalBlock[4] as "R" | "A" | "G";
-          state.signals[dir].pedestrian = signalBlock[5] as "R" | "A" | "G";
-        });
-      }
+      state.signals = initializeSignals(state.signalString);
     },
 
     validateConfig(state) {},

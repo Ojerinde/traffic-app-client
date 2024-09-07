@@ -15,6 +15,7 @@ import NewPattern from "@/components/IntersectionComponent/NewPattern";
 import EditPattern from "@/components/IntersectionComponent/EditPattern";
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
 import { setSignalState } from "@/store/signals/SignalConfigSlice";
+import Button from "@/components/UI/Button/Button";
 interface IntersectionConfigurationPageProps {
   params: any;
 }
@@ -35,10 +36,6 @@ const IntersectionConfigurationPage: React.FC<
   const patternOptions: Option[] = [
     { value: "pattern1", label: "Pattern 1 - N,E,W,S,P1,P2" },
     { value: "pattern2", label: "Pattern 2 - N,S,W,E" },
-    { value: "pattern3", label: "Pattern 3 - E,W,P1,P2,N,S" },
-    { value: "pattern4", label: "Pattern 4 - N,E,W,S,P1,P2" },
-    { value: "pattern5", label: "Pattern 5 - N,S,W,E" },
-    { value: "pattern6", label: "Pattern 6 - E,W,P1,P2,N,S" },
   ];
 
   const validationSchema = Yup.object({
@@ -76,26 +73,21 @@ const IntersectionConfigurationPage: React.FC<
         </div>
         <div className="intersectionConfigPage__box--right">
           <div className="intersectionConfigPage__buttons">
-            <button onClick={() => setClickedButton("new")}>
-              <FaPlus size={15} />
-              <span>New Pattern</span>
-            </button>
-            <button>
-              <FaArrowLeft size={15} />
-              <span>Prev. Phase</span>
-            </button>
-            <button>
-              <FaEdit size={15} />
-              <span>Edit Pattern</span>
-            </button>
-            <button>
-              <FaArrowRight size={15} />
-              <span>Next Phase</span>
-            </button>
-            <button>
-              <FaTrash size={15} />
-              <span>Delete Pattern</span>
-            </button>
+            <Button type="button" onClick={() => setClickedButton("new")}>
+              <FaPlus size={30} />
+            </Button>
+            <Button type="button">
+              <FaArrowLeft size={30} />
+            </Button>
+            <Button type="button">
+              <FaEdit size={30} />
+            </Button>
+            <Button type="button">
+              <FaArrowRight size={30} />
+            </Button>
+            <Button type="button">
+              <FaTrash size={30} />
+            </Button>
           </div>
 
           {clickedButton === "new" && (
@@ -110,7 +102,7 @@ const IntersectionConfigurationPage: React.FC<
               onSavePattern={(pattern) => console.log("Saved pattern", pattern)}
             />
           )}
-          <ul>
+          <ul className="intersectionConfigPage__box--tabs">
             <li
               onClick={() => setSelectedBox("patterns")}
               className={`${
@@ -130,7 +122,7 @@ const IntersectionConfigurationPage: React.FC<
               Schedules
             </li>
           </ul>
-          {selectedBox === "patterns" && (
+          {/* {selectedBox === "patterns" && (
             <div className="intersectionConfigPage__patterns">
               <h3 className="intersectionConfigPage__patterns--header">
                 Group Phase Patterns
@@ -161,7 +153,7 @@ const IntersectionConfigurationPage: React.FC<
                 </button>
               </div>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </section>

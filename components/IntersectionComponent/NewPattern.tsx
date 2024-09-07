@@ -5,6 +5,7 @@ import {
   setSignalString,
 } from "@/store/signals/SignalConfigSlice";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import Button from "../UI/Button/Button";
 interface NewPatternProps {
   onSavePattern: (selectedPhases: string[]) => void;
 }
@@ -16,6 +17,7 @@ const NewPattern: React.FC<NewPatternProps> = ({ onSavePattern }) => {
 
   // Function to handle selecting a phase to update Intersection UI
   const handleSelectPhase = (phaseName: string, signalString: string) => {
+    console.log("Handle Select", signalString);
     dispatch(setSignalString(signalString));
     dispatch(setSignalState());
   };
@@ -39,22 +41,22 @@ const NewPattern: React.FC<NewPatternProps> = ({ onSavePattern }) => {
   };
 
   return (
-    <div>
-      <h2>Select Phases for the New Pattern</h2>
-      <div className="phases-list">
+    <div className="newPattern">
+      <h2 className="newPattern__header">Select Phases for the New Pattern</h2>
+      <ul className="newPattern__phases">
         {phases.map((phase) => (
-          <div key={phase.name}>
-            <span>{phase.name}</span>
+          <li className="newPattern__phases--item" key={phase.name}>
+            <h3>{phase.name}</h3>
             <button onClick={() => handleSelectPhase(phase.name, phase.data)}>
               Preview
             </button>
             <button onClick={() => handleAddRemovePhase(phase.name)}>
               {selectedPhases.includes(phase.name) ? "Remove" : "Add"}
             </button>
-          </div>
+          </li>
         ))}
-      </div>
-      <div>
+      </ul>
+      <div className="newPattern__selected">
         <h3>Selected Phases</h3>
         <DragDropContext onDragEnd={handleDragEnd}>
           <Droppable droppableId="selected-phases">
@@ -78,9 +80,9 @@ const NewPattern: React.FC<NewPatternProps> = ({ onSavePattern }) => {
             )}
           </Droppable>
         </DragDropContext>
-        <button onClick={() => onSavePattern(selectedPhases)}>
-          Save Pattern
-        </button>
+        <Button type="button" onClick={() => onSavePattern(selectedPhases)}>
+          Create Pattern
+        </Button>
       </div>
     </div>
   );

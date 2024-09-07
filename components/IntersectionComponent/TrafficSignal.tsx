@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+import { checkForConflicts } from "@/utils/conflictChecker";
+import { emitToastMessage } from "@/utils/toastFunc";
+import React, { useEffect, useState } from "react";
 import { ImManWoman } from "react-icons/im";
 import styled from "styled-components";
+import { Signal } from "./Intersection";
 
 type Direction = "N" | "E" | "S" | "W";
 type LightColor = "R" | "A" | "G"; // Include Amber (A)
@@ -21,15 +24,16 @@ interface TrafficSignalProps {
     signalType: string,
     currentColor: LightColor
   ) => void;
+  signals: Signal[];
 }
 
 const SignalWrapper = styled.div<{
   orientation: "horizontal" | "vertical";
-  position: { top: number; left: number };
+  $position: { top: number; left: number };
 }>`
   position: absolute;
-  top: ${({ position }) => `${position.top}%`};
-  left: ${({ position }) => `${position.left}%`};
+  top: ${({ $position }) => `${$position.top}%`};
+  left: ${({ $position }) => `${$position.left}%`};
   display: flex;
   flex-direction: ${({ orientation }) =>
     orientation === "horizontal" ? "row" : "column"};
@@ -77,6 +81,7 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
   pedestrianPosition,
   editable,
   onSignalClick,
+  signals,
 }) => {
   const [signalColors, setSignalColors] = useState({
     left,
@@ -86,22 +91,47 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
     pedestrian,
   });
 
+  useEffect(() => {
+    setSignalColors({
+      left,
+      straight,
+      right,
+      bike,
+      pedestrian,
+    });
+  }, [left, straight, right, bike, pedestrian]);
+
   // Toggle only between Red and Green on click
   const handleSignalClick = (signalType: string) => {
     if (!editable) return;
+
     const currentColor = signalColors[signalType as keyof typeof signalColors];
-    const newColor = currentColor === "R" ? "G" : "R"; // Toggle R <-> G
+    const newColor = currentColor === "R" ? "G" : "R";
+
+    // Check for conflicts
+    const conflicts = checkForConflicts(
+      direction,
+      signalType,
+      newColor,
+      signals
+    );
+
+    if (conflicts.length > 0) {
+      emitToastMessage(conflicts.join(" "), "error");
+      return;
+    }
+
+    // No conflicts, update the signal color
+    onSignalClick(direction, signalType, newColor);
 
     setSignalColors((prevColors) => ({
       ...prevColors,
       [signalType]: newColor,
     }));
-
-    onSignalClick(direction, signalType, newColor);
   };
 
   return (
-    <SignalWrapper orientation={orientation} position={position}>
+    <SignalWrapper orientation={orientation} $position={position}>
       <SignalGroup orientation={orientation}>
         {direction === "N" || direction === "E" ? (
           <>

@@ -19,25 +19,24 @@
     }
     &--right {
       flex-basis: 48%;
+    }
+    &--tabs {
+      display: flex;
+      list-style: none;
+      width: 100%;
+      justify-content: space-evenly;
 
-      & ul {
-        display: flex;
-        list-style: none;
-        width: 100%;
-        justify-content: space-evenly;
+      & li {
+        font-size: 1.7rem;
+        letter-spacing: 0.1rem;
+        font-weight: bold;
+        padding: 0.8rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        border-bottom: 2px solid transparent;
 
-        & li {
-          font-size: 1.7rem;
-          letter-spacing: 0.1rem;
-          font-weight: bold;
-          padding: 0.8rem;
-          cursor: pointer;
-          transition: all 0.3s;
-          border-bottom: 2px solid transparent;
-
-          &:hover {
-            background-color: $color-white-light;
-          }
+        &:hover {
+          background-color: $color-white-light;
         }
       }
     }
@@ -47,7 +46,6 @@
     }
   }
   &__buttons {
-    margin-bottom: 4rem;
     display: flex;
     justify-content: space-between;
 
@@ -59,12 +57,10 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      color: $color-white;
 
       & svg {
         color: $color-black-light;
-      }
-      & span {
-        font-size: 1.1rem;
       }
     }
   }

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import TrafficSignal from "./TrafficSignal";
 import { IoMdAddCircle } from "react-icons/io";
@@ -18,7 +18,7 @@ interface SignalState {
   pedestrian: "R" | "G" | "A";
 }
 
-interface Signal extends SignalState {
+export interface Signal extends SignalState {
   direction: "N" | "E" | "S" | "W";
   position: { top: number; left: number };
   pedestrianPosition: { top: number; left: number };
@@ -104,12 +104,15 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
   backgroundImage,
   editable,
 }) => {
-  console.log("Initial Signals", initialSignals);
   const [signals, setSignals] = useState<Signal[]>(initialSignals);
   const [showInputModal, setShowInputModal] = useState<boolean>(false);
   const [phaseName, setPhaseName] = useState<string>("");
 
   const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    setSignals(initialSignals);
+  }, [initialSignals]);
 
   const handleSignalClick = (
     direction: "N" | "E" | "S" | "W",
@@ -163,19 +166,21 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
       emitToastMessage(error?.response.data.message, "error");
     }
   };
-
   return (
     <Background $backgroundImage={backgroundImage}>
-      {signals.map((signal, index) => (
-        <TrafficSignal
-          key={index}
-          {...signal}
-          editable={editable}
-          onSignalClick={(direction, signalType, color) =>
-            handleSignalClick(direction, signalType, color)
-          }
-        />
-      ))}
+      {signals.map((signal) => {
+        return (
+          <TrafficSignal
+            key={signal.direction}
+            {...signal}
+            editable={editable}
+            onSignalClick={(direction, signalType, color) =>
+              handleSignalClick(direction, signalType, color)
+            }
+            signals={signals}
+          />
+        );
+      })}
       {editable && (
         <AddPhaseIcon
           whileHover={{ scale: 1.2 }}
