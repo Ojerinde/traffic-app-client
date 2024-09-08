@@ -35,7 +35,6 @@ const Background = styled.div<{ $backgroundImage: string }>`
   position: relative;
   width: 100%;
   height: 80vh;
-  margin-top: 3rem;
   border: none;
   background-image: url(${({ $backgroundImage }) => $backgroundImage});
   box-shadow: rgba(0, 0, 0, 0.06) 0px 2px 4px 0px inset;
@@ -106,6 +105,7 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
 }) => {
   const [signals, setSignals] = useState<Signal[]>(initialSignals);
   const [showInputModal, setShowInputModal] = useState<boolean>(false);
+  const [isCreatingPhase, setIsCreatingPhase] = useState<boolean>(false);
   const [phaseName, setPhaseName] = useState<string>("");
 
   const dispatch = useAppDispatch();
@@ -136,6 +136,7 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
       alert("Please enter a name for the phase.");
       return;
     }
+    setIsCreatingPhase(true);
     const user = GetItemFromLocalStorage("user");
     console.log("Sending Phase Data:", phaseName, user);
     try {
@@ -153,7 +154,7 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
 
       const encodedSignals = encodeSignals();
 
-      const { data } = await HttpRequest.post("/phase", {
+      const { data } = await HttpRequest.post("/phases", {
         email: user.email,
         phaseName,
         phaseData: encodedSignals,
@@ -161,9 +162,13 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
       console.log("response", data);
       emitToastMessage(data.message, "success");
       dispatch(getUserPhase(user.email));
+      setIsCreatingPhase(false);
+      setPhaseName("");
+      setShowInputModal(false);
     } catch (error: any) {
       console.error("Error adding phase:", error);
       emitToastMessage(error?.response.data.message, "error");
+      setIsCreatingPhase(false);
     }
   };
   return (
@@ -203,7 +208,9 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
             value={phaseName}
             onChange={(e) => setPhaseName(e.target.value)}
           />
-          <AddPhaseButton onClick={handleAddPhase}>Create</AddPhaseButton>
+          <AddPhaseButton onClick={handleAddPhase}>
+            {isCreatingPhase ? "Creating..." : "Create"}
+          </AddPhaseButton>
         </PhaseContainer>
       )}
     </Background>

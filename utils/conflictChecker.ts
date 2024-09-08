@@ -25,89 +25,104 @@ export const checkForConflicts = (
   const eastSignal = signals.find((signal) => signal.direction === "E");
   const westSignal = signals.find((signal) => signal.direction === "W");
 
-  // Rule 1: North-South straight conflict
-  if (
-    direction === "N" &&
-    signalType === "straight" &&
-    newColor === "G" &&
-    southSignal?.straight === "G"
-  ) {
-    conflicts.push("North and South cannot both have green straight signals.");
-  }
-  if (
-    direction === "S" &&
-    signalType === "straight" &&
-    newColor === "G" &&
-    northSignal?.straight === "G"
-  ) {
-    conflicts.push("South and North cannot both have green straight signals.");
-  }
+  // Helper function to add conflicts
+  const addConflict = (message: string) => conflicts.push(message);
 
-  // Rule 2: East-West straight conflict
+  // Straight Movement Conflicts
   if (
-    direction === "E" &&
+    (direction === "N" || direction === "S") &&
     signalType === "straight" &&
     newColor === "G" &&
-    westSignal?.straight === "G"
+    (northSignal?.straight === "G" || southSignal?.straight === "G")
   ) {
-    conflicts.push("East and West cannot both have green straight signals.");
-  }
-  if (
-    direction === "W" &&
-    signalType === "straight" &&
-    newColor === "G" &&
-    eastSignal?.straight === "G"
-  ) {
-    conflicts.push("West and East cannot both have green straight signals.");
-  }
-
-  // Rule 3: Left-turn conflicts
-  if (
-    direction === "N" &&
-    signalType === "left" &&
-    newColor === "G" &&
-    southSignal?.left === "G"
-  ) {
-    conflicts.push("North and South cannot both have green left-turn signals.");
-  }
-  if (
-    direction === "S" &&
-    signalType === "left" &&
-    newColor === "G" &&
-    northSignal?.left === "G"
-  ) {
-    conflicts.push("South and North cannot both have green left-turn signals.");
+    addConflict("North and South cannot both have green straight signals.");
   }
 
   if (
-    direction === "E" &&
-    signalType === "left" &&
+    (direction === "E" || direction === "W") &&
+    signalType === "straight" &&
     newColor === "G" &&
-    westSignal?.left === "G"
+    (eastSignal?.straight === "G" || westSignal?.straight === "G")
   ) {
-    conflicts.push("East and West cannot both have green left-turn signals.");
-  }
-  if (
-    direction === "W" &&
-    signalType === "left" &&
-    newColor === "G" &&
-    eastSignal?.left === "G"
-  ) {
-    conflicts.push("West and East cannot both have green left-turn signals.");
+    addConflict("East and West cannot both have green straight signals.");
   }
 
-  // Rule 4: Pedestrian conflicts (example: pedestrians should not go when North or South is green)
+  // Left Turn Conflicts
+  if (
+    (direction === "N" || direction === "S") &&
+    signalType === "left" &&
+    newColor === "G" &&
+    (northSignal?.left === "G" || southSignal?.left === "G")
+  ) {
+    addConflict("North and South cannot both have green left-turn signals.");
+  }
+
+  if (
+    (direction === "E" || direction === "W") &&
+    signalType === "left" &&
+    newColor === "G" &&
+    (eastSignal?.left === "G" || westSignal?.left === "G")
+  ) {
+    addConflict("East and West cannot both have green left-turn signals.");
+  }
+
+  // Pedestrian Crossing Conflicts
   if (signalType === "pedestrian" && newColor === "G") {
     if (northSignal?.straight === "G" || southSignal?.straight === "G") {
-      conflicts.push(
+      addConflict(
         "Pedestrian cannot cross when North or South has green straight signals."
       );
     }
     if (eastSignal?.straight === "G" || westSignal?.straight === "G") {
-      conflicts.push(
+      addConflict(
         "Pedestrian cannot cross when East or West has green straight signals."
       );
     }
+  }
+
+  // Bicycle Lane Conflicts
+  if (signalType === "bicycle" && newColor === "G") {
+    if (
+      northSignal?.straight === "G" ||
+      southSignal?.straight === "G" ||
+      eastSignal?.straight === "G" ||
+      westSignal?.straight === "G"
+    ) {
+      addConflict(
+        "Bicycles cannot cross when any straight signals from the opposite direction are green."
+      );
+    }
+  }
+
+  // U-Turn Conflicts
+  if (signalType === "left" && newColor === "G") {
+    if (oppositeDirection[direction] === "W" && westSignal?.right === "G") {
+      addConflict(
+        `Conflicting U-turn: ${direction} left conflicts with ${oppositeDirection[direction]} right.`
+      );
+    }
+  }
+
+  // Continuous Right Turn Conflicts
+  if (signalType === "right" && newColor === "G") {
+    if (direction === "N" && westSignal?.left === "G") {
+      addConflict("North Right conflicts with West Left.");
+    }
+    if (direction === "S" && eastSignal?.left === "G") {
+      addConflict("South Right conflicts with East Left.");
+    }
+  }
+
+  // Additional Conflict Check for Outright and Conditional Conflicts
+  if (
+    (direction === "N" || direction === "S") &&
+    signalType === "straight" &&
+    newColor === "G" &&
+    (eastSignal?.straight === "G" || westSignal?.straight === "G")
+  ) {
+    addConflict(
+      "North/South straight conflicts with East/West straight movements."
+    );
   }
 
   return conflicts;

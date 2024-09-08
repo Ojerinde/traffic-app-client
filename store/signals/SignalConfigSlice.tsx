@@ -45,9 +45,9 @@ const initializeSignals = (
 };
 
 const initialConfig: SignalConfigState = {
-  signals: initializeSignals("*NRRRRREGGGGRSGGGGRWRRRRR#"),
+  signals: initializeSignals("*#"),
   warning: null,
-  signalString: "*NRRRRREGGGGRSGGGGRWRRRRR#",
+  signalString: "*#",
 };
 
 const signalConfigSlice = createSlice({

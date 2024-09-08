@@ -5,21 +5,25 @@ import { emitToastMessage } from "@/utils/toastFunc";
 interface InitialStateTypes {
   devices: any[];
   phases: any[];
+  patterns: any[];
   isFetchingDevices: boolean;
   isFetchingPhases: boolean;
+  isFetchingPatterns: boolean;
 }
 const initialState: InitialStateTypes = {
   devices: [],
   phases: [],
+  patterns: [],
   isFetchingDevices: false,
   isFetchingPhases: false,
+  isFetchingPatterns: false,
 };
 
 export const getUserDevice = createAsyncThunk(
   "userDevice/getUserDevice",
   async (email: string) => {
     try {
-      const { data } = await HttpRequest.get(`/device/${email}`);
+      const { data } = await HttpRequest.get(`/devices/${email}`);
       if (data.devices.length === 0) {
         return emitToastMessage("You have not added any device yet", "success");
       }
@@ -37,7 +41,7 @@ export const getUserPhase = createAsyncThunk(
     try {
       const {
         data: { data },
-      } = await HttpRequest.get(`/phase/${email}`);
+      } = await HttpRequest.get(`/phases/${email}`);
       if (data.phases.length === 0) {
         return emitToastMessage("You have not added any phase yet", "success");
       }
@@ -45,6 +49,29 @@ export const getUserPhase = createAsyncThunk(
       return data;
     } catch (error: any) {
       emitToastMessage("Could not fetch your phase(s)", "error");
+    }
+  }
+);
+export const getUserPattern = createAsyncThunk(
+  "userDevice/getUserPattern",
+  async (email: string) => {
+    console.log("Pattern data", email);
+
+    try {
+      const {
+        data: { data },
+      } = await HttpRequest.get(`/patterns/${email}`);
+      console.log("Pattern data", data);
+      if (data.pattern.length === 0) {
+        return emitToastMessage(
+          "You have not added any pattern yet",
+          "success"
+        );
+      }
+      emitToastMessage("Your pattern(s) are fetched successfully", "success");
+      return data;
+    } catch (error: any) {
+      emitToastMessage("Could not fetch your pattern(s)", "error");
     }
   }
 );
@@ -74,6 +101,17 @@ const UserDeviceSlice = createSlice({
       })
       .addCase(getUserPhase.rejected, (state) => {
         state.isFetchingPhases = false;
+      })
+      .addCase(getUserPattern.pending, (state) => {
+        state.isFetchingPatterns = true;
+      })
+      .addCase(getUserPattern.fulfilled, (state, action) => {
+        console.log("Patterns Action", action.payload);
+        state.patterns = action.payload.patterns;
+        state.isFetchingPatterns = false;
+      })
+      .addCase(getUserPattern.rejected, (state) => {
+        state.isFetchingPatterns = false;
       });
   },
 });

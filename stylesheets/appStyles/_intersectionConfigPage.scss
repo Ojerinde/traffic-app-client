@@ -13,79 +13,13 @@
   &__box {
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
 
     &--left {
       flex-basis: 50%;
     }
     &--right {
       flex-basis: 48%;
-    }
-    &--tabs {
-      display: flex;
-      list-style: none;
-      width: 100%;
-      justify-content: space-evenly;
-
-      & li {
-        font-size: 1.7rem;
-        letter-spacing: 0.1rem;
-        font-weight: bold;
-        padding: 0.8rem;
-        cursor: pointer;
-        transition: all 0.3s;
-        border-bottom: 2px solid transparent;
-
-        &:hover {
-          background-color: $color-white-light;
-        }
-      }
-    }
-    &--active {
-      color: $color-yellow;
-      border-bottom: 2px solid $color-yellow !important;
-    }
-  }
-  &__buttons {
-    display: flex;
-    justify-content: space-between;
-
-    & button {
-      flex-basis: 18%;
-      padding: 0.6rem 0.5rem;
-      gap: 0.3rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      color: $color-white;
-
-      & svg {
-        color: $color-black-light;
-      }
-    }
-  }
-
-  &__patterns {
-    margin-top: 1rem;
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px,
-      rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
-    padding: 3rem 2rem 2rem;
-    &--header {
-      font-size: 1.7rem;
-      color: $color-black-light;
-      margin-bottom: 1.3rem;
-    }
-  }
-
-  &__schedules {
-    margin-top: 1rem;
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px,
-      rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
-    padding: 3rem 2rem 2rem;
-    &--header {
-      font-size: 1.7rem;
-      color: $color-black-light;
-      margin-bottom: 1.3rem;
     }
   }
 }

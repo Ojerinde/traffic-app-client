@@ -5,19 +5,20 @@ import {
   setSignalString,
 } from "@/store/signals/SignalConfigSlice";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import Button from "../UI/Button/Button";
-interface NewPatternProps {
-  onSavePattern: (selectedPhases: string[]) => void;
-}
+import HttpRequest from "@/store/services/HttpRequest";
+import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
+import { emitToastMessage } from "@/utils/toastFunc";
 
-const NewPattern: React.FC<NewPatternProps> = ({ onSavePattern }) => {
+interface NewPatternProps {}
+
+const NewPattern: React.FC<NewPatternProps> = ({}) => {
   const { phases } = useAppSelector((state) => state.userDevice);
   const dispatch = useAppDispatch();
   const [selectedPhases, setSelectedPhases] = useState<string[]>([]);
+  const [patternName, setPatternName] = useState<string>("");
 
   // Function to handle selecting a phase to update Intersection UI
   const handleSelectPhase = (phaseName: string, signalString: string) => {
-    console.log("Handle Select", signalString);
     dispatch(setSignalString(signalString));
     dispatch(setSignalState());
   };
@@ -30,6 +31,13 @@ const NewPattern: React.FC<NewPatternProps> = ({ onSavePattern }) => {
         : [...prev, phaseName]
     );
   };
+  const handleDeletePhase = (phaseName: string) => {
+    const confirmResult = confirm(
+      "Are you sure you want to delete this phase?"
+    );
+    console.log("Confirm result", confirmResult, phaseName);
+    // Delete the phase from the list of phases
+  };
 
   // Handle Drag and Drop (reordering)
   const handleDragEnd = (result: any) => {
@@ -40,50 +48,89 @@ const NewPattern: React.FC<NewPatternProps> = ({ onSavePattern }) => {
     setSelectedPhases(reorderedPhases);
   };
 
+  const handleCreatePattern = async () => {
+    const selectedPhasesId = phases
+      .map((phase) => (selectedPhases.includes(phase.name) ? phase : null))
+      .filter(Boolean)
+      .map((phase) => phase._id);
+    console.log("Selected phases data", patternName, selectedPhasesId);
+    try {
+      const { data } = await HttpRequest.post("/patterns", {
+        patternName,
+        email: GetItemFromLocalStorage("user").email,
+        selectedPhases: selectedPhasesId,
+      });
+      emitToastMessage(data.message, "success");
+      setPatternName("");
+    } catch (error: any) {
+      emitToastMessage(error?.response.data.message, "error");
+      console.log("Error", error);
+    }
+  };
+
   return (
     <div className="newPattern">
-      <h2 className="newPattern__header">Select Phases for the New Pattern</h2>
+      <h2 className="newPattern__header">Select phases for the new pattern</h2>
       <ul className="newPattern__phases">
         {phases.map((phase) => (
           <li className="newPattern__phases--item" key={phase.name}>
             <h3>{phase.name}</h3>
-            <button onClick={() => handleSelectPhase(phase.name, phase.data)}>
-              Preview
-            </button>
-            <button onClick={() => handleAddRemovePhase(phase.name)}>
-              {selectedPhases.includes(phase.name) ? "Remove" : "Add"}
-            </button>
+            <div>
+              <button onClick={() => handleSelectPhase(phase.name, phase.data)}>
+                Preview
+              </button>
+              <button onClick={() => handleAddRemovePhase(phase.name)}>
+                {selectedPhases.includes(phase.name) ? "Remove" : "Add"}
+              </button>
+              <button onClick={() => handleDeletePhase(phase.name)}>
+                Delete
+              </button>
+            </div>
           </li>
         ))}
       </ul>
-      <div className="newPattern__selected">
-        <h3>Selected Phases</h3>
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="selected-phases">
-            {(provided) => (
-              <ul {...provided.droppableProps} ref={provided.innerRef}>
-                {selectedPhases.map((phase, index) => (
-                  <Draggable key={phase} draggableId={phase} index={index}>
-                    {(provided) => (
-                      <li
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                      >
-                        {phase}
-                      </li>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </ul>
-            )}
-          </Droppable>
-        </DragDropContext>
-        <Button type="button" onClick={() => onSavePattern(selectedPhases)}>
-          Create Pattern
-        </Button>
-      </div>
+      {selectedPhases.length > 0 && (
+        <div className="newPattern__selected">
+          <p>
+            Below are the phases you have selected. you can reorder by drag and
+            drop. <span onClick={() => setSelectedPhases([])}>Clear all</span>
+          </p>
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="selected-phases">
+              {(provided) => (
+                <ul {...provided.droppableProps} ref={provided.innerRef}>
+                  {selectedPhases.map((phase, index) => (
+                    <Draggable key={phase} draggableId={phase} index={index}>
+                      {(provided) => (
+                        <li
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                        >
+                          {phase}
+                        </li>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </ul>
+              )}
+            </Droppable>
+          </DragDropContext>
+          <div className="newPattern__selected--ctn">
+            <input
+              type="text"
+              name="pattern"
+              value={patternName}
+              onChange={(e) => setPatternName(e.target.value)}
+              placeholder="Enter pattern name"
+            />
+            <button type="button" onClick={handleCreatePattern}>
+              Create Pattern
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

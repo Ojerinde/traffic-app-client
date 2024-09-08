@@ -1,9 +1,9 @@
-import { checkForConflicts } from "@/utils/conflictChecker";
 import { emitToastMessage } from "@/utils/toastFunc";
 import React, { useEffect, useState } from "react";
 import { ImManWoman } from "react-icons/im";
 import styled from "styled-components";
 import { Signal } from "./Intersection";
+import { checkForConflicts } from "@/utils/conflictChecker";
 
 type Direction = "N" | "E" | "S" | "W";
 type LightColor = "R" | "A" | "G"; // Include Amber (A)
