@@ -1,4 +1,4 @@
-.newPattern {
+.newGroup {
   margin: 2rem 0;
   padding: 0.8rem;
   background-color: $color-white-dark;
@@ -8,7 +8,7 @@
     color: $color-black-light;
     margin-bottom: 1rem;
   }
-  &__phases {
+  &__patterns {
     display: flex;
     flex-direction: column;
     row-gap: 1rem;
@@ -82,10 +82,39 @@
       margin-bottom: 0.5rem;
 
       & li {
-        padding: 0.6rem 0.5rem;
-        font-size: 1.4em;
         box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
           rgb(209, 213, 219) 0px 0px 0px 1px inset;
+        padding: 0.4rem 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s;
+
+        & h3 {
+          font-size: 1.4rem;
+          letter-spacing: 0.1rem;
+        }
+
+        & button {
+          color: $color-black-light;
+          border-radius: 0.5rem;
+          font-size: 1.2rem;
+          letter-spacing: 0.08rem;
+          padding: 0.6rem 0.8rem;
+          margin-left: 0.7rem;
+          border: none;
+          cursor: pointer;
+          box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
+            rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+            rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+          transition: all 0.3s;
+
+          &:hover {
+            background-color: rgba($color-yellow, 0.8);
+            box-shadow: rgba(0, 0, 0, 0.45) 0px 25px 20px -20px;
+            color: $color-white;
+          }
+        }
       }
     }
     &--ctn {

@@ -55,14 +55,11 @@ export const getUserPhase = createAsyncThunk(
 export const getUserPattern = createAsyncThunk(
   "userDevice/getUserPattern",
   async (email: string) => {
-    console.log("Pattern data", email);
-
     try {
       const {
         data: { data },
       } = await HttpRequest.get(`/patterns/${email}`);
-      console.log("Pattern data", data);
-      if (data.pattern.length === 0) {
+      if (data.patterns.length === 0) {
         return emitToastMessage(
           "You have not added any pattern yet",
           "success"
@@ -106,7 +103,6 @@ const UserDeviceSlice = createSlice({
         state.isFetchingPatterns = true;
       })
       .addCase(getUserPattern.fulfilled, (state, action) => {
-        console.log("Patterns Action", action.payload);
         state.patterns = action.payload.patterns;
         state.isFetchingPatterns = false;
       })

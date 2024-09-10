@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import FourWayIntersection from "@/components/IntersectionComponent/FourWayIntersection";
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
 import { setSignalState } from "@/store/signals/SignalConfigSlice";

@@ -12,6 +12,7 @@ interface SignalConfigState {
   signals: Record<"N" | "E" | "S" | "W", SignalState>;
   warning: string | null;
   signalString: string;
+  allowConflictingConfig: false | true;
 }
 
 const initializeSignals = (
@@ -48,6 +49,7 @@ const initialConfig: SignalConfigState = {
   signals: initializeSignals("*#"),
   warning: null,
   signalString: "*#",
+  allowConflictingConfig: false,
 };
 
 const signalConfigSlice = createSlice({
@@ -60,11 +62,22 @@ const signalConfigSlice = createSlice({
     setSignalState(state) {
       state.signals = initializeSignals(state.signalString);
     },
+    clearSignalString(state) {
+      state.signalString = "*#";
+    },
+    allowConflictConfig(state, action: PayloadAction<boolean>) {
+      state.allowConflictingConfig = action.payload;
+    },
 
     validateConfig(state) {},
   },
 });
 
-export const { setSignalState, setSignalString, validateConfig } =
-  signalConfigSlice.actions;
+export const {
+  setSignalState,
+  setSignalString,
+  clearSignalString,
+  allowConflictConfig,
+  validateConfig,
+} = signalConfigSlice.actions;
 export default signalConfigSlice.reducer;

@@ -1,7 +1,0 @@
-.input:checked + div {
-  background-color: #222121;
-}
-
-.input:checked + div svg {
-  display: block;
-}

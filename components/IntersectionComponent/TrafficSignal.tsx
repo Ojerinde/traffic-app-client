@@ -4,9 +4,10 @@ import { ImManWoman } from "react-icons/im";
 import styled from "styled-components";
 import { Signal } from "./Intersection";
 import { checkForConflicts } from "@/utils/conflictChecker";
+import { useAppSelector } from "@/hooks/reduxHook";
 
 type Direction = "N" | "E" | "S" | "W";
-type LightColor = "R" | "A" | "G"; // Include Amber (A)
+type LightColor = "R" | "A" | "G";
 
 interface TrafficSignalProps {
   direction: Direction;
@@ -83,6 +84,9 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
   onSignalClick,
   signals,
 }) => {
+  const { allowConflictingConfig } = useAppSelector(
+    (state) => state.signalConfig
+  );
   const [signalColors, setSignalColors] = useState({
     left,
     straight,
@@ -109,12 +113,10 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
     const newColor = currentColor === "R" ? "G" : "R";
 
     // Check for conflicts
-    const conflicts = checkForConflicts(
-      direction,
-      signalType,
-      newColor,
-      signals
-    );
+    let conflicts: string[] = [];
+    if (allowConflictingConfig === false) {
+      conflicts = checkForConflicts(direction, signalType, newColor, signals);
+    }
 
     if (conflicts.length > 0) {
       emitToastMessage(conflicts.join(" "), "error");

@@ -4,21 +4,20 @@ import HttpRequest from "@/store/services/HttpRequest";
 import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
 import { emitToastMessage } from "@/utils/toastFunc";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { getUserPattern } from "@/store/devices/UserDeviceSlice";
+import OverlayModal from "../Modals/OverlayModal";
+import ConfigurePatternModal from "../Modals/ConfigurePatternModal";
 
 interface BoxThreeProps {}
 const BoxThree: React.FC<BoxThreeProps> = ({}) => {
   const { patterns } = useAppSelector((state) => state.userDevice);
   const [selectedPatterns, setSelectedPatterns] = useState<string[]>([]);
   const [groupName, setGroupName] = useState<string>("");
+  const [showConfigModal, setShowConfigureModal] = useState<boolean>(false);
+  const [patternToConfigure, setPatternToConfigure] = useState("");
   const dispatch = useAppDispatch();
 
-  useEffect(() => {
-    dispatch(getUserPattern(GetItemFromLocalStorage("user").email));
-  }, []);
-
-  // Function to handle adding/removing a phase
   const handleAddRemovePattern = (patternName: string) => {
     setSelectedPatterns((prev) =>
       prev.includes(patternName)
@@ -26,12 +25,26 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
         : [...prev, patternName]
     );
   };
-  const handleDeletePattern = (patternName: string) => {
+
+  const handleDeletePattern = async (patternName: string) => {
     const confirmResult = confirm(
       "Are you sure you want to delete this pattern?"
     );
-    console.log("Confirm result", confirmResult, patternName);
-    // Delete the pattern from the list of patterns
+    if (!confirmResult) return;
+    const pattern = patterns.find((p) => p.name === patternName);
+    const patternId = pattern?._id;
+    console.log("Pattern ID", pattern, patternName, patternId);
+
+    try {
+      const email = GetItemFromLocalStorage("user").email;
+      const { data } = await HttpRequest.delete(
+        `/patterns/${patternId}/${email}`
+      );
+      emitToastMessage(data.message, "success");
+      dispatch(getUserPattern(email));
+    } catch (error: any) {
+      emitToastMessage(error?.response.data.message, "error");
+    }
   };
 
   // Handle Drag and Drop (reordering)
@@ -43,40 +56,39 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
     setSelectedPatterns(reorderedPatterns);
   };
 
-  const handleCreatePattern = async () => {
-    const selectedPatternsId = patterns
-      .map((pattern) =>
-        selectedPatterns.includes(pattern.name) ? pattern : null
-      )
-      .filter(Boolean)
-      .map((pattern) => pattern._id);
-    console.log("Selected patterns data", groupName, selectedPatternsId);
-    try {
-      const { data } = await HttpRequest.post("/patterns", {
-        groupName,
-        email: GetItemFromLocalStorage("user").email,
-        selectedPatterns: selectedPatternsId,
-      });
-      emitToastMessage(data.message, "success");
-      setGroupName("");
-    } catch (error: any) {
-      emitToastMessage(error?.response.data.message, "error");
-      console.log("Error", error);
-    }
+  const handleCreateGroup = async () => {
+    if (!groupName) return emitToastMessage("Group name is required", "error");
+    console.log("Group data", groupName);
+    // try {
+    //   const { data } = await HttpRequest.post("/groups", {
+    //     groupName,
+    //     email: GetItemFromLocalStorage("user").email,
+    //   });
+    //   emitToastMessage(data.message, "success");
+    //   setGroupName("");
+    // } catch (error: any) {
+    //   emitToastMessage(error?.response.data.message, "error");
+    //   console.log("Error", error);
+    // }
+  };
+
+  const handleConfigurePattern = (patternName: any) => {
+    const patternToConfigure = patterns.find((p) => p.name === patternName);
+    setPatternToConfigure(patternToConfigure);
+    setShowConfigureModal(true);
   };
 
   return (
     <div>
-      <div className="newPattern">
-        <h2 className="newPattern__header">
+      <div className="newGroup">
+        <h2 className="newGroup__header">
           Select multiple pattern for the new group
         </h2>
-        <ul className="newPattern__patterns">
+        <ul className="newGroup__patterns">
           {patterns.map((pattern) => (
-            <li className="newPattern__patterns--item" key={pattern.name}>
+            <li className="newGroup__patterns--item" key={pattern.name}>
               <h3>{pattern.name}</h3>
               <div>
-                <button>Configure</button>
                 <button onClick={() => handleAddRemovePattern(pattern.name)}>
                   {selectedPatterns.includes(pattern.name) ? "Remove" : "Add"}
                 </button>
@@ -88,7 +100,7 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
           ))}
         </ul>
         {selectedPatterns.length > 0 && (
-          <div className="newPattern__selected">
+          <div className="newGroup__selected">
             <p>
               Below are the patterns you have selected. you can reorder by drag
               and drop.{" "}
@@ -110,7 +122,12 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
                           >
-                            {pattern}
+                            <h3> {pattern}</h3>
+                            <button
+                              onClick={() => handleConfigurePattern(pattern)}
+                            >
+                              Configure
+                            </button>
                           </li>
                         )}
                       </Draggable>
@@ -120,19 +137,27 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
                 )}
               </Droppable>
             </DragDropContext>
-            <div className="newPattern__selected--ctn">
+            <div className="newGroup__selected--ctn">
               <input
                 type="text"
                 name="pattern"
                 value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
-                placeholder="Enter pattern name"
+                placeholder="Enter group name"
               />
-              <button type="button" onClick={handleCreatePattern}>
-                Create Pattern
+              <button type="button" onClick={handleCreateGroup}>
+                Create Group
               </button>
             </div>
           </div>
+        )}
+        {showConfigModal && (
+          <OverlayModal onClose={() => setShowConfigureModal(false)}>
+            <ConfigurePatternModal
+              pattern={patternToConfigure}
+              closeModal={() => setShowConfigureModal(false)}
+            />
+          </OverlayModal>
         )}
       </div>
     </div>

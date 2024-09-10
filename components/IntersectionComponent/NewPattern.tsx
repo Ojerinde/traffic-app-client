@@ -8,6 +8,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import HttpRequest from "@/store/services/HttpRequest";
 import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
 import { emitToastMessage } from "@/utils/toastFunc";
+import { getUserPattern, getUserPhase } from "@/store/devices/UserDeviceSlice";
 
 interface NewPatternProps {}
 
@@ -31,12 +32,23 @@ const NewPattern: React.FC<NewPatternProps> = ({}) => {
         : [...prev, phaseName]
     );
   };
-  const handleDeletePhase = (phaseName: string) => {
+  const handleDeletePhase = async (phaseName: string) => {
     const confirmResult = confirm(
       "Are you sure you want to delete this phase?"
     );
-    console.log("Confirm result", confirmResult, phaseName);
-    // Delete the phase from the list of phases
+
+    if (!confirmResult) return;
+    const phase = phases.find((p) => p.name === phaseName);
+    const phaseId = phase?._id;
+
+    try {
+      const email = GetItemFromLocalStorage("user").email;
+      const { data } = await HttpRequest.delete(`/phases/${phaseId}/${email}`);
+      emitToastMessage(data.message, "success");
+      dispatch(getUserPhase(email));
+    } catch (error: any) {
+      emitToastMessage(error?.response.data.message, "error");
+    }
   };
 
   // Handle Drag and Drop (reordering)
@@ -55,13 +67,15 @@ const NewPattern: React.FC<NewPatternProps> = ({}) => {
       .map((phase) => phase._id);
     console.log("Selected phases data", patternName, selectedPhasesId);
     try {
+      const email = GetItemFromLocalStorage("user").email;
       const { data } = await HttpRequest.post("/patterns", {
         patternName,
-        email: GetItemFromLocalStorage("user").email,
+        email: email,
         selectedPhases: selectedPhasesId,
       });
       emitToastMessage(data.message, "success");
       setPatternName("");
+      dispatch(getUserPattern(email));
     } catch (error: any) {
       emitToastMessage(error?.response.data.message, "error");
       console.log("Error", error);
