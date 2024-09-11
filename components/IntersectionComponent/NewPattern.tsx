@@ -86,8 +86,8 @@ const NewPattern: React.FC<NewPatternProps> = ({}) => {
     <div className="newPattern">
       <h2 className="newPattern__header">Select phases for the new pattern</h2>
       <ul className="newPattern__phases">
-        {phases.map((phase) => (
-          <li className="newPattern__phases--item" key={phase.name}>
+        {phases.map((phase, index) => (
+          <li className="newPattern__phases--item" key={index}>
             <h3>{phase.name}</h3>
             <div>
               <button onClick={() => handleSelectPhase(phase.name, phase.data)}>
