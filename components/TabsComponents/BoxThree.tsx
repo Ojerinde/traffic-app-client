@@ -92,10 +92,10 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
         </h2>
         <ul className="newGroup__patterns">
           {patterns.map((pattern, index) => (
-            <li className="newGroup__patterns--item" key={pattern.name}>
+            <li className="newGroup__patterns--item" key={index}>
               <h3>{pattern.name}</h3>
               <div>
-                <button onClick={() => handleAddRemovePattern(index)}>
+                <button onClick={() => handleAddRemovePattern(pattern.name)}>
                   {selectedPatterns.includes(pattern.name) ? "Remove" : "Add"}
                 </button>
                 <button onClick={() => handleDeletePattern(pattern.name)}>
