@@ -26,11 +26,11 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
     );
   };
 
-  useEffect(() => {
-    (async () => {
-      dispatch(getUserPattern(GetItemFromLocalStorage("user").email));
-    })();
-  }, [dispatch]);
+  // useEffect(() => {
+  //   (async () => {
+  //     dispatch(getUserPattern(GetItemFromLocalStorage("user").email));
+  //   })();
+  // }, [dispatch]);
 
   const handleDeletePattern = async (patternName: string) => {
     const confirmResult = confirm(
