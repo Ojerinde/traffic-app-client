@@ -59,6 +59,7 @@ export const getUserPattern = createAsyncThunk(
       const {
         data: { data },
       } = await HttpRequest.get(`/patterns/${email}`);
+      console.log("Email:", email, data);
       if (data.patterns.length === 0) {
         return emitToastMessage(
           "You have not added any pattern yet",

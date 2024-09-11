@@ -4,7 +4,7 @@ import HttpRequest from "@/store/services/HttpRequest";
 import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
 import { emitToastMessage } from "@/utils/toastFunc";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getUserPattern } from "@/store/devices/UserDeviceSlice";
 import OverlayModal from "../Modals/OverlayModal";
 import ConfigurePatternModal from "../Modals/ConfigurePatternModal";
@@ -25,6 +25,12 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
         : [...prev, patternName]
     );
   };
+
+  useEffect(() => {
+    (async () => {
+      dispatch(getUserPattern(GetItemFromLocalStorage("user").email));
+    })();
+  }, [dispatch]);
 
   const handleDeletePattern = async (patternName: string) => {
     const confirmResult = confirm(

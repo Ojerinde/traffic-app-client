@@ -29,41 +29,47 @@ export const checkForConflicts = (
   const addConflict = (message: string) => conflicts.push(message);
 
   // Straight Movement Conflicts
-  if (
-    (direction === "N" || direction === "S") &&
-    signalType === "straight" &&
-    newColor === "G" &&
-    (northSignal?.straight === "G" || southSignal?.straight === "G")
-  ) {
-    addConflict("North and South cannot both have green straight signals.");
-  }
-
-  if (
-    (direction === "E" || direction === "W") &&
-    signalType === "straight" &&
-    newColor === "G" &&
-    (eastSignal?.straight === "G" || westSignal?.straight === "G")
-  ) {
-    addConflict("East and West cannot both have green straight signals.");
+  if (signalType === "straight" && newColor === "G") {
+    if (direction === "N" || direction === "S") {
+      if (eastSignal?.straight === "G" || westSignal?.straight === "G") {
+        addConflict(
+          "North/South straight conflicts with East/West straight movements."
+        );
+      }
+    } else if (direction === "E" || direction === "W") {
+      if (northSignal?.straight === "G" || southSignal?.straight === "G") {
+        addConflict(
+          "East/West straight conflicts with North/South straight movements."
+        );
+      }
+    }
   }
 
   // Left Turn Conflicts
-  if (
-    (direction === "N" || direction === "S") &&
-    signalType === "left" &&
-    newColor === "G" &&
-    (northSignal?.left === "G" || southSignal?.left === "G")
-  ) {
-    addConflict("North and South cannot both have green left-turn signals.");
+  if (signalType === "left" && newColor === "G") {
+    if (direction === "N" || direction === "S") {
+      if (eastSignal?.straight === "G" || westSignal?.straight === "G") {
+        addConflict(
+          "North/South left turns conflict with East/West straight movements."
+        );
+      }
+    } else if (direction === "E" || direction === "W") {
+      if (northSignal?.straight === "G" || southSignal?.straight === "G") {
+        addConflict(
+          "East/West left turns conflict with North/South straight movements."
+        );
+      }
+    }
   }
 
-  if (
-    (direction === "E" || direction === "W") &&
-    signalType === "left" &&
-    newColor === "G" &&
-    (eastSignal?.left === "G" || westSignal?.left === "G")
-  ) {
-    addConflict("East and West cannot both have green left-turn signals.");
+  // Right Turn Conflicts and Continuous Right Turn Conflicts
+  if (signalType === "right" && newColor === "G") {
+    if (direction === "N" && westSignal?.left === "G") {
+      addConflict("North Right conflicts with West Left.");
+    }
+    if (direction === "S" && eastSignal?.left === "G") {
+      addConflict("South Right conflicts with East Left.");
+    }
   }
 
   // Pedestrian Crossing Conflicts
@@ -103,26 +109,15 @@ export const checkForConflicts = (
     }
   }
 
-  // Continuous Right Turn Conflicts
-  if (signalType === "right" && newColor === "G") {
-    if (direction === "N" && westSignal?.left === "G") {
-      addConflict("North Right conflicts with West Left.");
+  // Additional Checks for Outright and Conditional Conflicts based on the comprehensive conflict matrix
+  // North/South Left and Right Turn Conflicts with U-turns and opposite directions
+  if (signalType === "left" && newColor === "G") {
+    if (direction === "N" && southSignal?.left === "G") {
+      addConflict("North Left conflicts with South Left.");
     }
-    if (direction === "S" && eastSignal?.left === "G") {
-      addConflict("South Right conflicts with East Left.");
+    if (direction === "S" && northSignal?.left === "G") {
+      addConflict("South Left conflicts with North Left.");
     }
-  }
-
-  // Additional Conflict Check for Outright and Conditional Conflicts
-  if (
-    (direction === "N" || direction === "S") &&
-    signalType === "straight" &&
-    newColor === "G" &&
-    (eastSignal?.straight === "G" || westSignal?.straight === "G")
-  ) {
-    addConflict(
-      "North/South straight conflicts with East/West straight movements."
-    );
   }
 
   return conflicts;
