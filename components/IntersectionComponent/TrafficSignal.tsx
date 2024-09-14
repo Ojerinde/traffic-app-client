@@ -52,7 +52,10 @@ const SignalLight = styled.div<{ color: LightColor }>`
   cursor: pointer;
 `;
 
-const PedestrianSignalLight = styled.div<{ color: LightColor }>`
+const PedestrianSignalLight = styled.div<{
+  orientation: "horizontal" | "vertical";
+  color: LightColor;
+}>`
   width: 2rem;
   height: 2rem;
   display: flex;
@@ -60,6 +63,8 @@ const PedestrianSignalLight = styled.div<{ color: LightColor }>`
   align-items: center;
   font-size: 1.2rem;
   color: ${({ color }) => (color === "R" ? "red" : "green")};
+  transform: ${({ orientation }) =>
+    orientation === "horizontal" ? "rotate(90deg)" : "rotate(0deg)"};
   cursor: pointer;
 `;
 
@@ -149,6 +154,7 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
             >
               <PedestrianSignalLight
                 color={signalColors.pedestrian}
+                orientation={orientation}
                 onClick={() => handleSignalClick("pedestrian")}
               >
                 <ImManWoman fontSize={20} />
@@ -201,6 +207,7 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
             >
               <PedestrianSignalLight
                 color={signalColors.pedestrian}
+                orientation={orientation}
                 onClick={() => handleSignalClick("pedestrian")}
               >
                 <ImManWoman size={20} />

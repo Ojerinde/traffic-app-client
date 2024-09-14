@@ -7,7 +7,7 @@ export const emitToastMessage = (
   if (type === "error") {
     return toast(message, {
       position: "top-right",
-      autoClose: 10000,
+      autoClose: 15000,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: true,
@@ -30,7 +30,7 @@ export const emitToastMessage = (
 
   return toast(message, {
     position: "top-right",
-    autoClose: 10000,
+    autoClose: 15000,
     hideProgressBar: false,
     closeOnClick: true,
     pauseOnHover: true,
