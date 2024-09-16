@@ -60,6 +60,9 @@ export const checkForConflicts = (
       if (direction === "S") {
         addConflict("South left conflicts with East straight movements.");
       }
+      if (direction === "W") {
+        addConflict("West left conflicts with East straight movements.");
+      }
     }
 
     if (westSignal?.straight === "G") {
@@ -68,6 +71,9 @@ export const checkForConflicts = (
       }
       if (direction === "S") {
         addConflict("South left conflicts with West straight movements.");
+      }
+      if (direction === "E") {
+        addConflict("East left conflicts with West straight movements.");
       }
     }
     if (northSignal?.bike === "G") {
@@ -132,6 +138,55 @@ export const checkForConflicts = (
       }
       if (direction === "E") {
         addConflict("East left conflicts with North right movements.");
+      }
+    }
+    // Conditional Left Movements
+    if (northSignal?.right === "G") {
+      if (direction === "S") {
+        const isSLAllowedWithNR = confirm(
+          "Do you want to allow continuous right turn on the South road with North right active?"
+        );
+        if (!isSLAllowedWithNR) {
+          addConflict("South right conflicts with North right movements.");
+        } else {
+          // Save this in the database
+        }
+      }
+    }
+    if (southSignal?.right === "G") {
+      if (direction === "N") {
+        const isNLAllowedWithSR = confirm(
+          "Do you want to allow continuous right turn on the North road with South right active?"
+        );
+        if (!isNLAllowedWithSR) {
+          addConflict("North left conflicts with South right movements.");
+        } else {
+          // Save this in the database
+        }
+      }
+    }
+    if (eastSignal?.right === "G") {
+      if (direction === "W") {
+        const isWLAllowedWithER = confirm(
+          "Do you want to allow continuous right turn on the West road with East right active?"
+        );
+        if (!isWLAllowedWithER) {
+          addConflict("West left conflicts with East right movements.");
+        } else {
+          // Save this in the database
+        }
+      }
+    }
+    if (westSignal?.right === "G") {
+      if (direction === "E") {
+        const isELAllowedWithWR = confirm(
+          "Do you want to allow continuous right turn on the East road with West right active?"
+        );
+        if (!isELAllowedWithWR) {
+          addConflict("East left conflicts with West right movements.");
+        } else {
+          // Save this in the database
+        }
       }
     }
   }
@@ -268,6 +323,152 @@ export const checkForConflicts = (
         addConflict("East right conflicts with South right movements.");
       }
     }
+    if (northSignal?.straight === "G") {
+      if (direction === "W") {
+        const isWRAllowedWithNS = confirm(
+          "Do you want to allow continuous right turn on the West road with North straight active?"
+        );
+        if (!isWRAllowedWithNS) {
+          addConflict("West right conflicts with North straight movements.");
+        } else {
+          // Save this in the database
+        }
+      }
+    }
+    if (southSignal?.straight === "G") {
+      if (direction === "E") {
+        const isERAllowedWithSS = confirm(
+          "Do you want to allow continuous right turn on the East road with South straight active?"
+        );
+        if (!isERAllowedWithSS) {
+          addConflict("East right conflicts with South straight movements.");
+        } else {
+          // Save this in the database
+        }
+      }
+    }
+    if (eastSignal?.straight === "G") {
+      if (direction === "N") {
+        const isNRAllowedWithES = confirm(
+          "Do you want to allow continuous right turn on the North road with East straight active?"
+        );
+        if (!isNRAllowedWithES) {
+          addConflict("North right conflicts with East straight movements.");
+        } else {
+          // Save this in the database
+        }
+      }
+    }
+    if (westSignal?.straight === "G") {
+      if (direction === "S") {
+        const isSRAllowedWithWS = confirm(
+          "Do you want to allow continuous right turn on the South road with West straight active?"
+        );
+        if (!isSRAllowedWithWS) {
+          addConflict("South right conflicts with West straight movements.");
+        } else {
+          // Save this in the database
+        }
+      }
+    }
+    if (northSignal?.left === "G") {
+      if (direction === "S") {
+        const isSRAllowedWithNL = confirm(
+          "Do you want to allow continuous right turn on the South road with North left active?"
+        );
+        if (!isSRAllowedWithNL) {
+          addConflict("South right conflicts with North left movements.");
+        } else {
+          // Save this in the database
+        }
+      }
+    }
+    if (southSignal?.left === "G") {
+      if (direction === "N") {
+        const isNRAllowedWithSL = confirm(
+          "Do you want to allow continuous right turn on the North road with South left active?"
+        );
+        if (!isNRAllowedWithSL) {
+          addConflict("North right conflicts with South left movements.");
+        } else {
+          // Save this in the database
+        }
+      }
+    }
+    if (eastSignal?.left === "G") {
+      if (direction === "W") {
+        const isWRAllowedWithEL = confirm(
+          "Do you want to allow continuous right turn on the West road with East left active?"
+        );
+        if (!isWRAllowedWithEL) {
+          addConflict("West right conflicts with East left movements.");
+        } else {
+          // Save this in the database
+        }
+      }
+    }
+    if (westSignal?.left === "G") {
+      if (direction === "E") {
+        const isERAllowedWithWL = confirm(
+          "Do you want to allow continuous right turn on the East road with West left active?"
+        );
+        if (!isERAllowedWithWL) {
+          addConflict("East right conflicts with West left movements.");
+        } else {
+          // Save this in the database
+        }
+      }
+    }
+    //////////////////////////
+    // Conditional pedestrian
+    if (northSignal?.pedestrian === "G") {
+      if (direction === "E") {
+        const isERAllowedWithNP = confirm(
+          "Do you want to allow continuous right turn on the East road with North pedestrian active?"
+        );
+        if (!isERAllowedWithNP) {
+          addConflict("East right conflicts with North pedestrian movements.");
+        } else {
+          // Save this in the database
+        }
+      }
+    }
+    if (southSignal?.pedestrian === "G") {
+      if (direction === "W") {
+        const isWRAllowedWithSP = confirm(
+          "Do you want to allow continuous right turn on the West road with South pedestrian active?"
+        );
+        if (!isWRAllowedWithSP) {
+          addConflict("West right conflicts with South pedestrian movements.");
+        } else {
+          // Save this in the database
+        }
+      }
+    }
+    if (eastSignal?.pedestrian === "G") {
+      if (direction === "S") {
+        const isSRAllowedWithEP = confirm(
+          "Do you want to allow continuous right turn on the South road with East pedestrian active?"
+        );
+        if (!isSRAllowedWithEP) {
+          addConflict("South right conflicts with East pedestrian movements.");
+        } else {
+          // Save this in the database
+        }
+      }
+    }
+    if (westSignal?.pedestrian === "G") {
+      if (direction === "N") {
+        const isNRAllowedWithWP = confirm(
+          "Do you want to allow continuous right turn on the North road with West pedestrian active?"
+        );
+        if (!isNRAllowedWithWP) {
+          addConflict("North right conflicts with West pedestrian movements.");
+        } else {
+          // Save this in the database
+        }
+      }
+    }
   }
 
   ////////////////////////////////////////////////////////
@@ -300,6 +501,16 @@ export const checkForConflicts = (
       }
       if (westSignal?.bike === "G") {
         addConflict("North straight conflicts with West bicycle movement.");
+      }
+      if (westSignal?.right === "G") {
+        const isNSAllowedWithWR = confirm(
+          "Do you want to allow continuous right turn on the North road with West right active?"
+        );
+        if (!isNSAllowedWithWR) {
+          addConflict("North straight conflicts with West right movement.");
+        } else {
+          // Save this in the database
+        }
       }
     }
 
@@ -337,6 +548,16 @@ export const checkForConflicts = (
       if (westSignal?.right === "G") {
         addConflict("South straight conflicts with West right movement.");
       }
+      if (eastSignal?.right === "G") {
+        const isSSAllowedWithER = confirm(
+          "Do you want to allow continuous right turn on the South road with East right active?"
+        );
+        if (!isSSAllowedWithER) {
+          addConflict("South straight conflicts with East right movement.");
+        } else {
+          // Save this in the database
+        }
+      }
     }
 
     if (direction === "E") {
@@ -365,7 +586,14 @@ export const checkForConflicts = (
         addConflict("East straight conflicts with South bicycle movement.");
       }
       if (northSignal?.right === "G") {
-        addConflict("East straight conflicts with North right movement.");
+        const isESAllowedWithNR = confirm(
+          "Do you want to allow continuous right turn on the East road with North right active?"
+        );
+        if (!isESAllowedWithNR) {
+          addConflict("East straight conflicts with North right movement.");
+        } else {
+          // Save this in the database
+        }
       }
     }
 
@@ -395,7 +623,14 @@ export const checkForConflicts = (
         addConflict("West straight conflicts with South bicycle movement.");
       }
       if (southSignal?.right === "G") {
-        addConflict("West straight conflicts with South right movement.");
+        const isWSAllowedWithSR = confirm(
+          "Do you want to allow continuous right turn on the West road with South right active?"
+        );
+        if (!isWSAllowedWithSR) {
+          addConflict("West straight conflicts with South right movement.");
+        } else {
+          // Save this in the database
+        }
       }
     }
   }
@@ -479,7 +714,7 @@ export const checkForConflicts = (
   }
 
   // All Bicycle Lane Conflicts
-  if (signalType === "bicycle" && newColor === "G") {
+  if (signalType === "bike" && newColor === "G") {
     if (direction === "E") {
       if (northSignal?.straight === "G") {
         addConflict("East bicycle conflicts with North straight movement.");

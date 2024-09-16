@@ -18,7 +18,10 @@ interface TrafficSignalProps {
   pedestrian: LightColor;
   position: { top: number; left: number };
   orientation: "horizontal" | "vertical";
-  pedestrianPosition: { top: number; left: number };
+  pedestrianPosition: {
+    first: { top: number; left: number };
+    second: { top: number; left: number };
+  };
   editable: boolean;
   onSignalClick: (
     direction: Direction,
@@ -56,15 +59,16 @@ const PedestrianSignalLight = styled.div<{
   orientation: "horizontal" | "vertical";
   color: LightColor;
 }>`
-  width: 2rem;
-  height: 2rem;
+  width: 1rem;
+  height: 1rem;
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 1.2rem;
+  font-weight: 600;
   color: ${({ color }) => (color === "R" ? "red" : "green")};
   transform: ${({ orientation }) =>
-    orientation === "horizontal" ? "rotate(90deg)" : "rotate(0deg)"};
+    orientation === "horizontal" ? "rotate(0deg)" : "rotate(0deg)"};
   cursor: pointer;
 `;
 
@@ -145,10 +149,10 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
             <div
               style={{
                 position: "absolute",
-                top: pedestrianPosition.top,
-                left: pedestrianPosition.left,
-                backgroundColor: "#2a2a29",
-                padding: ".7rem",
+                top: pedestrianPosition.first.top,
+                left: pedestrianPosition.first.left,
+                backgroundColor: "#fff",
+                padding: ".5rem",
                 borderRadius: "50%",
               }}
             >
@@ -157,7 +161,27 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
                 orientation={orientation}
                 onClick={() => handleSignalClick("pedestrian")}
               >
-                <ImManWoman fontSize={20} />
+                {/* <ImManWoman fontSize={20} /> */}
+                {direction}
+              </PedestrianSignalLight>
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                top: pedestrianPosition.second.top,
+                left: pedestrianPosition.second.left,
+                backgroundColor: "#fff",
+                padding: ".5rem",
+                borderRadius: "50%",
+              }}
+            >
+              <PedestrianSignalLight
+                color={signalColors.pedestrian}
+                orientation={orientation}
+                onClick={() => handleSignalClick("pedestrian")}
+              >
+                {/* <ImManWoman fontSize={20} /> */}
+                {direction}
               </PedestrianSignalLight>
             </div>
             <SignalLight
@@ -198,10 +222,10 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
             <div
               style={{
                 position: "absolute",
-                top: pedestrianPosition.top,
-                left: pedestrianPosition.left,
-                backgroundColor: "#2a2a29",
-                padding: ".7rem",
+                top: pedestrianPosition.first.top,
+                left: pedestrianPosition.first.left,
+                backgroundColor: "#fff",
+                padding: ".5rem",
                 borderRadius: "50%",
               }}
             >
@@ -210,7 +234,27 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
                 orientation={orientation}
                 onClick={() => handleSignalClick("pedestrian")}
               >
-                <ImManWoman size={20} />
+                {/* <ImManWoman size={20} /> */}
+                {direction}
+              </PedestrianSignalLight>
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                top: pedestrianPosition.second.top,
+                left: pedestrianPosition.second.left,
+                backgroundColor: "#fff",
+                padding: ".5rem",
+                borderRadius: "50%",
+              }}
+            >
+              <PedestrianSignalLight
+                color={signalColors.pedestrian}
+                orientation={orientation}
+                onClick={() => handleSignalClick("pedestrian")}
+              >
+                {/* <ImManWoman size={20} /> */}
+                {direction}
               </PedestrianSignalLight>
             </div>
           </>

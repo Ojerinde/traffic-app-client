@@ -21,7 +21,7 @@ const CheckBox: React.FC<CheckBoxProps> = ({
             id="cbx-12"
             type="checkbox"
             name={name}
-            value={checked}
+            checked={checked === 1}
             onChange={onChecked}
           />
           <label htmlFor="cbx-12"></label>

@@ -21,7 +21,10 @@ interface SignalState {
 export interface Signal extends SignalState {
   direction: "N" | "E" | "S" | "W";
   position: { top: number; left: number };
-  pedestrianPosition: { top: number; left: number };
+  pedestrianPosition: {
+    first: { top: number; left: number };
+    second: { top: number; left: number };
+  };
   orientation: "horizontal" | "vertical";
 }
 

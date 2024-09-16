@@ -5,11 +5,10 @@ interface TabsProps {
 
 const Tabs: React.FC<TabsProps> = ({ currentStep, onChangeTab }) => {
   const tabs = [
-    { step: 1, value: "Add Phase" },
-    { step: 2, value: "Create Pattern" },
-    { step: 3, value: "Group Patterns" }, // Multiple pattern will be selected, time will be set for each phase in a pattern
-    { step: 4, value: "Schedule" }, // Schedule will be created for each day of the week
-    { step: 5, value: "Plan" }, // Plan will be created for each day of the
+    { step: 1, value: "Phases" },
+    { step: 2, value: "Patterns" },
+    { step: 3, value: "Time Segments" },
+    { step: 4, value: "Segment Plan" },
   ];
 
   return (
@@ -22,8 +21,9 @@ const Tabs: React.FC<TabsProps> = ({ currentStep, onChangeTab }) => {
           key={tab.step}
           onClick={() => onChangeTab(tab.step)}
         >
-          <p>{tab.step}</p>
-          {currentStep === tab.step && <span>{tab.value}</span>}
+          {/* <p>{tab.step}</p> */}
+          {/* {currentStep === tab.step && <span>{tab.value}</span>} */}
+          <span>{tab.value}</span>
         </li>
       ))}
     </ul>
