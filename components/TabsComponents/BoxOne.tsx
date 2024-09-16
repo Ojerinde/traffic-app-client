@@ -19,7 +19,7 @@ const BoxOne: React.FC<BoxOneProps> = ({}) => {
   const dispatch = useAppDispatch();
 
   // Function to handle selecting a phase to update Intersection UI
-  const handleSelectPhase = (phaseName: string, signalString: string) => {
+  const handlePhasePreview = (phaseName: string, signalString: string) => {
     dispatch(setSignalString(signalString));
     dispatch(setSignalState());
   };
@@ -53,7 +53,7 @@ const BoxOne: React.FC<BoxOneProps> = ({}) => {
               <h3>{phase.name}</h3>
               <div>
                 <button
-                  onClick={() => handleSelectPhase(phase.name, phase.data)}
+                  onClick={() => handlePhasePreview(phase.name, phase.data)}
                 >
                   Preview
                 </button>

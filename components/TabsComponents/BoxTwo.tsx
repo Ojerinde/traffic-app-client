@@ -46,6 +46,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
     }
   };
 
+  // Logic to edit a phase
   const handleRemovePhase = (phaseId: string) => {
     const updatedPhases = updatedPatternPhases.filter(
       (phase) => phase._id !== phaseId
@@ -66,6 +67,19 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
     setUpdatedPatternPhases(reorderedPhases);
   };
 
+  // Logic for creating a new pattern
+  // Handle selecting/unselecting a phase (Add/Remove)
+  const handlePhaseSelect = (phaseName: string) => {
+    setSelectedPhases((prevSelectedPhases) => {
+      if (prevSelectedPhases.includes(phaseName)) {
+        // Remove the phase if it's already selected
+        return prevSelectedPhases.filter((id) => id !== phaseName);
+      } else {
+        // Add the phase if it's not selected
+        return [...prevSelectedPhases, phaseName];
+      }
+    });
+  };
   const handleDragEndCreate = (result: any) => {
     if (!result.destination) return;
     const reorderedPhases = [...selectedPhases];
@@ -79,7 +93,6 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
       .map((phase) => (selectedPhases.includes(phase.name) ? phase : null))
       .filter(Boolean)
       .map((phase) => phase._id);
-
     try {
       const email = GetItemFromLocalStorage("user").email;
       const { data } = await HttpRequest.post("/patterns", {
@@ -97,7 +110,8 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
     }
   };
 
-  const handleSelectPhase = (phaseSignalString: string) => {
+  // For previewing phase
+  const handlePhasePreview = (phaseSignalString: string) => {
     dispatch(setSignalString(phaseSignalString));
     dispatch(setSignalState());
   };
@@ -109,22 +123,24 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
         className="patterns__new"
         onClick={() => setShowAllAvailablePhases((prev) => !prev)}
       >
-        Add a new Pattern
+        {!showAllAvailablePhases ? "Add a new Pattern" : "Cancel"}
       </button>
       {showAllAvailablePhases && (
         <div>
-          <ul className="patterns">
-            <h2 className="patterns__header">
-              Select phases for the new pattern
-            </h2>
+          <h2 className="patterns__availablePhases--header">
+            Select phases for the new pattern
+          </h2>
+          <ul className="patterns__availablePhases">
             {phases.map((phase, index) => (
-              <li className="patterns__list--item" key={index}>
+              <li className="patterns__availablePhases--item" key={index}>
                 <h3>{phase.name}</h3>
                 <div>
-                  <button onClick={() => handleSelectPhase(phase.data)}>
+                  <button onClick={() => handlePhasePreview(phase.data)}>
                     Preview
                   </button>
-                  <button>Add</button>
+                  <button onClick={() => handlePhaseSelect(phase.name)}>
+                    {selectedPhases.includes(phase.name) ? "Remove" : "Add"}
+                  </button>
                 </div>
               </li>
             ))}
@@ -164,7 +180,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                   )}
                 </Droppable>
               </DragDropContext>
-              <div className="boxTwo__selected--ctn">
+              <div className="patterns__selected--ctn">
                 <input
                   type="text"
                   name="pattern"
@@ -213,7 +229,9 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                       <li className="patterns__phases--item" key={index}>
                         <h3>{phase.name}</h3>
                         <div>
-                          <button onClick={() => handleSelectPhase(phase.data)}>
+                          <button
+                            onClick={() => handlePhasePreview(phase.data)}
+                          >
                             Preview
                           </button>
                         </div>
@@ -239,9 +257,6 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                                     {...provided.draggableProps}
                                     {...provided.dragHandleProps}
                                     className="patterns__phases--item"
-                                    style={{
-                                      fontSize: "1.4rem",
-                                    }}
                                   >
                                     {phase.name}
                                     <button
