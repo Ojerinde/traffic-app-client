@@ -21,16 +21,22 @@ const getPosition = (direction: "N" | "E" | "S" | "W") => {
 const getPedestrianPosition = (direction: "N" | "E" | "S" | "W") => {
   switch (direction) {
     case "N":
-      return { first: { top: 47, left: -43 }, second: { top: 215, left: -43 } };
+      return {
+        first: { top: 25, left: -20 },
+        second: { top: 25, left: 150 },
+      };
     case "E":
       return {
-        first: { top: -47, left: -47 },
-        second: { top: -47, left: -215 },
+        first: { top: -20, left: -25 },
+        second: { top: 145, left: -25 },
       };
     case "S":
-      return { first: { top: -47, left: 95 }, second: { top: -215, left: 95 } };
+      return {
+        first: { top: -25, left: -95 },
+        second: { top: -25, left: 73 },
+      };
     case "W":
-      return { first: { top: 95, left: 50 }, second: { top: 95, left: 215 } };
+      return { first: { top: 70, left: 25 }, second: { top: -95, left: 25 } };
     default:
       return { first: { top: 0, left: 0 }, second: { top: 0, left: 0 } };
   }

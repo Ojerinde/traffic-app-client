@@ -687,7 +687,9 @@ export const checkForConflicts = (
 
     if (direction === "N") {
       if (northSignal?.straight === "G") {
-        addConflict("North pedestrian conflicts with North right movements.");
+        addConflict(
+          "North pedestrian conflicts with North straight movements."
+        );
       }
       if (southSignal?.straight === "G") {
         addConflict("North pedestrian conflicts with South right movements.");
