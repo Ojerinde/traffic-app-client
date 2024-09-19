@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 import { useAppSelector, useAppDispatch } from "@/hooks/reduxHook";
 import {
   setSignalState,
@@ -8,14 +10,34 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import HttpRequest from "@/store/services/HttpRequest";
 import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
 import { emitToastMessage } from "@/utils/toastFunc";
-import { getUserPattern } from "@/store/devices/UserDeviceSlice";
+import {
+  addOrUpdatePhaseConfig,
+  getUserPattern,
+  removePhaseConfig,
+} from "@/store/devices/UserDeviceSlice";
 import Button from "../UI/Button/Button";
+import { generatePhaseString } from "@/utils/misc";
 
 interface BoxTwoProps {}
 
+interface PhaseConfigType {
+  _id: string;
+  name: string;
+  data: string;
+  duration: string;
+  blinkEnabled: boolean;
+  blinkTimeRedToGreen: number;
+  blinkTimeGreenToRed: number;
+  amberEnabled: boolean;
+  amberDurationRedToGreen: number;
+  amberDurationGreenToRed: number;
+}
+
 const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
   const dispatch = useAppDispatch();
-  const { phases, patterns } = useAppSelector((state) => state.userDevice);
+  const { phases, patterns, configuredPhases } = useAppSelector(
+    (state) => state.userDevice
+  );
   const [showAllAvailablePhases, setShowAllAvailablePhases] =
     useState<boolean>(false);
 
@@ -34,6 +56,9 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
   // Logic for adding new pattern
   const [selectedPhases, setSelectedPhases] = useState<string[]>([]);
   const [patternName, setPatternName] = useState<string>("");
+  const [phaseToConfigure, setPhaseToConfigure] = useState<
+    PhaseConfigType | undefined
+  >(undefined);
 
   const handleSelectPattern = (pattern: any, index: number) => {
     if (showPatternPhases === index) {
@@ -52,7 +77,6 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
     if (!confirmResult) return;
     const pattern = patterns.find((p) => p.name === patternName);
     const patternId = pattern?._id;
-    console.log("Pattern ID", pattern, patternName, patternId);
 
     try {
       const email = GetItemFromLocalStorage("user").email;
@@ -75,7 +99,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
   };
 
   const editPatternHandler = async () => {
-    console.log("Saving updated phases:", updatedPatternPhases);
+    console.log("Saving updated phases for a pattern", updatedPatternPhases);
     // Implement backend call here
   };
 
@@ -88,17 +112,15 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
   };
 
   // Logic for creating a new pattern
-  // Handle selecting/unselecting a phase (Add/Remove)
   const handlePhaseSelect = (phaseName: string) => {
-    setSelectedPhases((prevSelectedPhases) => {
-      if (prevSelectedPhases.includes(phaseName)) {
-        // Remove the phase if it's already selected
-        return prevSelectedPhases.filter((id) => id !== phaseName);
-      } else {
-        // Add the phase if it's not selected
-        return [...prevSelectedPhases, phaseName];
-      }
-    });
+    setSelectedPhases((prev) =>
+      prev.includes(phaseName)
+        ? prev.filter((p) => p !== phaseName)
+        : [...prev, phaseName]
+    );
+    if (selectedPhases.includes(phaseName)) {
+      dispatch(removePhaseConfig(phaseName));
+    }
   };
   const handleDragEndCreate = (result: any) => {
     if (!result.destination) return;
@@ -109,24 +131,28 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
   };
 
   const handleCreatePattern = async () => {
-    const selectedPhasesId = phases
-      .map((phase) => (selectedPhases.includes(phase.name) ? phase : null))
-      .filter(Boolean)
-      .map((phase) => phase._id);
+    if (!patternName)
+      return emitToastMessage("Pattern name is required", "error");
+
+    if (!configuredPhases || configuredPhases.length === 0) {
+      return emitToastMessage("At least one phase must be configured", "error");
+    }
     try {
       const email = GetItemFromLocalStorage("user").email;
+      console.log("configured Phases", configuredPhases);
+      return;
       const { data } = await HttpRequest.post("/patterns", {
-        patternName,
+        name: patternName,
         email: email,
-        selectedPhases: selectedPhasesId,
+        configuredPhases,
       });
+
       emitToastMessage(data.message, "success");
       setPatternName("");
       setSelectedPhases([]);
       dispatch(getUserPattern(email));
     } catch (error: any) {
       emitToastMessage(error?.response.data.message, "error");
-      console.log("Error", error);
     }
   };
 
@@ -136,6 +162,114 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
     dispatch(setSignalState());
   };
 
+  // Logic for configuring a pattern
+  const handleConfigurePhase = (phaseName: any) => {
+    const phaseToConfigure = phases.find((p) => p.name === phaseName);
+    setPhaseToConfigure(phaseToConfigure);
+  };
+
+  // Find the saved configuration for the current pattern
+  const savedPhaseConfig = configuredPhases.find(
+    (p) => p.phaseId === phaseToConfigure?._id
+  );
+
+  const formik = useFormik({
+    enableReinitialize: true,
+    initialValues: {
+      patternName: savedPhaseConfig?.name || phaseToConfigure?.name || "",
+      phases: savedPhaseConfig?.phases || [],
+      duration: savedPhaseConfig?.duration || "",
+      blinkEnabled: savedPhaseConfig?.blinkEnabled || false,
+      blinkTimeRedToGreen: savedPhaseConfig?.blinkTimeRedToGreen || 1,
+      blinkTimeGreenToRed: savedPhaseConfig?.blinkTimeGreenToRed || 2,
+      amberEnabled: savedPhaseConfig?.amberEnabled || true,
+      amberDurationRedToGreen: savedPhaseConfig?.amberDurationRedToGreen || 3,
+      amberDurationGreenToRed: savedPhaseConfig?.amberDurationGreenToRed || 3,
+    },
+    validationSchema: Yup.object({
+      patternName: Yup.string().required("Pattern name is required"),
+      duration: Yup.number().required("Duration is required").min(1),
+      blinkTimeRedToGreen: Yup.number().when(
+        "blinkEnabled",
+        (blinkEnabled, schema) => {
+          return blinkEnabled
+            ? schema.min(1, "Blink time must be at least 1").max(5).required()
+            : schema.notRequired();
+        }
+      ),
+      blinkTimeGreenToRed: Yup.number().when(
+        "blinkEnabled",
+        (blinkEnabled, schema) => {
+          return blinkEnabled
+            ? schema.min(1, "Blink time must be at least 1").max(5).required()
+            : schema.notRequired();
+        }
+      ),
+      amberDurationRedToGreen: Yup.number().when(
+        "amberEnabled",
+        (amberEnabled, schema) => {
+          return amberEnabled
+            ? schema
+                .min(1, "Amber duration must be at least 1")
+                .max(5)
+                .required()
+            : schema.notRequired();
+        }
+      ),
+      amberDurationGreenToRed: Yup.number().when(
+        "amberEnabled",
+        (amberEnabled, schema) => {
+          return amberEnabled
+            ? schema
+                .min(1, "Amber duration must be at least 1")
+                .max(5)
+                .required()
+            : schema.notRequired();
+        }
+      ),
+    }),
+    onSubmit: async (values) => {
+      const configToSave = {
+        phaseId: phaseToConfigure?._id,
+        name: phaseToConfigure?.name,
+        signalString: phaseToConfigure?.data,
+        signalData: generatePhaseString({
+          signalString: phaseToConfigure?.data,
+          duration: values.duration,
+          blinkTimeRedToGreen: values.blinkEnabled
+            ? values.blinkTimeRedToGreen
+            : undefined,
+          blinkTimeGreenToRed: values.blinkEnabled
+            ? values.blinkTimeGreenToRed
+            : undefined,
+          amberDurationRedToGreen: values.amberEnabled
+            ? values.amberDurationRedToGreen
+            : undefined,
+          amberDurationGreenToRed: values.amberEnabled
+            ? values.amberDurationGreenToRed
+            : undefined,
+        }),
+        blinkTimeRedToGreen: values.blinkEnabled
+          ? values.blinkTimeRedToGreen
+          : undefined,
+        blinkTimeGreenToRed: values.blinkEnabled
+          ? values.blinkTimeGreenToRed
+          : undefined,
+        amberDurationRedToGreen: values.amberEnabled
+          ? values.amberDurationRedToGreen
+          : undefined,
+        amberDurationGreenToRed: values.amberEnabled
+          ? values.amberDurationGreenToRed
+          : undefined,
+        duration: values.duration,
+        blinkEnabled: values.blinkEnabled,
+        amberEnabled: values.amberEnabled,
+      };
+
+      dispatch(addOrUpdatePhaseConfig(configToSave));
+      emitToastMessage("Phase configuration saved temporarily.", "success");
+    },
+  });
   return (
     <div className="boxTwo">
       {/* Logic to add a new pattern */}
@@ -155,7 +289,9 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
               <li className="patterns__availablePhases--item" key={index}>
                 <h3>{phase.name}</h3>
                 <div>
-                  <button onClick={() => handlePhasePreview(phase.data)}>
+                  <button
+                    onClick={() => handlePhasePreview(phase.signalString)}
+                  >
                     Preview
                   </button>
                   <button onClick={() => handlePhaseSelect(phase.name)}>
@@ -178,10 +314,10 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                 <Droppable droppableId="selected-phases">
                   {(provided) => (
                     <ul {...provided.droppableProps} ref={provided.innerRef}>
-                      {selectedPhases.map((phase, index) => (
+                      {selectedPhases.map((phaseName, index) => (
                         <Draggable
-                          key={phase}
-                          draggableId={phase}
+                          key={phaseName}
+                          draggableId={phaseName}
                           index={index}
                         >
                           {(provided) => (
@@ -190,7 +326,208 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
                             >
-                              {phase}
+                              <div className="row">
+                                <h3>{phaseName}</h3>
+                                <button
+                                  onClick={() =>
+                                    handleConfigurePhase(phaseName)
+                                  }
+                                >
+                                  Configure
+                                </button>
+                              </div>
+
+                              {/* Confuguration form */}
+                              {phaseToConfigure &&
+                                phaseToConfigure.name === phaseName && (
+                                  <form
+                                    onSubmit={formik.handleSubmit}
+                                    className="patterns__selected--form"
+                                  >
+                                    <h3>Phase Settings</h3>
+
+                                    {/* Phase Duration */}
+                                    <div className="patterns__selected--item">
+                                      <label>Phase Duration</label>
+                                      <input
+                                        type="number"
+                                        name="duration"
+                                        value={formik.values.duration}
+                                        onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
+                                      />
+                                      {formik.touched.duration &&
+                                        formik.errors.duration &&
+                                        typeof formik.errors.duration ===
+                                          "string" && (
+                                          <div>{formik.errors.duration}</div>
+                                        )}
+                                    </div>
+
+                                    {/* Enable Blink */}
+                                    <div className="patterns__selected--item">
+                                      <label>
+                                        <input
+                                          type="checkbox"
+                                          name="blinkEnabled"
+                                          checked={formik.values.blinkEnabled}
+                                          onChange={formik.handleChange}
+                                          onBlur={formik.handleBlur}
+                                        />
+                                        Enable Blink
+                                      </label>
+
+                                      {/* Blink Time Fields (Red to Green and Green to Red) */}
+                                      {formik.values.blinkEnabled && (
+                                        <>
+                                          <div className="patterns__selected--item">
+                                            <label>
+                                              Blink Time (Red to Green)
+                                            </label>
+                                            <input
+                                              type="number"
+                                              name="blinkTimeRedToGreen"
+                                              value={
+                                                formik.values
+                                                  .blinkTimeRedToGreen
+                                              }
+                                              onChange={formik.handleChange}
+                                              onBlur={formik.handleBlur}
+                                            />
+                                            {formik.touched
+                                              .blinkTimeRedToGreen &&
+                                              formik.errors
+                                                .blinkTimeRedToGreen &&
+                                              typeof formik.errors
+                                                .blinkTimeRedToGreen ===
+                                                "string" && (
+                                                <div>
+                                                  {
+                                                    formik.errors
+                                                      .blinkTimeRedToGreen
+                                                  }
+                                                </div>
+                                              )}
+                                          </div>
+
+                                          <div className="patterns__selected--item">
+                                            <label>
+                                              Blink Time (Green to Red)
+                                            </label>
+                                            <input
+                                              type="number"
+                                              name="blinkTimeGreenToRed"
+                                              value={
+                                                formik.values
+                                                  .blinkTimeGreenToRed
+                                              }
+                                              onChange={formik.handleChange}
+                                              onBlur={formik.handleBlur}
+                                            />
+                                            {formik.touched
+                                              .blinkTimeGreenToRed &&
+                                              formik.errors
+                                                .blinkTimeGreenToRed &&
+                                              typeof formik.errors
+                                                .blinkTimeGreenToRed ===
+                                                "string" && (
+                                                <div>
+                                                  {
+                                                    formik.errors
+                                                      .blinkTimeGreenToRed
+                                                  }
+                                                </div>
+                                              )}
+                                          </div>
+                                        </>
+                                      )}
+                                    </div>
+
+                                    {/* Enable Amber */}
+                                    <div className="patterns__selected--item">
+                                      <label>
+                                        <input
+                                          type="checkbox"
+                                          name="amberEnabled"
+                                          checked={formik.values.amberEnabled}
+                                          onChange={formik.handleChange}
+                                          onBlur={formik.handleBlur}
+                                        />
+                                        Enable Amber
+                                      </label>
+
+                                      {/* Amber Duration Fields (Red to Green and Green to Red) */}
+                                      {formik.values.amberEnabled && (
+                                        <>
+                                          <div className="patterns__selected--item">
+                                            <label>
+                                              Amber Duration (Red to Green)
+                                            </label>
+                                            <input
+                                              type="number"
+                                              name="amberDurationRedToGreen"
+                                              value={
+                                                formik.values
+                                                  .amberDurationRedToGreen
+                                              }
+                                              onChange={formik.handleChange}
+                                              onBlur={formik.handleBlur}
+                                            />
+                                            {formik.touched
+                                              .amberDurationRedToGreen &&
+                                              formik.errors
+                                                .amberDurationRedToGreen &&
+                                              typeof formik.errors
+                                                .amberDurationRedToGreen ===
+                                                "string" && (
+                                                <div>
+                                                  {
+                                                    formik.errors
+                                                      .amberDurationRedToGreen
+                                                  }
+                                                </div>
+                                              )}
+                                          </div>
+
+                                          <div className="patterns__selected--item">
+                                            <label>
+                                              Amber Duration (Green to Red)
+                                            </label>
+                                            <input
+                                              type="number"
+                                              name="amberDurationGreenToRed"
+                                              value={
+                                                formik.values
+                                                  .amberDurationGreenToRed
+                                              }
+                                              onChange={formik.handleChange}
+                                              onBlur={formik.handleBlur}
+                                            />
+                                            {formik.touched
+                                              .amberDurationGreenToRed &&
+                                              formik.errors
+                                                .amberDurationGreenToRed &&
+                                              typeof formik.errors
+                                                .amberDurationGreenToRed ===
+                                                "string" && (
+                                                <div>
+                                                  {
+                                                    formik.errors
+                                                      .amberDurationGreenToRed
+                                                  }
+                                                </div>
+                                              )}
+                                          </div>
+                                        </>
+                                      )}
+                                    </div>
+
+                                    {/* Submit Button */}
+                                    <button type="submit">
+                                      Save Configuration
+                                    </button>
+                                  </form>
+                                )}
                             </li>
                           )}
                         </Draggable>
@@ -237,7 +574,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
               {showPatternPhases === index && (
                 <ul className="patterns__phases">
                   <h2 className="patterns__phases--header">
-                    {pattern.name} Phases.{" "}
+                    {pattern.name} phases{" "}
                     <span
                       onClick={() =>
                         setPatternPhaseIsEditable(!patternPhaseIsEditable)
@@ -253,7 +590,9 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                         <h3>{phase.name}</h3>
                         <div>
                           <button
-                            onClick={() => handlePhasePreview(phase.data)}
+                            onClick={() =>
+                              handlePhasePreview(phase.signalString)
+                            }
                           >
                             Preview
                           </button>

@@ -20,12 +20,6 @@ interface PaternToConfigureTypes {
   name: string;
   startTime: string;
   endTime: string;
-  phases: {
-    _id: string;
-    name: string;
-    data: string;
-    duration: string;
-  }[];
 }
 
 interface BoxThreeProps {}
@@ -37,7 +31,7 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
   const [selectedPatterns, setSelectedPatterns] = useState<string[]>([]);
   const [groupName, setGroupName] = useState<string>("");
   const [groupOptions, setGroupOptions] = useState<any>(
-    groups.map((group) => ({
+    groups?.map((group) => ({
       value: group.name,
       label: group.name,
     }))
@@ -52,7 +46,6 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
   const [showGroupPatterns, setShowGroupPatterns] = useState<number | null>(
     null
   );
-  // Not fully used
   const [updatedGroupPatterns, setUpdatedGroupPatterns] = useState<any[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<{
     name: string;
@@ -63,7 +56,7 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
 
   useEffect(() => {
     setGroupOptions(
-      groups.map((group) => ({
+      groups?.map((group) => ({
         value: group.name,
         label: group.name,
       }))
@@ -93,26 +86,22 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
   const handleCreateGroup = async () => {
     if (!groupName) return emitToastMessage("Group name is required", "error");
 
-    if (!configuredPatterns || configuredPatterns.length === 0) {
+    if (!configuredPatterns || configuredPatterns?.length === 0) {
       return emitToastMessage(
         "At least one pattern must be configured",
         "error"
       );
     }
+    console.log("A", configuredPatterns);
     try {
       const { data } = await HttpRequest.post("/groups", {
         name: groupName,
         email: GetItemFromLocalStorage("user").email,
-        patterns: configuredPatterns.map((pattern: any) => ({
+        patterns: configuredPatterns?.map((pattern: any) => ({
           name: pattern.name,
           startTime: pattern.startTime,
           endTime: pattern.endTime,
-          phases: pattern.phases.map((phase: any) => ({
-            name: phase.name,
-            phaseData: phase.phaseData,
-            phaseId: phase.phaseId,
-            duration: phase.duration,
-          })),
+          patternId: pattern.patternId,
         })),
       });
 
@@ -145,7 +134,7 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
 
   // Find the saved configuration for the current pattern
   const savedPatternConfig = configuredPatterns.find(
-    (p) => p.patternId === patternToConfigure?._id
+    (p) => p.name === patternToConfigure?.name
   );
 
   const patternConfigFormik = useFormik({
@@ -154,46 +143,22 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
       startTime:
         savedPatternConfig?.startTime || patternToConfigure?.startTime || "",
       endTime: savedPatternConfig?.endTime || patternToConfigure?.endTime || "",
-      phases:
-        savedPatternConfig?.phases.map((savedPhase: any) => ({
-          phaseId: savedPhase.phaseId,
-          name: savedPhase.name,
-          phaseData: savedPhase.data,
-          duration: savedPhase.duration,
-        })) ||
-        patternToConfigure?.phases.map((phase: any) => ({
-          phaseId: phase._id,
-          name: phase.name,
-          phaseData: phase.data,
-          duration: "",
-        })) ||
-        [],
     },
     validationSchema: Yup.object().shape({
       startTime: Yup.string().required("Start time is required"),
       endTime: Yup.string().required("End time is required"),
-      phases: Yup.array().of(
-        Yup.object().shape({
-          phaseId: Yup.string().required(),
-          phaseData: Yup.string().required(),
-          name: Yup.string().required("Phase name is required"),
-          duration: Yup.number()
-            .min(1, "Duration must be at least 1 minute")
-            .required("Duration is required"),
-        })
-      ),
     }),
     onSubmit: (values: any) => {
+      console.log("B", configuredPatterns, patternToConfigure);
+
       dispatch(
         addOrUpdatePatternConfig({
-          patternId: patternToConfigure?._id,
           name: patternToConfigure?.name,
           startTime: values.startTime,
           endTime: values.endTime,
-          phases: values.phases,
         })
       );
-      emitToastMessage("Configuration saved temporarily.", "success");
+      emitToastMessage("Pattern configuration saved temporarily.", "success");
     },
   });
 
@@ -204,7 +169,6 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
     if (!confirmResult) return;
     const group = groups.find((g) => g.name === groupName);
     const groupId = group?._id;
-    console.log("Group ID", group, groupName, groupId);
 
     try {
       const email = GetItemFromLocalStorage("user").email;
@@ -299,7 +263,7 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
       {showDifferentDaysGroup && (
         <div>
           <form onSubmit={formik.handleSubmit}>
-            {daysOfWeek.map((day) => (
+            {daysOfWeek?.map((day) => (
               <SelectField
                 key={day.name}
                 onChange={(option) => formik.setFieldValue(day.name, option)}
@@ -320,7 +284,7 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
             Select and configure patterns for the new group
           </h2>
           <ul className="newGroup__patterns">
-            {patterns.map((pattern, index) => (
+            {patterns?.map((pattern, index) => (
               <li className="newGroup__patterns--item" key={index}>
                 <h3>{pattern.name}</h3>
                 <div>
@@ -333,7 +297,7 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
           </ul>
         </div>
       )}
-      {selectedPatterns.length > 0 && (
+      {selectedPatterns?.length > 0 && (
         <div className="newGroup__selected">
           <p>
             Below are the patterns you have selected. you can reorder by drag
@@ -344,7 +308,7 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
             <Droppable droppableId="selected-patterns">
               {(provided) => (
                 <ul {...provided.droppableProps} ref={provided.innerRef}>
-                  {selectedPatterns.map((patternName, index) => (
+                  {selectedPatterns?.map((patternName, index) => (
                     <Draggable
                       key={patternName}
                       draggableId={patternName}
@@ -419,55 +383,6 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
                                   </div>
                                 </div>
 
-                                <div className="newGroup__selected--phases">
-                                  <h4>Configure Each Phase</h4>
-                                  {patternConfigFormik.values.phases.map(
-                                    (phase: any, index: number) => (
-                                      <div key={index}>
-                                        <label>{phase.name} Duration</label>
-                                        <input
-                                          type="number"
-                                          name={`phases[${index}].duration`}
-                                          value={phase.duration}
-                                          onChange={
-                                            patternConfigFormik.handleChange
-                                          }
-                                        />
-                                        {patternConfigFormik.touched.phases &&
-                                        Array.isArray(
-                                          patternConfigFormik.touched.phases
-                                        ) &&
-                                        patternConfigFormik.touched.phases[
-                                          index
-                                        ] &&
-                                        patternConfigFormik.touched.phases[
-                                          index
-                                        ].duration &&
-                                        patternConfigFormik.errors.phases &&
-                                        Array.isArray(
-                                          patternConfigFormik.errors.phases
-                                        ) &&
-                                        patternConfigFormik.errors.phases[
-                                          index
-                                        ] &&
-                                        (
-                                          patternConfigFormik.errors.phases[
-                                            index
-                                          ] as any
-                                        )?.duration ? (
-                                          <div className="error">
-                                            {
-                                              (
-                                                patternConfigFormik.errors
-                                                  .phases[index] as any
-                                              ).duration as string
-                                            }
-                                          </div>
-                                        ) : null}
-                                      </div>
-                                    )
-                                  )}
-                                </div>
                                 <button
                                   disabled={
                                     !patternConfigFormik.isValid ||
@@ -508,16 +423,16 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
       {!showDifferentDaysGroup && (
         <>
           <h2 className="newGroup__header">Available Group(s)</h2>
-          {groups.length > 0 ? (
+          {groups?.length > 0 ? (
             <ul className="patterns">
-              {groups.map((group, index) => (
+              {groups?.map((group, index) => (
                 <li className="patterns__list" key={index}>
                   <div className="patterns__list--item">
                     <h3>{group.name}</h3>
                     <div>
-                      <button onClick={() => handleSelectGroup(group, index)}>
+                      {/* <button onClick={() => handleSelectGroup(group, index)}>
                         {showGroupPatterns === index ? "Close" : "See Patterns"}
-                      </button>
+                      </button> */}
                       <button onClick={() => handleDeleteGroup(group.name)}>
                         Delete
                       </button>

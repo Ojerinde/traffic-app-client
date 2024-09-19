@@ -8,6 +8,7 @@ interface InitialStateTypes {
   patterns: any[];
   groups: any[];
   configuredPatterns: any[];
+  configuredPhases: any[];
   isFetchingDevices: boolean;
   isFetchingPhases: boolean;
   isFetchingPatterns: boolean;
@@ -19,6 +20,7 @@ const initialState: InitialStateTypes = {
   patterns: [],
   groups: [],
   configuredPatterns: [],
+  configuredPhases: [],
   isFetchingDevices: false,
   isFetchingPhases: false,
   isFetchingPatterns: false,
@@ -30,13 +32,10 @@ export const getUserDevice = createAsyncThunk(
   async (email: string) => {
     try {
       const { data } = await HttpRequest.get(`/devices/${email}`);
-      if (data.devices.length === 0) {
-        return emitToastMessage("You have not added any device yet", "success");
-      }
       emitToastMessage("Your device(s) are fetched successfully", "success");
       return data;
     } catch (error: any) {
-      emitToastMessage("Could not fetch your device(s)", "error");
+      emitToastMessage(error?.response.data.message, "error");
     }
   }
 );
@@ -48,13 +47,11 @@ export const getUserPhase = createAsyncThunk(
       const {
         data: { data },
       } = await HttpRequest.get(`/phases/${email}`);
-      if (data.phases.length === 0) {
-        return emitToastMessage("You have not added any phase yet", "success");
-      }
+
       emitToastMessage("Your phase(s) are fetched successfully", "success");
       return data;
     } catch (error: any) {
-      emitToastMessage("Could not fetch your phase(s)", "error");
+      emitToastMessage(error?.response.data.message, "error");
     }
   }
 );
@@ -65,16 +62,11 @@ export const getUserPattern = createAsyncThunk(
       const {
         data: { data },
       } = await HttpRequest.get(`/patterns/${email}`);
-      if (data.patterns.length === 0) {
-        return emitToastMessage(
-          "You have not added any pattern yet",
-          "success"
-        );
-      }
+
       emitToastMessage("Your pattern(s) are fetched successfully", "success");
       return data;
     } catch (error: any) {
-      emitToastMessage("Could not fetch your pattern(s)", "error");
+      emitToastMessage(error?.response.data.message, "error");
     }
   }
 );
@@ -85,13 +77,10 @@ export const getUserGroup = createAsyncThunk(
       const {
         data: { data },
       } = await HttpRequest.get(`/groups/${email}`);
-      if (data.length === 0) {
-        return emitToastMessage("You have not added any group yet", "success");
-      }
       emitToastMessage("Your group(s) are fetched successfully", "success");
       return data;
     } catch (error: any) {
-      emitToastMessage("Could not fetch your group(s)", "error");
+      emitToastMessage(error?.response.data.message, "error");
     }
   }
 );
@@ -101,23 +90,20 @@ const UserDeviceSlice = createSlice({
   initialState: initialState,
   reducers: {
     addOrUpdatePatternConfig: (state, action) => {
-      const { patternId, name, startTime, endTime, phases } = action.payload;
+      const { name, startTime, endTime } = action.payload;
       const existingPattern = state.configuredPatterns.find(
-        (p) => p.patternId === patternId
+        (p) => p.name === name
       );
 
       if (existingPattern) {
         existingPattern.startTime = startTime;
         existingPattern.name = name;
         existingPattern.endTime = endTime;
-        existingPattern.phases = phases;
       } else {
         state.configuredPatterns.push({
           name,
-          patternId,
           startTime,
           endTime,
-          phases,
         });
       }
     },
@@ -125,6 +111,56 @@ const UserDeviceSlice = createSlice({
       const patternNameToRemove = action.payload;
       state.configuredPatterns = state.configuredPatterns.filter(
         (pattern) => pattern.name !== patternNameToRemove
+      );
+    },
+    addOrUpdatePhaseConfig: (state, action) => {
+      const {
+        phaseId,
+        name,
+        signalString,
+        signalData,
+        duration,
+        blinkEnabled,
+        blinkTimeRedToGreen,
+        blinkTimeGreenToRed,
+        amberDurationRedToGreen,
+        amberDurationGreenToRed,
+        amberEnabled,
+      } = action.payload;
+      const existingPhase = state.configuredPhases.find(
+        (phase) => phase.phaseId === phaseId
+      );
+
+      if (existingPhase) {
+        existingPhase.name = name;
+        existingPhase.signalData = signalData;
+        existingPhase.duration = duration;
+        existingPhase.blinkEnabled = blinkEnabled;
+        existingPhase.blinkTimeRedToGreen = blinkTimeRedToGreen;
+        existingPhase.blinkTimeGreenToRed = blinkTimeGreenToRed;
+        existingPhase.amberDurationRedToGreen = amberDurationRedToGreen;
+        existingPhase.amberDurationGreenToRed = amberDurationGreenToRed;
+        existingPhase.amberEnabled = amberEnabled;
+      } else {
+        state.configuredPhases.push({
+          phaseId,
+          name,
+          duration,
+          signalString,
+          signalData,
+          blinkEnabled,
+          blinkTimeRedToGreen,
+          blinkTimeGreenToRed,
+          amberDurationRedToGreen,
+          amberDurationGreenToRed,
+          amberEnabled,
+        });
+      }
+    },
+    removePhaseConfig: (state, action) => {
+      const phaseIdToRemove = action.payload;
+      state.configuredPhases = state.configuredPhases.filter(
+        (phase) => phase.phaseId !== phaseIdToRemove
       );
     },
   },
@@ -172,6 +208,10 @@ const UserDeviceSlice = createSlice({
       });
   },
 });
-export const { addOrUpdatePatternConfig, removePatternConfig } =
-  UserDeviceSlice.actions;
+export const {
+  addOrUpdatePatternConfig,
+  removePatternConfig,
+  addOrUpdatePhaseConfig,
+  removePhaseConfig,
+} = UserDeviceSlice.actions;
 export default UserDeviceSlice.reducer;

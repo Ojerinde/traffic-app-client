@@ -226,7 +226,7 @@
       }
     }
     & ul {
-      max-height: 15rem;
+      max-height: 25rem;
       overflow-y: scroll;
       list-style: none;
       margin-bottom: 1rem;
@@ -234,11 +234,80 @@
       row-gap: 0.5rem;
 
       & li {
-        gap: 0.5rem;
-        padding: 0.6rem 0.5rem;
-        font-size: 1.4em;
+        margin: 0.2rem 0;
         box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
           rgb(209, 213, 219) 0px 0px 0px 1px inset;
+        padding: 0.4rem 1rem;
+        transition: all 0.3s;
+        & .row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        & h3 {
+          font-size: 1.4rem;
+          letter-spacing: 0.1rem;
+        }
+
+        & button {
+          color: $color-black-light;
+          border-radius: 0.5rem;
+          font-size: 1.2rem;
+          letter-spacing: 0.08rem;
+          padding: 0.6rem 0.8rem;
+          margin-left: 0.7rem;
+          border: none;
+          cursor: pointer;
+          box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
+            rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+            rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+          transition: all 0.3s;
+
+          &:hover {
+            background-color: rgba($color-yellow, 0.8);
+            box-shadow: rgba(0, 0, 0, 0.45) 0px 25px 20px -20px;
+            color: $color-white;
+          }
+          &:disabled {
+            cursor: not-allowed;
+          }
+        }
+      }
+    }
+    &--form {
+      margin-top: 0.4rem;
+      background-color: rgba($color-yellow, 0.5);
+      padding: 1rem;
+      color: $color-white;
+      & h3 {
+        font-size: 1.3rem;
+        width: fit-content;
+        border-bottom: 0.2rem solid $color-white-dark;
+        margin-bottom: 0.9rem;
+      }
+    }
+    &--item {
+      margin: 0.3rem 0;
+      display: flex;
+      justify-content: space-between;
+      flex-direction: column;
+      gap: 0.7rem;
+      & label {
+        flex-basis: 60%;
+        font-size: 1.2rem;
+        margin-right: 0.5rem;
+        font-weight: 600;
+      }
+
+      & input {
+        padding: 0.4rem 0.5rem;
+        font-size: 1.3rem;
+        border-radius: 0.5rem;
+        border: 1px solid $color-yellow;
+
+        &:focus {
+          outline: none;
+        }
       }
     }
     &--ctn {

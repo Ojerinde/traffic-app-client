@@ -130,7 +130,6 @@
           font-size: 1.2rem;
           letter-spacing: 0.08rem;
           padding: 0.6rem 0.8rem;
-          margin-left: 0.7rem;
           border: none;
           cursor: pointer;
           box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
@@ -156,6 +155,7 @@
       color: $color-white;
     }
     &--time {
+      margin: 0.8rem 0;
       display: flex;
       justify-content: space-between;
 
