@@ -2,21 +2,73 @@
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
 import HttpRequest from "@/store/services/HttpRequest";
 import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 import { emitToastMessage } from "@/utils/toastFunc";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { useEffect, useState } from "react";
-import { getUserPattern } from "@/store/devices/UserDeviceSlice";
-import OverlayModal from "../Modals/OverlayModal";
-import ConfigurePatternModal from "../Modals/ConfigurePatternModal";
+import Button from "../UI/Button/Button";
+import SelectField from "../UI/SelectField/SelectField";
+import {
+  addOrUpdatePatternConfig,
+  getUserGroup,
+  removePatternConfig,
+} from "@/store/devices/UserDeviceSlice";
+
+interface PaternToConfigureTypes {
+  _id: string;
+  name: string;
+  startTime: string;
+  endTime: string;
+  phases: {
+    _id: string;
+    name: string;
+    data: string;
+    duration: string;
+  }[];
+}
 
 interface BoxThreeProps {}
 const BoxThree: React.FC<BoxThreeProps> = ({}) => {
-  const { patterns } = useAppSelector((state) => state.userDevice);
+  const dispatch = useAppDispatch();
+  const { patterns, groups, configuredPatterns } = useAppSelector(
+    (state) => state.userDevice
+  );
   const [selectedPatterns, setSelectedPatterns] = useState<string[]>([]);
   const [groupName, setGroupName] = useState<string>("");
-  const [showConfigModal, setShowConfigureModal] = useState<boolean>(false);
-  const [patternToConfigure, setPatternToConfigure] = useState("");
-  const dispatch = useAppDispatch();
+  const [groupOptions, setGroupOptions] = useState<any>(
+    groups.map((group) => ({
+      value: group.name,
+      label: group.name,
+    }))
+  );
+  const [patternToConfigure, setPatternToConfigure] = useState<
+    PaternToConfigureTypes | undefined
+  >(undefined);
+  const [showAllAvailablePatterns, setShowAllAvailablePatterns] =
+    useState<boolean>(false);
+  const [showDifferentDaysGroup, setShowDifferentDaysGroup] =
+    useState<boolean>(false);
+  const [showGroupPatterns, setShowGroupPatterns] = useState<number | null>(
+    null
+  );
+  // Not fully used
+  const [updatedGroupPatterns, setUpdatedGroupPatterns] = useState<any[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState<{
+    name: string;
+    phases: any[];
+  } | null>(null);
+  const [groupPatternIsEditable, setGroupPatternIsEditable] =
+    useState<boolean>(false);
+
+  useEffect(() => {
+    setGroupOptions(
+      groups.map((group) => ({
+        value: group.name,
+        label: group.name,
+      }))
+    );
+  }, []);
 
   const handleAddRemovePattern = (patternName: string) => {
     setSelectedPatterns((prev) =>
@@ -24,32 +76,8 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
         ? prev.filter((p) => p !== patternName)
         : [...prev, patternName]
     );
-  };
-
-  // useEffect(() => {
-  //   (async () => {
-  //     dispatch(getUserPattern(GetItemFromLocalStorage("user").email));
-  //   })();
-  // }, [dispatch]);
-
-  const handleDeletePattern = async (patternName: string) => {
-    const confirmResult = confirm(
-      "Are you sure you want to delete this pattern?"
-    );
-    if (!confirmResult) return;
-    const pattern = patterns.find((p) => p.name === patternName);
-    const patternId = pattern?._id;
-    console.log("Pattern ID", pattern, patternName, patternId);
-
-    try {
-      const email = GetItemFromLocalStorage("user").email;
-      const { data } = await HttpRequest.delete(
-        `/patterns/${patternId}/${email}`
-      );
-      emitToastMessage(data.message, "success");
-      dispatch(getUserPattern(email));
-    } catch (error: any) {
-      emitToastMessage(error?.response.data.message, "error");
+    if (selectedPatterns.includes(patternName)) {
+      dispatch(removePatternConfig(patternName));
     }
   };
 
@@ -64,108 +92,447 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
 
   const handleCreateGroup = async () => {
     if (!groupName) return emitToastMessage("Group name is required", "error");
-    console.log("Group data", groupName);
-    // try {
-    //   const { data } = await HttpRequest.post("/groups", {
-    //     groupName,
-    //     email: GetItemFromLocalStorage("user").email,
-    //   });
-    //   emitToastMessage(data.message, "success");
-    //   setGroupName("");
-    // } catch (error: any) {
-    //   emitToastMessage(error?.response.data.message, "error");
-    //   console.log("Error", error);
-    // }
+
+    if (!configuredPatterns || configuredPatterns.length === 0) {
+      return emitToastMessage(
+        "At least one pattern must be configured",
+        "error"
+      );
+    }
+    try {
+      const { data } = await HttpRequest.post("/groups", {
+        name: groupName,
+        email: GetItemFromLocalStorage("user").email,
+        patterns: configuredPatterns.map((pattern: any) => ({
+          name: pattern.name,
+          startTime: pattern.startTime,
+          endTime: pattern.endTime,
+          phases: pattern.phases.map((phase: any) => ({
+            name: phase.name,
+            phaseData: phase.phaseData,
+            phaseId: phase.phaseId,
+            duration: phase.duration,
+          })),
+        })),
+      });
+
+      emitToastMessage(data.message, "success");
+      setGroupName("");
+      setSelectedPatterns([]);
+      dispatch(getUserGroup(GetItemFromLocalStorage("user").email));
+    } catch (error: any) {
+      emitToastMessage(error?.response.data.message, "error");
+      console.log("Error", error);
+    }
   };
 
+  const handleSelectGroup = (pattern: any, index: number) => {
+    if (showGroupPatterns === index) {
+      setShowGroupPatterns(null);
+      setSelectedGroup(null);
+    } else {
+      setShowGroupPatterns(index);
+      setSelectedGroup(pattern);
+      setUpdatedGroupPatterns(pattern.phases);
+    }
+  };
+
+  // Logic for configuring a pattern
   const handleConfigurePattern = (patternName: any) => {
-    const patternToConfigure = patterns.find((p) => p.name === patternName);
-    setPatternToConfigure(patternToConfigure);
-    setShowConfigureModal(true);
+    const patternToBeConfigured = patterns.find((p) => p.name === patternName);
+    setPatternToConfigure(patternToBeConfigured);
   };
 
+  // Find the saved configuration for the current pattern
+  const savedPatternConfig = configuredPatterns.find(
+    (p) => p.patternId === patternToConfigure?._id
+  );
+
+  const patternConfigFormik = useFormik({
+    enableReinitialize: true,
+    initialValues: {
+      startTime:
+        savedPatternConfig?.startTime || patternToConfigure?.startTime || "",
+      endTime: savedPatternConfig?.endTime || patternToConfigure?.endTime || "",
+      phases:
+        savedPatternConfig?.phases.map((savedPhase: any) => ({
+          phaseId: savedPhase.phaseId,
+          name: savedPhase.name,
+          phaseData: savedPhase.data,
+          duration: savedPhase.duration,
+        })) ||
+        patternToConfigure?.phases.map((phase: any) => ({
+          phaseId: phase._id,
+          name: phase.name,
+          phaseData: phase.data,
+          duration: "",
+        })) ||
+        [],
+    },
+    validationSchema: Yup.object().shape({
+      startTime: Yup.string().required("Start time is required"),
+      endTime: Yup.string().required("End time is required"),
+      phases: Yup.array().of(
+        Yup.object().shape({
+          phaseId: Yup.string().required(),
+          phaseData: Yup.string().required(),
+          name: Yup.string().required("Phase name is required"),
+          duration: Yup.number()
+            .min(1, "Duration must be at least 1 minute")
+            .required("Duration is required"),
+        })
+      ),
+    }),
+    onSubmit: (values: any) => {
+      dispatch(
+        addOrUpdatePatternConfig({
+          patternId: patternToConfigure?._id,
+          name: patternToConfigure?.name,
+          startTime: values.startTime,
+          endTime: values.endTime,
+          phases: values.phases,
+        })
+      );
+      emitToastMessage("Configuration saved temporarily.", "success");
+    },
+  });
+
+  const handleDeleteGroup = async (groupName: string) => {
+    const confirmResult = confirm(
+      "Are you sure you want to delete this group?"
+    );
+    if (!confirmResult) return;
+    const group = groups.find((g) => g.name === groupName);
+    const groupId = group?._id;
+    console.log("Group ID", group, groupName, groupId);
+
+    try {
+      const email = GetItemFromLocalStorage("user").email;
+      const { data } = await HttpRequest.delete(`/groups/${groupId}/${email}`);
+      emitToastMessage(data.message, "success");
+      dispatch(getUserGroup(email));
+    } catch (error: any) {
+      emitToastMessage(error?.response.data.message, "error");
+    }
+  };
+
+  // Days of the week for looping
+  const daysOfWeek = [
+    { name: "sunday", label: "Sunday" },
+    { name: "monday", label: "Monday" },
+    { name: "tuesday", label: "Tuesday" },
+    { name: "wednesday", label: "Wednesday" },
+    { name: "thursday", label: "Thursday" },
+    { name: "friday", label: "Friday" },
+    { name: "saturday", label: "Saturday" },
+  ];
+
+  interface FormValuesType {
+    sunday: { value: string | null; label: string } | null;
+    monday: { value: string | null; label: string } | null;
+    tuesday: { value: string | null; label: string } | null;
+    wednesday: { value: string | null; label: string } | null;
+    thursday: { value: string | null; label: string } | null;
+    friday: { value: string | null; label: string } | null;
+    saturday: { value: string | null; label: string } | null;
+  }
+
+  const formik = useFormik<FormValuesType>({
+    initialValues: {
+      sunday: null,
+      monday: null,
+      tuesday: null,
+      wednesday: null,
+      thursday: null,
+      friday: null,
+      saturday: null,
+    },
+    validationSchema: Yup.object().shape({
+      sunday: Yup.object().nullable(),
+      monday: Yup.object().nullable(),
+      tuesday: Yup.object().nullable(),
+      wednesday: Yup.object().nullable(),
+      thursday: Yup.object().nullable(),
+      friday: Yup.object().nullable(),
+      saturday: Yup.object().nullable(),
+    }),
+    validateOnChange: true,
+    validateOnBlur: true,
+    validateOnMount: true,
+    onSubmit: async (values, actions) => {
+      try {
+        // Your submit logic here
+        console.log("Submitted values:", values);
+      } catch (error: any) {
+        // Handle error
+      } finally {
+        actions.setSubmitting(false);
+      }
+    },
+  });
   return (
-    <div>
-      <div className="newGroup">
-        <h2 className="newGroup__header">
-          Select multiple pattern for the new group
-        </h2>
-        <ul className="newGroup__patterns">
-          {patterns.map((pattern, index) => (
-            <li className="newGroup__patterns--item" key={index}>
-              <h3>{pattern.name}</h3>
-              <div>
-                <button onClick={() => handleAddRemovePattern(pattern.name)}>
-                  {selectedPatterns.includes(pattern.name) ? "Remove" : "Add"}
-                </button>
-                <button onClick={() => handleDeletePattern(pattern.name)}>
-                  Delete
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-        {selectedPatterns.length > 0 && (
-          <div className="newGroup__selected">
-            <p>
-              Below are the patterns you have selected. you can reorder by drag
-              and drop.{" "}
-              <span onClick={() => setSelectedPatterns([])}>Clear all</span>
-            </p>
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId="selected-patterns">
-                {(provided) => (
-                  <ul {...provided.droppableProps} ref={provided.innerRef}>
-                    {selectedPatterns.map((pattern, index) => (
-                      <Draggable
-                        key={pattern}
-                        draggableId={pattern}
-                        index={index}
-                      >
-                        {(provided) => (
-                          <li
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                          >
-                            <h3> {pattern}</h3>
+    <div className="newGroup">
+      <div className="newGroup__buttons">
+        <button
+          className="newGroup__button"
+          onClick={() => {
+            setShowDifferentDaysGroup(false);
+            setShowAllAvailablePatterns((prev) => !prev);
+          }}
+        >
+          {!showAllAvailablePatterns ? "Group patterns" : "Cancel"}
+        </button>
+        <button
+          className="newGroup__button"
+          onClick={() => {
+            setShowAllAvailablePatterns(false);
+            setSelectedPatterns([]);
+            setShowDifferentDaysGroup((prev) => !prev);
+          }}
+        >
+          {!showDifferentDaysGroup
+            ? "Specify Group for Different Days"
+            : "Cancel"}
+        </button>
+      </div>
+      {/* Configuring Groups for different days */}
+      {showDifferentDaysGroup && (
+        <div>
+          <form onSubmit={formik.handleSubmit}>
+            {daysOfWeek.map((day) => (
+              <SelectField
+                key={day.name}
+                onChange={(option) => formik.setFieldValue(day.name, option)}
+                value={formik.values[day.name as keyof FormValuesType]} // Pass the object value
+                options={groupOptions}
+                placeholder={`Select ${day.label} Group`}
+              />
+            ))}
+            <Button type="submit">Save</Button>
+          </form>
+        </div>
+      )}
+
+      {/*All other Logics */}
+      {showAllAvailablePatterns && (
+        <div>
+          <h2 className="newGroup__header">
+            Select and configure patterns for the new group
+          </h2>
+          <ul className="newGroup__patterns">
+            {patterns.map((pattern, index) => (
+              <li className="newGroup__patterns--item" key={index}>
+                <h3>{pattern.name}</h3>
+                <div>
+                  <button onClick={() => handleAddRemovePattern(pattern.name)}>
+                    {selectedPatterns.includes(pattern.name) ? "Remove" : "Add"}
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {selectedPatterns.length > 0 && (
+        <div className="newGroup__selected">
+          <p>
+            Below are the patterns you have selected. you can reorder by drag
+            and drop.{" "}
+            <span onClick={() => setSelectedPatterns([])}>Clear all</span>
+          </p>
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="selected-patterns">
+              {(provided) => (
+                <ul {...provided.droppableProps} ref={provided.innerRef}>
+                  {selectedPatterns.map((patternName, index) => (
+                    <Draggable
+                      key={patternName}
+                      draggableId={patternName}
+                      index={index}
+                    >
+                      {(provided) => (
+                        <li
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                        >
+                          <div className="row">
+                            <h3>{patternName}</h3>
                             <button
-                              onClick={() => handleConfigurePattern(pattern)}
+                              onClick={() =>
+                                handleConfigurePattern(patternName)
+                              }
                             >
                               Configure
                             </button>
-                          </li>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </ul>
-                )}
-              </Droppable>
-            </DragDropContext>
-            <div className="newGroup__selected--ctn">
-              <input
-                type="text"
-                name="pattern"
-                value={groupName}
-                onChange={(e) => setGroupName(e.target.value)}
-                placeholder="Enter group name"
-              />
-              <button type="button" onClick={handleCreateGroup}>
-                Create Group
-              </button>
-            </div>
-          </div>
-        )}
-        {showConfigModal && (
-          <OverlayModal onClose={() => setShowConfigureModal(false)}>
-            <ConfigurePatternModal
-              pattern={patternToConfigure}
-              closeModal={() => setShowConfigureModal(false)}
+                          </div>
+
+                          {/* Configuration Form */}
+                          {patternToConfigure &&
+                            patternToConfigure.name === patternName && (
+                              <form
+                                onSubmit={patternConfigFormik.handleSubmit}
+                                className="newGroup__selected--form"
+                              >
+                                <div className="newGroup__selected--time">
+                                  <div>
+                                    <label>Start Time</label>
+                                    <input
+                                      type="time"
+                                      name="startTime"
+                                      value={
+                                        patternConfigFormik.values.startTime
+                                      }
+                                      onChange={
+                                        patternConfigFormik.handleChange
+                                      }
+                                    />
+                                    {patternConfigFormik.touched.startTime &&
+                                    patternConfigFormik.errors.startTime ? (
+                                      <div className="error">
+                                        {
+                                          patternConfigFormik.errors
+                                            .startTime as string
+                                        }
+                                      </div>
+                                    ) : null}
+                                  </div>
+                                  <div>
+                                    <label>End Time</label>
+                                    <input
+                                      type="time"
+                                      name="endTime"
+                                      value={patternConfigFormik.values.endTime}
+                                      onChange={
+                                        patternConfigFormik.handleChange
+                                      }
+                                    />
+                                    {patternConfigFormik.touched.endTime &&
+                                    patternConfigFormik.errors.endTime ? (
+                                      <div className="error">
+                                        {
+                                          patternConfigFormik.errors
+                                            .endTime as string
+                                        }
+                                      </div>
+                                    ) : null}
+                                  </div>
+                                </div>
+
+                                <div className="newGroup__selected--phases">
+                                  <h4>Configure Each Phase</h4>
+                                  {patternConfigFormik.values.phases.map(
+                                    (phase: any, index: number) => (
+                                      <div key={index}>
+                                        <label>{phase.name} Duration</label>
+                                        <input
+                                          type="number"
+                                          name={`phases[${index}].duration`}
+                                          value={phase.duration}
+                                          onChange={
+                                            patternConfigFormik.handleChange
+                                          }
+                                        />
+                                        {patternConfigFormik.touched.phases &&
+                                        Array.isArray(
+                                          patternConfigFormik.touched.phases
+                                        ) &&
+                                        patternConfigFormik.touched.phases[
+                                          index
+                                        ] &&
+                                        patternConfigFormik.touched.phases[
+                                          index
+                                        ].duration &&
+                                        patternConfigFormik.errors.phases &&
+                                        Array.isArray(
+                                          patternConfigFormik.errors.phases
+                                        ) &&
+                                        patternConfigFormik.errors.phases[
+                                          index
+                                        ] &&
+                                        (
+                                          patternConfigFormik.errors.phases[
+                                            index
+                                          ] as any
+                                        )?.duration ? (
+                                          <div className="error">
+                                            {
+                                              (
+                                                patternConfigFormik.errors
+                                                  .phases[index] as any
+                                              ).duration as string
+                                            }
+                                          </div>
+                                        ) : null}
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                                <button
+                                  disabled={
+                                    !patternConfigFormik.isValid ||
+                                    patternConfigFormik.isSubmitting
+                                  }
+                                  type="submit"
+                                >
+                                  Save Configuration
+                                </button>
+                              </form>
+                            )}
+                        </li>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </ul>
+              )}
+            </Droppable>
+          </DragDropContext>
+
+          <div className="newGroup__selected--ctn">
+            <input
+              type="text"
+              name="pattern"
+              value={groupName}
+              onChange={(e) => setGroupName(e.target.value)}
+              placeholder="Enter group name"
             />
-          </OverlayModal>
-        )}
-      </div>
+            <button type="button" onClick={handleCreateGroup}>
+              Create Group
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Available Group */}
+      {!showDifferentDaysGroup && (
+        <>
+          <h2 className="newGroup__header">Available Group(s)</h2>
+          {groups.length > 0 ? (
+            <ul className="patterns">
+              {groups.map((group, index) => (
+                <li className="patterns__list" key={index}>
+                  <div className="patterns__list--item">
+                    <h3>{group.name}</h3>
+                    <div>
+                      <button onClick={() => handleSelectGroup(group, index)}>
+                        {showGroupPatterns === index ? "Close" : "See Patterns"}
+                      </button>
+                      <button onClick={() => handleDeleteGroup(group.name)}>
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="patterns__noPattern">
+              You have not created any group yet.
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };

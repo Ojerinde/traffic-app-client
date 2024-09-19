@@ -6,17 +6,23 @@ interface InitialStateTypes {
   devices: any[];
   phases: any[];
   patterns: any[];
+  groups: any[];
+  configuredPatterns: any[];
   isFetchingDevices: boolean;
   isFetchingPhases: boolean;
   isFetchingPatterns: boolean;
+  isFetchingGroups: boolean;
 }
 const initialState: InitialStateTypes = {
   devices: [],
   phases: [],
   patterns: [],
+  groups: [],
+  configuredPatterns: [],
   isFetchingDevices: false,
   isFetchingPhases: false,
   isFetchingPatterns: false,
+  isFetchingGroups: false,
 };
 
 export const getUserDevice = createAsyncThunk(
@@ -59,7 +65,6 @@ export const getUserPattern = createAsyncThunk(
       const {
         data: { data },
       } = await HttpRequest.get(`/patterns/${email}`);
-      console.log("Email:", email, data);
       if (data.patterns.length === 0) {
         return emitToastMessage(
           "You have not added any pattern yet",
@@ -73,11 +78,56 @@ export const getUserPattern = createAsyncThunk(
     }
   }
 );
+export const getUserGroup = createAsyncThunk(
+  "userDevice/getUserGroup",
+  async (email: string) => {
+    try {
+      const {
+        data: { data },
+      } = await HttpRequest.get(`/groups/${email}`);
+      if (data.length === 0) {
+        return emitToastMessage("You have not added any group yet", "success");
+      }
+      emitToastMessage("Your group(s) are fetched successfully", "success");
+      return data;
+    } catch (error: any) {
+      emitToastMessage("Could not fetch your group(s)", "error");
+    }
+  }
+);
 
 const UserDeviceSlice = createSlice({
   name: "userDevice",
   initialState: initialState,
-  reducers: {},
+  reducers: {
+    addOrUpdatePatternConfig: (state, action) => {
+      const { patternId, name, startTime, endTime, phases } = action.payload;
+      const existingPattern = state.configuredPatterns.find(
+        (p) => p.patternId === patternId
+      );
+
+      if (existingPattern) {
+        existingPattern.startTime = startTime;
+        existingPattern.name = name;
+        existingPattern.endTime = endTime;
+        existingPattern.phases = phases;
+      } else {
+        state.configuredPatterns.push({
+          name,
+          patternId,
+          startTime,
+          endTime,
+          phases,
+        });
+      }
+    },
+    removePatternConfig: (state, action) => {
+      const patternNameToRemove = action.payload;
+      state.configuredPatterns = state.configuredPatterns.filter(
+        (pattern) => pattern.name !== patternNameToRemove
+      );
+    },
+  },
   extraReducers(builder) {
     builder
       .addCase(getUserDevice.pending, (state) => {
@@ -109,7 +159,19 @@ const UserDeviceSlice = createSlice({
       })
       .addCase(getUserPattern.rejected, (state) => {
         state.isFetchingPatterns = false;
+      })
+      .addCase(getUserGroup.pending, (state) => {
+        state.isFetchingGroups = true;
+      })
+      .addCase(getUserGroup.fulfilled, (state, action) => {
+        state.groups = action.payload;
+        state.isFetchingGroups = false;
+      })
+      .addCase(getUserGroup.rejected, (state) => {
+        state.isFetchingGroups = false;
       });
   },
 });
+export const { addOrUpdatePatternConfig, removePatternConfig } =
+  UserDeviceSlice.actions;
 export default UserDeviceSlice.reducer;

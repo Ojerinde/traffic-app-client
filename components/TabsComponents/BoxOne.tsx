@@ -77,16 +77,27 @@ const BoxOne: React.FC<BoxOneProps> = ({}) => {
             ? "Conflicts Check is Disabled"
             : "Conflicts Check is Enabled"
         } `}
-        onChecked={(e: ChangeEvent<HTMLInputElement>) => {
+        onChecked={async (e: ChangeEvent<HTMLInputElement>) => {
           if (!e.target.checked) {
-            const resp = confirm(
-              "I understand the potential conflict and accept liability."
-            );
-            if (!resp) return;
-            dispatch(allowConflictConfig(true));
-            emitToastMessage("Conflict check is disabled", "success");
-            return setChecked(0);
+            const password = prompt("Please enter your password to proceed");
+
+            if (!password) return;
+
+            try {
+              await HttpRequest.post("/confirm-password", {
+                email: GetItemFromLocalStorage("user").email,
+                password,
+              });
+              dispatch(allowConflictConfig(true));
+              emitToastMessage("Conflict check is disabled", "success");
+              return setChecked(0);
+            } catch (error: any) {
+              emitToastMessage(error?.response.data.message, "error");
+              return;
+            }
           }
+
+          // If checkbox is checked, clear signal and reset state
           setChecked(1);
           dispatch(clearSignalString());
           dispatch(setSignalState());
@@ -94,6 +105,7 @@ const BoxOne: React.FC<BoxOneProps> = ({}) => {
           emitToastMessage("Signal configuration cleared", "success");
         }}
       />
+
       {phases.length == 0 ? (
         <p>
           To create a phase, configure each signal by toggling the corresponding

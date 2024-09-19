@@ -3,6 +3,7 @@
 import { useAppDispatch } from "@/hooks/reduxHook";
 import {
   getUserDevice,
+  getUserGroup,
   getUserPattern,
   getUserPhase,
 } from "@/store/devices/UserDeviceSlice";
@@ -26,6 +27,7 @@ const SendUserDeviceRequests: React.FC<SendUserDeviceRequestsProps> = ({
       dispatch(getUserDevice(user.email));
       dispatch(getUserPhase(user.email));
       dispatch(getUserPattern(user.email));
+      dispatch(getUserGroup(user.email));
     })();
   }, [dispatch]);
 

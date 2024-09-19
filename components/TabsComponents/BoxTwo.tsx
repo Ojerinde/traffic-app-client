@@ -45,6 +45,26 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
       setUpdatedPatternPhases(pattern.phases);
     }
   };
+  const handleDeletePattern = async (patternName: string) => {
+    const confirmResult = confirm(
+      "Are you sure you want to delete this pattern?"
+    );
+    if (!confirmResult) return;
+    const pattern = patterns.find((p) => p.name === patternName);
+    const patternId = pattern?._id;
+    console.log("Pattern ID", pattern, patternName, patternId);
+
+    try {
+      const email = GetItemFromLocalStorage("user").email;
+      const { data } = await HttpRequest.delete(
+        `/patterns/${patternId}/${email}`
+      );
+      emitToastMessage(data.message, "success");
+      dispatch(getUserPattern(email));
+    } catch (error: any) {
+      emitToastMessage(error?.response.data.message, "error");
+    }
+  };
 
   // Logic to edit a phase
   const handleRemovePhase = (phaseId: string) => {
@@ -206,6 +226,9 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                 <div>
                   <button onClick={() => handleSelectPattern(pattern, index)}>
                     {showPatternPhases === index ? "Close" : "See Phases"}
+                  </button>
+                  <button onClick={() => handleDeletePattern(pattern.name)}>
+                    Delete
                   </button>
                 </div>
               </div>

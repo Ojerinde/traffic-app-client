@@ -7,7 +7,7 @@ import Select, { StylesConfig, ActionMeta } from "react-select";
 import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
 
 export interface Option {
-  value: string;
+  value: string | null;
   label: string;
 }
 
