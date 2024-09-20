@@ -197,9 +197,9 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
           onClick={() => setShowInputModal((prev) => !prev)}
         >
           {!showInputModal ? (
-            <IoMdAddCircle size={48} />
+            <IoMdAddCircle size={50} />
           ) : (
-            <MdCancel size={48} />
+            <MdCancel size={50} />
           )}
         </AddPhaseIcon>
       )}

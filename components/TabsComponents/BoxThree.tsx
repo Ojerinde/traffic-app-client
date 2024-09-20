@@ -66,7 +66,7 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
   const handleAddRemovePattern = (patternName: string) => {
     setSelectedPatterns((prev) =>
       prev.includes(patternName)
-        ? prev.filter((p) => p !== patternName)
+        ? prev?.filter((p) => p !== patternName)
         : [...prev, patternName]
     );
     if (selectedPatterns.includes(patternName)) {
@@ -128,12 +128,12 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
 
   // Logic for configuring a pattern
   const handleConfigurePattern = (patternName: any) => {
-    const patternToBeConfigured = patterns.find((p) => p.name === patternName);
+    const patternToBeConfigured = patterns?.find((p) => p.name === patternName);
     setPatternToConfigure(patternToBeConfigured);
   };
 
   // Find the saved configuration for the current pattern
-  const savedPatternConfig = configuredPatterns.find(
+  const savedPatternConfig = configuredPatterns?.find(
     (p) => p.name === patternToConfigure?.name
   );
 
@@ -167,7 +167,7 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
       "Are you sure you want to delete this group?"
     );
     if (!confirmResult) return;
-    const group = groups.find((g) => g.name === groupName);
+    const group = groups?.find((g) => g.name === groupName);
     const groupId = group?._id;
 
     try {

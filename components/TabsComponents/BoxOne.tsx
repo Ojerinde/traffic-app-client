@@ -31,7 +31,7 @@ const BoxOne: React.FC<BoxOneProps> = ({}) => {
     );
 
     if (!confirmResult) return;
-    const phase = phases.find((p) => p.name === phaseName);
+    const phase = phases?.find((p) => p.name === phaseName);
     const phaseId = phase?._id;
 
     try {
@@ -45,10 +45,10 @@ const BoxOne: React.FC<BoxOneProps> = ({}) => {
   };
   return (
     <div className="boxOne">
-      {phases.length > 0 ? (
+      {phases?.length > 0 ? (
         <ul className="phases">
           <h2 className="phases__header">Available Phase(s)</h2>
-          {phases.map((phase, index) => (
+          {phases?.map((phase, index) => (
             <li className="phases--item" key={index}>
               <h3>{phase.name}</h3>
               <div>
@@ -106,7 +106,7 @@ const BoxOne: React.FC<BoxOneProps> = ({}) => {
         }}
       />
 
-      {phases.length == 0 ? (
+      {phases?.length == 0 ? (
         <p>
           To create a phase, configure each signal by toggling the corresponding
           lights. If a potential conflict arises, you will receive a
@@ -134,7 +134,7 @@ const BoxOne: React.FC<BoxOneProps> = ({}) => {
         </div>
       )}
 
-      {phases.length == 0 && (
+      {phases?.length == 0 && (
         <p>
           Once you have completed the signal configuration, click on the add
           icon at the center of the intersection. You will be prompted to enter

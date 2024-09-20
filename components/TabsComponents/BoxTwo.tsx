@@ -67,7 +67,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
     } else {
       setShowPatternPhases(index);
       setSelectedPattern(pattern);
-      setUpdatedPatternPhases(pattern.phases);
+      setUpdatedPatternPhases(pattern?.phases);
     }
   };
   const handleDeletePattern = async (patternName: string) => {
@@ -75,7 +75,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
       "Are you sure you want to delete this pattern?"
     );
     if (!confirmResult) return;
-    const pattern = patterns.find((p) => p.name === patternName);
+    const pattern = patterns?.find((p) => p.name === patternName);
     const patternId = pattern?._id;
 
     try {
@@ -92,7 +92,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
 
   // Logic to edit a phase
   const handleRemovePhase = (phaseId: string) => {
-    const updatedPhases = updatedPatternPhases.filter(
+    const updatedPhases = updatedPatternPhases?.filter(
       (phase) => phase._id !== phaseId
     );
     setUpdatedPatternPhases(updatedPhases);
@@ -115,7 +115,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
   const handlePhaseSelect = (phaseName: string) => {
     setSelectedPhases((prev) =>
       prev.includes(phaseName)
-        ? prev.filter((p) => p !== phaseName)
+        ? prev?.filter((p) => p !== phaseName)
         : [...prev, phaseName]
     );
     if (selectedPhases.includes(phaseName)) {
@@ -134,7 +134,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
     if (!patternName)
       return emitToastMessage("Pattern name is required", "error");
 
-    if (!configuredPhases || configuredPhases.length === 0) {
+    if (!configuredPhases || configuredPhases?.length === 0) {
       return emitToastMessage("At least one phase must be configured", "error");
     }
     try {
@@ -285,7 +285,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
             Select phases for the new pattern
           </h2>
           <ul className="patterns__availablePhases">
-            {phases.map((phase, index) => (
+            {phases?.map((phase, index) => (
               <li className="patterns__availablePhases--item" key={index}>
                 <h3>{phase.name}</h3>
                 <div>
@@ -303,7 +303,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
           </ul>
 
           {/* Drag and drop for creating a new pattern */}
-          {selectedPhases.length > 0 && (
+          {selectedPhases?.length > 0 && (
             <div className="patterns__selected">
               <p>
                 Below are the phases you have selected. You can reorder by drag
@@ -314,7 +314,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                 <Droppable droppableId="selected-phases">
                   {(provided) => (
                     <ul {...provided.droppableProps} ref={provided.innerRef}>
-                      {selectedPhases.map((phaseName, index) => (
+                      {selectedPhases?.map((phaseName, index) => (
                         <Draggable
                           key={phaseName}
                           draggableId={phaseName}
@@ -553,10 +553,10 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
           )}
         </div>
       )}
-      {patterns.length > 0 ? (
+      {patterns?.length > 0 ? (
         <ul className="patterns">
           <h2 className="patterns__header">Available Pattern(s)</h2>
-          {patterns.map((pattern, index) => (
+          {patterns?.map((pattern, index) => (
             <li className="patterns__list" key={index}>
               <div className="patterns__list--item">
                 <h3>{pattern.name}</h3>
@@ -585,7 +585,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                   </h2>
 
                   {!patternPhaseIsEditable ? (
-                    pattern.phases.map((phase: any, index: any) => (
+                    pattern.phases?.map((phase: any, index: any) => (
                       <li className="patterns__phases--item" key={index}>
                         <h3>{phase.name}</h3>
                         <div>
@@ -607,7 +607,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                             {...provided.droppableProps}
                             ref={provided.innerRef}
                           >
-                            {updatedPatternPhases.map((phase, index) => (
+                            {updatedPatternPhases?.map((phase, index) => (
                               <Draggable
                                 key={phase._id}
                                 draggableId={phase._id}
