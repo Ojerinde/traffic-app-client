@@ -1,11 +1,11 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface SignalState {
-  left: "R" | "A" | "G";
-  straight: "R" | "A" | "G";
-  right: "R" | "A" | "G";
-  bike: "R" | "G" | "A";
-  pedestrian: "R" | "G" | "A";
+  left: "R" | "A" | "G" | "B";
+  straight: "R" | "A" | "G" | "B";
+  right: "R" | "A" | "G" | "B";
+  bike: "R" | "G" | "A" | "B";
+  pedestrian: "R" | "G" | "A" | "B";
 }
 
 interface SignalConfigState {
@@ -26,19 +26,17 @@ const initializeSignals = (
   };
 
   const trimmedString = signalString.slice(1, -1);
-
-  // Extract signals in blocks of 6 characters
   const signalBlocks = trimmedString.match(/.{6}/g);
 
   if (signalBlocks && signalBlocks.length === 4) {
     signalBlocks.forEach((signalBlock) => {
       const direction = signalBlock[0] as keyof typeof signals;
 
-      signals[direction].left = signalBlock[1] as "R" | "A" | "G";
-      signals[direction].straight = signalBlock[2] as "R" | "A" | "G";
-      signals[direction].right = signalBlock[3] as "R" | "A" | "G";
-      signals[direction].bike = signalBlock[4] as "R" | "A" | "G";
-      signals[direction].pedestrian = signalBlock[5] as "R" | "A" | "G";
+      signals[direction].left = signalBlock[1] as "R" | "A" | "G" | "B";
+      signals[direction].straight = signalBlock[2] as "R" | "A" | "G" | "B";
+      signals[direction].right = signalBlock[3] as "R" | "A" | "G" | "B";
+      signals[direction].bike = signalBlock[4] as "R" | "A" | "G" | "B";
+      signals[direction].pedestrian = signalBlock[5] as "R" | "A" | "G" | "B";
     });
   }
 
@@ -62,9 +60,16 @@ const signalConfigSlice = createSlice({
     setSignalState(state) {
       state.signals = initializeSignals(state.signalString);
     },
-    clearSignalString(state) {
-      state.signalString = "*#";
+    setSignalStringToAllRed(state) {
+      state.signalString = "*NRRRRRERRRRRSRRRRRWRRRRR#";
     },
+    setSignalStringToAllAmber(state) {
+      state.signalString = "*NAAAAAEAAAAASAAAAAWAAAAA#";
+    },
+    setSignalStringToAllBlank(state) {
+      state.signalString = "*NBBBBBEBBBBBSBBBBBWBBBBB#";
+    },
+
     allowConflictConfig(state, action: PayloadAction<boolean>) {
       state.allowConflictingConfig = action.payload;
     },
@@ -76,7 +81,9 @@ const signalConfigSlice = createSlice({
 export const {
   setSignalState,
   setSignalString,
-  clearSignalString,
+  setSignalStringToAllRed,
+  setSignalStringToAllAmber,
+  setSignalStringToAllBlank,
   allowConflictConfig,
   validateConfig,
 } = signalConfigSlice.actions;

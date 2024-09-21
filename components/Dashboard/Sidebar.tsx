@@ -30,7 +30,7 @@ const SideBar: React.FC<SideBarProps> = ({ sideBarLinks }) => {
         ))}
       </ul>
 
-      <button
+      {/* <button
         className="sidebar-logout"
         onClick={() => setShowLogoutVerificationModal(true)}
       >
@@ -42,7 +42,7 @@ const SideBar: React.FC<SideBarProps> = ({ sideBarLinks }) => {
             onClose={() => setShowLogoutVerificationModal(false)}
           ></LogoutModal>
         </OverlayModal>
-      )}
+      )} */}
     </section>
   );
 };

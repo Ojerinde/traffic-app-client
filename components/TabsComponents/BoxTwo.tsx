@@ -59,6 +59,19 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
   const [phaseToConfigure, setPhaseToConfigure] = useState<
     PhaseConfigType | undefined
   >(undefined);
+  const [activeOrLastAddedPhase, setActiveOrLastAddedPhase] =
+    useState<string>("");
+  const [searchedResult, setSearchedResult] = useState<any[]>([]);
+  const [showSearchedResult, setShowSearchedResult] = useState<boolean>(false);
+  const [inputtedPatternName, setInputtedPatternName] = useState<string>("");
+
+  const searchPatternByName = (patternName: string) => {
+    const matchedPhases = patterns.filter((pattern) =>
+      pattern.name.toLowerCase().includes(patternName.toLowerCase())
+    );
+    setSearchedResult(matchedPhases);
+  };
+  const patternsToShow = showSearchedResult ? searchedResult : patterns;
 
   const handleSelectPattern = (pattern: any, index: number) => {
     if (showPatternPhases === index) {
@@ -72,7 +85,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
   };
   const handleDeletePattern = async (patternName: string) => {
     const confirmResult = confirm(
-      "Are you sure you want to delete this pattern?"
+      `Are you sure you want to delete ${patternName} pattern?`
     );
     if (!confirmResult) return;
     const pattern = patterns?.find((p) => p.name === patternName);
@@ -140,7 +153,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
     try {
       const email = GetItemFromLocalStorage("user").email;
       console.log("configured Phases", configuredPhases);
-      return;
+
       const { data } = await HttpRequest.post("/patterns", {
         name: patternName,
         email: email,
@@ -157,9 +170,11 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
   };
 
   // For previewing phase
-  const handlePhasePreview = (phaseSignalString: string) => {
+  const handlePhasePreview = (phaseSignalString: string, phaseName: string) => {
+    console.log("Preview signal", phaseSignalString, phaseName);
     dispatch(setSignalString(phaseSignalString));
     dispatch(setSignalState());
+    setActiveOrLastAddedPhase(phaseName);
   };
 
   // Logic for configuring a pattern
@@ -188,44 +203,48 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
     },
     validationSchema: Yup.object({
       patternName: Yup.string().required("Pattern name is required"),
-      duration: Yup.number().required("Duration is required").min(1),
+      duration: Yup.number()
+        .required("Duration is required")
+        .min(1, "Minimum duration is 1"),
       blinkTimeRedToGreen: Yup.number().when(
         "blinkEnabled",
-        (blinkEnabled, schema) => {
-          return blinkEnabled
-            ? schema.min(1, "Blink time must be at least 1").max(5).required()
-            : schema.notRequired();
-        }
+        (blinkEnabled, schema) =>
+          blinkEnabled
+            ? schema
+                .min(1, "Blink time must be at least 1")
+                .max(5, "Blink time must be at most 5")
+                .required("Blink time is required")
+            : schema.notRequired()
       ),
       blinkTimeGreenToRed: Yup.number().when(
         "blinkEnabled",
-        (blinkEnabled, schema) => {
-          return blinkEnabled
-            ? schema.min(1, "Blink time must be at least 1").max(5).required()
-            : schema.notRequired();
-        }
+        (blinkEnabled, schema) =>
+          blinkEnabled
+            ? schema
+                .min(1, "Blink time must be at least 1")
+                .max(5, "Blink time must be at most 5")
+                .required("Blink time is required")
+            : schema.notRequired()
       ),
       amberDurationRedToGreen: Yup.number().when(
         "amberEnabled",
-        (amberEnabled, schema) => {
-          return amberEnabled
+        (amberEnabled, schema) =>
+          amberEnabled
             ? schema
                 .min(1, "Amber duration must be at least 1")
-                .max(5)
-                .required()
-            : schema.notRequired();
-        }
+                .max(5, "Amber duration must be at most 5")
+                .required("Amber duration is required")
+            : schema.notRequired()
       ),
       amberDurationGreenToRed: Yup.number().when(
         "amberEnabled",
-        (amberEnabled, schema) => {
-          return amberEnabled
+        (amberEnabled, schema) =>
+          amberEnabled
             ? schema
                 .min(1, "Amber duration must be at least 1")
-                .max(5)
-                .required()
-            : schema.notRequired();
-        }
+                .max(5, "Amber duration must be at most 5")
+                .required("Amber duration is required")
+            : schema.notRequired()
       ),
     }),
     onSubmit: async (values) => {
@@ -280,17 +299,22 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
         {!showAllAvailablePhases ? "Add a new Pattern" : "Cancel"}
       </button>
       {showAllAvailablePhases && (
-        <div>
+        <>
           <h2 className="patterns__availablePhases--header">
             Select phases for the new pattern
           </h2>
           <ul className="patterns__availablePhases">
             {phases?.map((phase, index) => (
-              <li className="patterns__availablePhases--item" key={index}>
+              <li
+                className={`patterns__availablePhases--item ${
+                  activeOrLastAddedPhase === phase.name && "active"
+                }`}
+                key={index}
+              >
                 <h3>{phase.name}</h3>
                 <div>
                   <button
-                    onClick={() => handlePhasePreview(phase.signalString)}
+                    onClick={() => handlePhasePreview(phase.data, phase.name)}
                   >
                     Preview
                   </button>
@@ -523,7 +547,12 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                                     </div>
 
                                     {/* Submit Button */}
-                                    <button type="submit">
+                                    <button
+                                      type="submit"
+                                      disabled={
+                                        !formik.isValid || !formik.dirty
+                                      }
+                                    >
                                       Save Configuration
                                     </button>
                                   </form>
@@ -551,104 +580,134 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
               </div>
             </div>
           )}
-        </div>
+        </>
       )}
       {patterns?.length > 0 ? (
-        <ul className="patterns">
-          <h2 className="patterns__header">Available Pattern(s)</h2>
-          {patterns?.map((pattern, index) => (
-            <li className="patterns__list" key={index}>
-              <div className="patterns__list--item">
-                <h3>{pattern.name}</h3>
-                <div>
-                  <button onClick={() => handleSelectPattern(pattern, index)}>
-                    {showPatternPhases === index ? "Close" : "See Phases"}
-                  </button>
-                  <button onClick={() => handleDeletePattern(pattern.name)}>
-                    Delete
-                  </button>
+        <>
+          <div className="patterns__header">
+            <h2>Available Pattern(s)</h2>
+            <form
+              action=""
+              onSubmit={(e: any) => {
+                e.preventDefault();
+                searchPatternByName(inputtedPatternName);
+              }}
+            >
+              <input
+                type="text"
+                placeholder="Find a pattern by its name"
+                value={inputtedPatternName}
+                onChange={(e) => {
+                  setInputtedPatternName(e.target.value);
+                  searchPatternByName(e.target.value);
+                  setShowSearchedResult(true);
+                }}
+              />
+            </form>
+          </div>
+          <ul className="patterns">
+            {patternsToShow?.map((pattern, index) => (
+              <li className="patterns__list" key={index}>
+                <div className="patterns__list--item">
+                  <h3>{pattern.name}</h3>
+                  <div>
+                    <button onClick={() => handleSelectPattern(pattern, index)}>
+                      {showPatternPhases === index ? "Close" : "See Phases"}
+                    </button>
+                    <button onClick={() => handleDeletePattern(pattern.name)}>
+                      Delete
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              {/* Show phases under the selected pattern */}
-              {showPatternPhases === index && (
-                <ul className="patterns__phases">
-                  <h2 className="patterns__phases--header">
-                    {pattern.name} phases{" "}
-                    <span
-                      onClick={() =>
-                        setPatternPhaseIsEditable(!patternPhaseIsEditable)
-                      }
-                    >
-                      {patternPhaseIsEditable ? "Cancel" : "Edit"}
-                    </span>
-                  </h2>
+                {/* Show phases under the selected pattern */}
+                {showPatternPhases === index && (
+                  <ul className="patterns__phases">
+                    <h2 className="patterns__phases--header">
+                      {pattern.name} phases{" "}
+                      <span
+                        onClick={() =>
+                          setPatternPhaseIsEditable(!patternPhaseIsEditable)
+                        }
+                      >
+                        {patternPhaseIsEditable ? "Cancel" : "Edit"}
+                      </span>
+                    </h2>
 
-                  {!patternPhaseIsEditable ? (
-                    pattern.phases?.map((phase: any, index: any) => (
-                      <li className="patterns__phases--item" key={index}>
-                        <h3>{phase.name}</h3>
-                        <div>
-                          <button
-                            onClick={() =>
-                              handlePhasePreview(phase.signalString)
-                            }
-                          >
-                            Preview
-                          </button>
-                        </div>
-                      </li>
-                    ))
-                  ) : (
-                    <DragDropContext onDragEnd={handleDragEndEdit}>
-                      <Droppable droppableId="phases-edit">
-                        {(provided) => (
-                          <ul
-                            {...provided.droppableProps}
-                            ref={provided.innerRef}
-                          >
-                            {updatedPatternPhases?.map((phase, index) => (
-                              <Draggable
-                                key={phase._id}
-                                draggableId={phase._id}
-                                index={index}
-                              >
-                                {(provided) => (
-                                  <li
-                                    ref={provided.innerRef}
-                                    {...provided.draggableProps}
-                                    {...provided.dragHandleProps}
-                                    className="patterns__phases--item"
-                                  >
-                                    {phase.name}
-                                    <button
-                                      onClick={() =>
-                                        handleRemovePhase(phase._id)
-                                      }
+                    {!patternPhaseIsEditable ? (
+                      pattern.phases?.map((phase: any, index: any) => (
+                        <li
+                          className={`patterns__phases--item ${
+                            activeOrLastAddedPhase === phase.name && "active"
+                          }`}
+                          key={index}
+                        >
+                          <h3>{phase.name}</h3>
+                          <div>
+                            <button
+                              onClick={() =>
+                                handlePhasePreview(
+                                  phase.signalString,
+                                  phase.name
+                                )
+                              }
+                            >
+                              Preview
+                            </button>
+                          </div>
+                        </li>
+                      ))
+                    ) : (
+                      <DragDropContext onDragEnd={handleDragEndEdit}>
+                        <Droppable droppableId="phases-edit">
+                          {(provided) => (
+                            <ul
+                              {...provided.droppableProps}
+                              ref={provided.innerRef}
+                            >
+                              {updatedPatternPhases?.map((phase, index) => (
+                                <Draggable
+                                  key={phase._id}
+                                  draggableId={phase._id}
+                                  index={index}
+                                >
+                                  {(provided) => (
+                                    <li
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      {...provided.dragHandleProps}
+                                      className="patterns__phases--item"
                                     >
-                                      Remove
-                                    </button>
-                                  </li>
-                                )}
-                              </Draggable>
-                            ))}
-                            {provided.placeholder}
-                          </ul>
-                        )}
-                      </Droppable>
-                    </DragDropContext>
-                  )}
+                                      {phase.name}
+                                      <button
+                                        onClick={() =>
+                                          handleRemovePhase(phase._id)
+                                        }
+                                      >
+                                        Remove
+                                      </button>
+                                    </li>
+                                  )}
+                                </Draggable>
+                              ))}
+                              {provided.placeholder}
+                            </ul>
+                          )}
+                        </Droppable>
+                      </DragDropContext>
+                    )}
 
-                  {patternPhaseIsEditable && (
-                    <Button type="button" onClick={editPatternHandler}>
-                      Save
-                    </Button>
-                  )}
-                </ul>
-              )}
-            </li>
-          ))}
-        </ul>
+                    {patternPhaseIsEditable && (
+                      <Button type="button" onClick={editPatternHandler}>
+                        Save
+                      </Button>
+                    )}
+                  </ul>
+                )}
+              </li>
+            ))}
+          </ul>
+        </>
       ) : (
         <div className="patterns__noPattern">
           You have not created any pattern yet.

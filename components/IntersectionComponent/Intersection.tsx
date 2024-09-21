@@ -47,8 +47,8 @@ const Background = styled.div<{ $backgroundImage: string }>`
 
 const AddPhaseIcon = styled(motion.div)`
   position: absolute;
-  top: 44.8%;
-  right: 45%;
+  top: 44.4%;
+  left: 45%;
   color: black;
   border: none;
   cursor: pointer;
@@ -197,9 +197,9 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
           onClick={() => setShowInputModal((prev) => !prev)}
         >
           {!showInputModal ? (
-            <IoMdAddCircle size={50} />
+            <IoMdAddCircle size={52} />
           ) : (
-            <MdCancel size={50} />
+            <MdCancel size={52} />
           )}
         </AddPhaseIcon>
       )}

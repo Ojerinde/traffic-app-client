@@ -32,7 +32,7 @@ export const getUserDevice = createAsyncThunk(
   async (email: string) => {
     try {
       const { data } = await HttpRequest.get(`/devices/${email}`);
-      emitToastMessage("Your device(s) are fetched successfully", "success");
+      // emitToastMessage("Your device(s) are fetched successfully", "success");
       return data;
     } catch (error: any) {
       emitToastMessage(error?.response.data.message, "error");
@@ -48,7 +48,7 @@ export const getUserPhase = createAsyncThunk(
         data: { data },
       } = await HttpRequest.get(`/phases/${email}`);
 
-      emitToastMessage("Your phase(s) are fetched successfully", "success");
+      // emitToastMessage("Your phase(s) are fetched successfully", "success");
       return data;
     } catch (error: any) {
       emitToastMessage(error?.response.data.message, "error");
@@ -63,7 +63,7 @@ export const getUserPattern = createAsyncThunk(
         data: { data },
       } = await HttpRequest.get(`/patterns/${email}`);
 
-      emitToastMessage("Your pattern(s) are fetched successfully", "success");
+      // emitToastMessage("Your pattern(s) are fetched successfully", "success");
       return data;
     } catch (error: any) {
       emitToastMessage(error?.response.data.message, "error");
@@ -77,7 +77,7 @@ export const getUserGroup = createAsyncThunk(
       const {
         data: { data },
       } = await HttpRequest.get(`/groups/${email}`);
-      emitToastMessage("Your group(s) are fetched successfully", "success");
+      // emitToastMessage("Your group(s) are fetched successfully", "success");
       return data;
     } catch (error: any) {
       emitToastMessage(error?.response.data.message, "error");
@@ -180,7 +180,7 @@ const UserDeviceSlice = createSlice({
         state.isFetchingPhases = true;
       })
       .addCase(getUserPhase.fulfilled, (state, action) => {
-        state.phases = action.payload.phases;
+        state.phases = action.payload.phases.reverse();
         state.isFetchingPhases = false;
       })
       .addCase(getUserPhase.rejected, (state) => {
@@ -190,7 +190,7 @@ const UserDeviceSlice = createSlice({
         state.isFetchingPatterns = true;
       })
       .addCase(getUserPattern.fulfilled, (state, action) => {
-        state.patterns = action.payload.patterns;
+        state.patterns = action.payload.patterns.reverse();
         state.isFetchingPatterns = false;
       })
       .addCase(getUserPattern.rejected, (state) => {
@@ -200,7 +200,7 @@ const UserDeviceSlice = createSlice({
         state.isFetchingGroups = true;
       })
       .addCase(getUserGroup.fulfilled, (state, action) => {
-        state.groups = action.payload;
+        state.groups = action.payload.reverse();
         state.isFetchingGroups = false;
       })
       .addCase(getUserGroup.rejected, (state) => {

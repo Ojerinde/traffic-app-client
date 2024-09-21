@@ -1,13 +1,12 @@
 import { emitToastMessage } from "@/utils/toastFunc";
 import React, { useEffect, useState } from "react";
-import { ImManWoman } from "react-icons/im";
 import styled from "styled-components";
 import { Signal } from "./Intersection";
 import { checkForConflicts } from "@/utils/conflictChecker";
 import { useAppSelector } from "@/hooks/reduxHook";
 
 type Direction = "N" | "E" | "S" | "W";
-type LightColor = "R" | "A" | "G";
+type LightColor = "R" | "A" | "G" | "B";
 
 interface TrafficSignalProps {
   direction: Direction;
@@ -49,7 +48,13 @@ const SignalLight = styled.div<{ color: LightColor }>`
   width: 1.6rem;
   height: 1.6rem;
   background-color: ${({ color }) =>
-    color === "R" ? "red" : color === "A" ? "orange" : "green"};
+    color === "R"
+      ? "red"
+      : color === "A"
+      ? "orange"
+      : color === "G"
+      ? "green"
+      : "black"};
   margin: 1px;
   border-radius: 50%;
   cursor: pointer;
@@ -66,9 +71,16 @@ const PedestrianSignalLight = styled.div<{
   align-items: center;
   font-size: 1.2rem;
   font-weight: 600;
-  color: ${({ color }) => (color === "R" ? "red" : "green")};
+  color: ${({ color }) =>
+    color === "R"
+      ? "red"
+      : color === "A"
+      ? "orange"
+      : color === "G"
+      ? "green"
+      : "black"};
   transform: ${({ orientation }) =>
-    orientation === "horizontal" ? "rotate(0deg)" : "rotate(0deg)"};
+    orientation === "horizontal" ? "rotate(0deg)" : "rotate(90deg)"};
   cursor: pointer;
 `;
 

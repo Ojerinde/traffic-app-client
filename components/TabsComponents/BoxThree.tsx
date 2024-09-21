@@ -53,6 +53,17 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
   } | null>(null);
   const [groupPatternIsEditable, setGroupPatternIsEditable] =
     useState<boolean>(false);
+  const [searchedResult, setSearchedResult] = useState<any[]>([]);
+  const [showSearchedResult, setShowSearchedResult] = useState<boolean>(false);
+  const [inputtedGroupName, setInputtedGroupName] = useState<string>("");
+
+  const searchGroupByName = (gruopName: string) => {
+    const matchedGroups = groups.filter((group) =>
+      group.name.toLowerCase().includes(gruopName.toLowerCase())
+    );
+    setSearchedResult(matchedGroups);
+  };
+  const groupsToShow = showSearchedResult ? searchedResult : groups;
 
   useEffect(() => {
     setGroupOptions(
@@ -422,21 +433,39 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
       {/* Available Group */}
       {!showDifferentDaysGroup && (
         <>
-          <h2 className="newGroup__header">Available Group(s)</h2>
+          <div className="newGroup__header">
+            <h2>Available Group(s)</h2>
+            <form
+              action=""
+              onSubmit={(e: any) => {
+                e.preventDefault();
+                searchGroupByName(inputtedGroupName);
+              }}
+            >
+              <input
+                type="text"
+                placeholder="Find a group by its name"
+                value={inputtedGroupName}
+                onChange={(e) => {
+                  setInputtedGroupName(e.target.value);
+                  searchGroupByName(e.target.value);
+                  setShowSearchedResult(true);
+                }}
+              />
+            </form>
+          </div>
           {groups?.length > 0 ? (
-            <ul className="patterns">
+            <ul className="newGroup__availablePatterns">
               {groups?.map((group, index) => (
-                <li className="patterns__list" key={index}>
-                  <div className="patterns__list--item">
-                    <h3>{group.name}</h3>
-                    <div>
-                      {/* <button onClick={() => handleSelectGroup(group, index)}>
+                <li className="newGroup__availablePatterns--item" key={index}>
+                  <h3>{group.name}</h3>
+                  <div>
+                    {/* <button onClick={() => handleSelectGroup(group, index)}>
                         {showGroupPatterns === index ? "Close" : "See Patterns"}
                       </button> */}
-                      <button onClick={() => handleDeleteGroup(group.name)}>
-                        Delete
-                      </button>
-                    </div>
+                    <button onClick={() => handleDeleteGroup(group.name)}>
+                      Delete
+                    </button>
                   </div>
                 </li>
               ))}

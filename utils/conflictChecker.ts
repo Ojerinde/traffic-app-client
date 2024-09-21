@@ -173,9 +173,8 @@ export const checkForConflicts = (
       }
     }
 
-    // Confirm this =
     if (northSignal?.right === "G") {
-      if (direction === "N") {
+      if (direction === "S") {
         const isNLAllowedWithSR = confirm(
           "Do you want to allow continuous left turn on the South road with North right active?"
         );

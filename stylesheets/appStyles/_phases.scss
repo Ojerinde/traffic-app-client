@@ -4,10 +4,34 @@
   row-gap: 1rem;
   justify-content: space-between;
   margin-bottom: 1rem;
+  overflow-y: scroll;
+  max-height: 20rem;
 
   &__header {
-    font-size: 1.5rem;
-    color: $color-black-light;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    & h2 {
+      font-size: 1.5rem;
+      color: $color-black-light;
+      border-bottom: 2px solid rgba($color-black, 0.8);
+      width: fit-content;
+    }
+    & form {
+      flex-basis: 45%;
+      & input {
+        width: 100%;
+        border: none;
+        border-bottom: 2px solid $color-black-light;
+        font-size: 1.5rem;
+
+        &:focus {
+          outline: none;
+        }
+      }
+    }
   }
   &__noPhase {
     font-size: 1.5rem;
@@ -15,7 +39,7 @@
     margin: 2rem 0;
   }
 
-  &--item {
+  &__item {
     padding: 0.4rem 1rem;
     gap: 0.3rem;
     display: flex;
@@ -25,6 +49,9 @@
     box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px,
       rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
 
+    &.active {
+      background-color: rgba($color-yellow, 0.5);
+    }
     & h3 {
       font-size: 1.4rem;
       letter-spacing: 0.1rem;
@@ -65,13 +92,18 @@
     font-size: 1.4rem;
     letter-spacing: 0.08rem;
     padding: 0.8rem 0.8rem;
-    margin: 1rem 0;
+    margin: 1rem 0.5rem;
     border: none;
     cursor: pointer;
     box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
       rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
       rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
     transition: all 0.3s;
+
+    &__buttonBox {
+      display: flex;
+      justify-content: space-between;
+    }
 
     &:hover {
       background-color: rgba($color-yellow, 0.8);
