@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface SignalState {
+export interface SignalState {
   left: "R" | "A" | "G" | "B";
   straight: "R" | "A" | "G" | "B";
   right: "R" | "A" | "G" | "B";
@@ -12,7 +12,12 @@ interface SignalConfigState {
   signals: Record<"N" | "E" | "S" | "W", SignalState>;
   warning: string | null;
   signalString: string;
-  allowConflictingConfig: false | true;
+  allowConflictingConfig: boolean;
+  isIntersectionConfigurable: boolean;
+  createdPatternPhasePreviewing: {
+    duration: number | null;
+    showDuration: boolean;
+  };
 }
 
 const initializeSignals = (
@@ -48,6 +53,11 @@ const initialConfig: SignalConfigState = {
   warning: null,
   signalString: "*#",
   allowConflictingConfig: false,
+  isIntersectionConfigurable: false,
+  createdPatternPhasePreviewing: {
+    duration: null,
+    showDuration: false,
+  },
 };
 
 const signalConfigSlice = createSlice({
@@ -73,8 +83,19 @@ const signalConfigSlice = createSlice({
     allowConflictConfig(state, action: PayloadAction<boolean>) {
       state.allowConflictingConfig = action.payload;
     },
-
-    validateConfig(state) {},
+    setIsIntersectionConfigurable(state, action: PayloadAction<boolean>) {
+      state.isIntersectionConfigurable = action.payload;
+    },
+    previewCreatedPatternPhase(state, action) {
+      state.createdPatternPhasePreviewing.duration = action.payload.duration;
+      state.signalString = action.payload.signalString;
+      state.createdPatternPhasePreviewing.showDuration = true;
+    },
+    closePreviewCreatedPatternPhase(state) {
+      state.createdPatternPhasePreviewing.duration = null;
+      state.signalString = "*NRRRRRERRRRRSRRRRRWRRRRR#";
+      state.createdPatternPhasePreviewing.showDuration = false;
+    },
   },
 });
 
@@ -85,6 +106,8 @@ export const {
   setSignalStringToAllAmber,
   setSignalStringToAllBlank,
   allowConflictConfig,
-  validateConfig,
+  setIsIntersectionConfigurable,
+  previewCreatedPatternPhase,
+  closePreviewCreatedPatternPhase,
 } = signalConfigSlice.actions;
 export default signalConfigSlice.reducer;

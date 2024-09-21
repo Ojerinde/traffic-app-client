@@ -1,6 +1,11 @@
+"use client";
+
 import DeviceConfiguration from "@/components/Device/DeviceConfiguration";
 import IntersectionConfiguration from "@/components/Device/IntersectionConfiguration";
 import FourWayIntersection from "@/components/IntersectionComponent/FourWayIntersection";
+import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
+import { setIsIntersectionConfigurable } from "@/store/signals/SignalConfigSlice";
+import { useEffect } from "react";
 
 interface DeviceDetailsProps {
   params: any;
@@ -53,11 +58,18 @@ const intersectionConfigItems: IntersectionConfigItem[] = [
 ];
 
 const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
-  console.log("Device ID", params);
+  const dispatch = useAppDispatch();
+  const { isIntersectionConfigurable } = useAppSelector(
+    (state) => state.signalConfig
+  );
+  useEffect(() => {
+    dispatch(setIsIntersectionConfigurable(false));
+  }, [dispatch]);
+
   return (
     <section className="device">
       <div className="device__left">
-        <FourWayIntersection editable={false} />
+        <FourWayIntersection editable={isIntersectionConfigurable} />
       </div>
       <div className="device__right">
         <div className="device__right--top">

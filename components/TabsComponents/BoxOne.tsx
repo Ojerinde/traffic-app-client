@@ -1,8 +1,10 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import CheckBox from "../UI/CheckBox/CheckBox";
 import { useAppSelector, useAppDispatch } from "@/hooks/reduxHook";
 import {
   allowConflictConfig,
+  closePreviewCreatedPatternPhase,
+  setIsIntersectionConfigurable,
   setSignalState,
   setSignalString,
   setSignalStringToAllAmber,
@@ -60,7 +62,11 @@ const BoxOne: React.FC<BoxOneProps> = ({}) => {
       emitToastMessage(error?.response.data.message, "error");
     }
   };
-  console.log("All Phases", phases);
+
+  useEffect(() => {
+    dispatch(closePreviewCreatedPatternPhase());
+    dispatch(setIsIntersectionConfigurable(true));
+  }, [dispatch]);
 
   return (
     <div className="boxOne">

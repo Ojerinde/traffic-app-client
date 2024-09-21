@@ -44,7 +44,7 @@ const SignalWrapper = styled.div<{
   justify-content: center;
 `;
 
-const SignalLight = styled.div<{ color: LightColor }>`
+const SignalLight = styled.div<{ color: LightColor; editable: boolean }>`
   width: 1.6rem;
   height: 1.6rem;
   background-color: ${({ color }) =>
@@ -57,12 +57,13 @@ const SignalLight = styled.div<{ color: LightColor }>`
       : "black"};
   margin: 1px;
   border-radius: 50%;
-  cursor: pointer;
+  cursor: ${({ editable }) => (editable ? "pointer" : "default")};
 `;
 
 const PedestrianSignalLight = styled.div<{
   orientation: "horizontal" | "vertical";
   color: LightColor;
+  editable: boolean;
 }>`
   width: 1rem;
   height: 1rem;
@@ -81,7 +82,7 @@ const PedestrianSignalLight = styled.div<{
       : "black"};
   transform: ${({ orientation }) =>
     orientation === "horizontal" ? "rotate(0deg)" : "rotate(90deg)"};
-  cursor: pointer;
+  cursor: ${({ editable }) => (editable ? "pointer" : "default")};
 `;
 
 const SignalGroup = styled.div<{ orientation: "horizontal" | "vertical" }>`
@@ -171,6 +172,7 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
               <PedestrianSignalLight
                 color={signalColors.pedestrian}
                 orientation={orientation}
+                editable={editable}
                 onClick={() => handleSignalClick("pedestrian")}
               >
                 {/* <ImManWoman fontSize={20} /> */}
@@ -190,6 +192,7 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
               <PedestrianSignalLight
                 color={signalColors.pedestrian}
                 orientation={orientation}
+                editable={editable}
                 onClick={() => handleSignalClick("pedestrian")}
               >
                 {/* <ImManWoman fontSize={20} /> */}
@@ -198,18 +201,22 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
             </div>
             <SignalLight
               color={signalColors.bike}
+              editable={editable}
               onClick={() => handleSignalClick("bike")}
             />
             <SignalLight
               color={signalColors.right}
+              editable={editable}
               onClick={() => handleSignalClick("right")}
             />
             <SignalLight
               color={signalColors.straight}
+              editable={editable}
               onClick={() => handleSignalClick("straight")}
             />
             <SignalLight
               color={signalColors.left}
+              editable={editable}
               onClick={() => handleSignalClick("left")}
             />
           </>
@@ -217,18 +224,22 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
           <>
             <SignalLight
               color={signalColors.left}
+              editable={editable}
               onClick={() => handleSignalClick("left")}
             />
             <SignalLight
               color={signalColors.straight}
+              editable={editable}
               onClick={() => handleSignalClick("straight")}
             />
             <SignalLight
               color={signalColors.right}
+              editable={editable}
               onClick={() => handleSignalClick("right")}
             />
             <SignalLight
               color={signalColors.bike}
+              editable={editable}
               onClick={() => handleSignalClick("bike")}
             />
             <div
@@ -244,6 +255,7 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
               <PedestrianSignalLight
                 color={signalColors.pedestrian}
                 orientation={orientation}
+                editable={editable}
                 onClick={() => handleSignalClick("pedestrian")}
               >
                 {/* <ImManWoman size={20} /> */}
@@ -263,6 +275,7 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
               <PedestrianSignalLight
                 color={signalColors.pedestrian}
                 orientation={orientation}
+                editable={editable}
                 onClick={() => handleSignalClick("pedestrian")}
               >
                 {/* <ImManWoman size={20} /> */}

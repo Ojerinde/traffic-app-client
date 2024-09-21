@@ -18,6 +18,7 @@ const getPosition = (direction: "N" | "E" | "S" | "W") => {
       return { top: 0, left: 0 };
   }
 };
+
 const getPedestrianPosition = (direction: "N" | "E" | "S" | "W") => {
   switch (direction) {
     case "N":
@@ -50,9 +51,8 @@ const getOrientation = (
 
 const FourWayIntersection = ({ editable }: { editable: boolean }) => {
   const dispatch = useAppDispatch();
-  const { signals: trafficSignals, signalString } = useAppSelector(
-    (state) => state.signalConfig
-  );
+  const { signals: trafficSignals, createdPatternPhasePreviewing } =
+    useAppSelector((state) => state.signalConfig);
 
   const signalsArray = useMemo(
     () =>
@@ -69,7 +69,7 @@ const FourWayIntersection = ({ editable }: { editable: boolean }) => {
           orientation: getOrientation(direction as "N" | "E" | "S" | "W"),
         };
       }),
-    [trafficSignals] // Recompute only when trafficSignals changes
+    [trafficSignals]
   );
 
   return (
@@ -78,6 +78,7 @@ const FourWayIntersection = ({ editable }: { editable: boolean }) => {
         initialSignals={signalsArray}
         backgroundImage="/images/cross.png"
         editable={editable}
+        createdPatternPhasePreviewing={createdPatternPhasePreviewing}
       />
     </div>
   );

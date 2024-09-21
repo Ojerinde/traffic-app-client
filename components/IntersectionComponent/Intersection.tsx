@@ -9,14 +9,7 @@ import { emitToastMessage } from "@/utils/toastFunc";
 import { MdCancel } from "react-icons/md";
 import { getUserPhase } from "@/store/devices/UserDeviceSlice";
 import { useAppDispatch } from "@/hooks/reduxHook";
-
-interface SignalState {
-  left: "R" | "A" | "G";
-  straight: "R" | "A" | "G";
-  right: "R" | "A" | "G";
-  bike: "R" | "G" | "A";
-  pedestrian: "R" | "G" | "A";
-}
+import { SignalState } from "@/store/signals/SignalConfigSlice";
 
 export interface Signal extends SignalState {
   direction: "N" | "E" | "S" | "W";
@@ -32,6 +25,10 @@ interface IntersectionDisplayProps {
   initialSignals: Signal[];
   backgroundImage: string;
   editable: boolean;
+  createdPatternPhasePreviewing: {
+    duration: number | null;
+    showDuration: boolean;
+  };
 }
 
 const Background = styled.div<{ $backgroundImage: string }>`
@@ -43,16 +40,6 @@ const Background = styled.div<{ $backgroundImage: string }>`
   box-shadow: rgba(0, 0, 0, 0.06) 0px 2px 4px 0px inset;
   background-size: cover;
   background-position: center;
-`;
-
-const AddPhaseIcon = styled(motion.div)`
-  position: absolute;
-  top: 44.4%;
-  left: 45%;
-  color: black;
-  border: none;
-  cursor: pointer;
-  border-radius: 50%;
 `;
 
 const PhaseContainer = styled.div`
@@ -100,11 +87,34 @@ const AddPhaseButton = styled.button`
     border-color: #2a2a29;
   }
 `;
-
+const AddPhaseIcon = styled(motion.div)`
+  position: absolute;
+  top: 44.4%;
+  left: 45%;
+  color: black;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+`;
+const DurationDisplay = styled.div`
+  position: absolute;
+  top: 44.4%;
+  left: 45%;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: white;
+  width: 5.2rem;
+  height: 5.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  font-size: 2rem;
+`;
 const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
   initialSignals,
   backgroundImage,
   editable,
+  createdPatternPhasePreviewing,
 }) => {
   const [signals, setSignals] = useState<Signal[]>(initialSignals);
   const [showInputModal, setShowInputModal] = useState<boolean>(false);
@@ -120,7 +130,7 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
   const handleSignalClick = (
     direction: "N" | "E" | "S" | "W",
     signalType: string,
-    color: "R" | "A" | "G"
+    color: "R" | "A" | "G" | "B"
   ) => {
     setSignals((prevSignals) =>
       prevSignals.map((signal) =>
@@ -176,20 +186,18 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
   };
   return (
     <Background $backgroundImage={backgroundImage}>
-      {signals.map((signal) => {
-        return (
-          <TrafficSignal
-            key={signal.direction}
-            {...signal}
-            editable={editable}
-            onSignalClick={(direction, signalType, color) =>
-              handleSignalClick(direction, signalType, color)
-            }
-            signals={signals}
-          />
-        );
-      })}
-      {editable && (
+      {signals.map((signal) => (
+        <TrafficSignal
+          key={signal.direction}
+          {...signal}
+          editable={editable}
+          onSignalClick={(direction, signalType, color) =>
+            handleSignalClick(direction, signalType, color)
+          }
+          signals={signals}
+        />
+      ))}
+      {editable && !createdPatternPhasePreviewing.showDuration && (
         <AddPhaseIcon
           whileHover={{ scale: 1.2 }}
           whileTap={{ scale: 0.9 }}
@@ -203,6 +211,12 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
           )}
         </AddPhaseIcon>
       )}
+      {createdPatternPhasePreviewing.showDuration &&
+        createdPatternPhasePreviewing.duration !== null && (
+          <DurationDisplay>
+            {createdPatternPhasePreviewing.duration}s
+          </DurationDisplay>
+        )}
       {showInputModal && (
         <PhaseContainer>
           <PhaseNameInput

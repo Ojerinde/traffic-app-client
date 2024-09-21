@@ -62,7 +62,6 @@ export const getUserPattern = createAsyncThunk(
       const {
         data: { data },
       } = await HttpRequest.get(`/patterns/${email}`);
-
       // emitToastMessage("Your pattern(s) are fetched successfully", "success");
       return data;
     } catch (error: any) {
@@ -89,6 +88,7 @@ const UserDeviceSlice = createSlice({
   name: "userDevice",
   initialState: initialState,
   reducers: {
+    // Groups Tab
     addOrUpdatePatternConfig: (state, action) => {
       const { name, startTime, endTime } = action.payload;
       const existingPattern = state.configuredPatterns.find(
@@ -113,54 +113,30 @@ const UserDeviceSlice = createSlice({
         (pattern) => pattern.name !== patternNameToRemove
       );
     },
+    // Patterns Tab
     addOrUpdatePhaseConfig: (state, action) => {
-      const {
-        phaseId,
-        name,
-        signalString,
-        signalData,
-        duration,
-        blinkEnabled,
-        blinkTimeRedToGreen,
-        blinkTimeGreenToRed,
-        amberDurationRedToGreen,
-        amberDurationGreenToRed,
-        amberEnabled,
-      } = action.payload;
+      const { phaseId, name, signalString, duration } = action.payload;
       const existingPhase = state.configuredPhases.find(
         (phase) => phase.phaseId === phaseId
       );
 
       if (existingPhase) {
         existingPhase.name = name;
-        existingPhase.signalData = signalData;
         existingPhase.duration = duration;
-        existingPhase.blinkEnabled = blinkEnabled;
-        existingPhase.blinkTimeRedToGreen = blinkTimeRedToGreen;
-        existingPhase.blinkTimeGreenToRed = blinkTimeGreenToRed;
-        existingPhase.amberDurationRedToGreen = amberDurationRedToGreen;
-        existingPhase.amberDurationGreenToRed = amberDurationGreenToRed;
-        existingPhase.amberEnabled = amberEnabled;
       } else {
         state.configuredPhases.push({
           phaseId,
           name,
           duration,
           signalString,
-          signalData,
-          blinkEnabled,
-          blinkTimeRedToGreen,
-          blinkTimeGreenToRed,
-          amberDurationRedToGreen,
-          amberDurationGreenToRed,
-          amberEnabled,
         });
       }
     },
     removePhaseConfig: (state, action) => {
-      const phaseIdToRemove = action.payload;
+      const nameOfPhaseToRemove = action.payload;
       state.configuredPhases = state.configuredPhases.filter(
-        (phase) => phase.phaseId !== phaseIdToRemove
+        (phase) =>
+          phase.name.toLowerCase() !== nameOfPhaseToRemove.toLowerCase()
       );
     },
   },
