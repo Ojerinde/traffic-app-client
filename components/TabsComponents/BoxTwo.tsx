@@ -25,7 +25,6 @@ import {
   FaTrashAlt,
   FaArrowRight,
   FaArrowLeft,
-  FaEllipsisH,
 } from "react-icons/fa";
 import { MdExpandLess, MdExpandMore } from "react-icons/md";
 
@@ -36,6 +35,13 @@ interface PhaseConfigType {
   name: string;
   data: string;
   duration: string;
+}
+interface Pattern {
+  configuredPhases: any[];
+  blinkEnabled: boolean;
+  amberEnabled: boolean;
+  blinkTimeGreenToRed: number;
+  amberDurationGreenToRed: number;
 }
 
 const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
@@ -165,11 +171,19 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
   const handlePhasePreview = (phaseSignalString: string, phaseName: string) => {
     dispatch(setSignalString(phaseSignalString));
     dispatch(setSignalState());
+    dispatch(closePreviewCreatedPatternPhase());
+    dispatch(setIsIntersectionConfigurable(false));
     setActiveOrLastAddedPhase(phaseName);
   };
+
+  useEffect(() => {
+    dispatch(setIsIntersectionConfigurable(false));
+  }, [dispatch]);
+
   const handleCreatedPatternPhasePreview = (phase: any) => {
     if (activePreviewPhase === phase.name) {
       dispatch(closePreviewCreatedPatternPhase());
+
       setActivePreviewPhase(null);
     } else {
       if (activePreviewPhase) {
@@ -244,14 +258,12 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
     selectedPhases.every((phase) =>
       configuredPhases.some((p) => p.name === phase)
     );
+
   const handleCancel = () => {
     setShowAllAvailablePhases(false);
     setShowOtherPatternConfig(false);
     setSelectedPhases([]);
   };
-  useEffect(() => {
-    dispatch(setIsIntersectionConfigurable(false));
-  }, [dispatch]);
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -334,6 +346,203 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
       }
     },
   });
+
+  // Preview Pattern logic
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
+  const [activePatternIndex, setActivePatternIndex] = useState<number | null>(
+    null
+  );
+  const [remainingTime, setRemainingTime] = useState<number | null>(null);
+  const [activePatternPhases, setActivePatternPhases] = useState<any[]>([]);
+  const [intervalId, setIntervalId] = useState<ReturnType<
+    typeof setInterval
+  > | null>(null);
+
+  const startPlayPhases = (
+    pattern: Pattern,
+    startFromTime: number | null = null
+  ) => {
+    if (!isPlaying) {
+      setIsPlaying(true);
+
+      const startPhaseInterval = (
+        index: number,
+        initialTimeLeft: number | null = null
+      ) => {
+        const currentPhase = pattern.configuredPhases[index];
+        let timeLeft =
+          initialTimeLeft !== null ? initialTimeLeft : currentPhase.duration;
+
+        console.log(
+          "Start Playing",
+          pattern.configuredPhases,
+          currentPhase,
+          timeLeft
+        );
+
+        const showPhase = (
+          phase: any,
+          time: number,
+          isBlinking: boolean = false
+        ) => {
+          dispatch(
+            previewCreatedPatternPhase({
+              duration: time,
+              signalString: isBlinking
+                ? phase.signalString.replace(/G/g, "B")
+                : phase.signalString,
+            })
+          );
+        };
+
+        const blinkPhase = (phase: any, blinkTime: number) => {
+          console.log("Blink Phase", phase, blinkTime);
+          return new Promise<void>((resolve) => {
+            let blinkCount = blinkTime * 2; // Two blinks per second
+            const blinkInterval = setInterval(() => {
+              showPhase(phase, timeLeft, blinkCount % 2 === 0);
+              blinkCount--;
+              if (blinkCount <= 0) {
+                clearInterval(blinkInterval);
+                resolve();
+              }
+            }, 1000); // 1000ms for each blink state
+          });
+        };
+
+        const showAmber = (phase: any, amberDuration: number) => {
+          console.log("Show Amber", phase, amberDuration);
+          return new Promise<void>((resolve) => {
+            dispatch(
+              previewCreatedPatternPhase({
+                duration: amberDuration,
+                signalString: phase.signalString.replace(/G/g, "A"),
+              })
+            );
+            setTimeout(() => {
+              resolve();
+            }, amberDuration * 1000);
+          });
+        };
+
+        const runPhase = async () => {
+          showPhase(currentPhase, timeLeft);
+
+          const id = setInterval(async () => {
+            timeLeft -= 1;
+            setRemainingTime(timeLeft);
+
+            if (timeLeft <= 0) {
+              clearInterval(id);
+              setRemainingTime(null);
+
+              if (pattern.blinkEnabled && pattern.blinkTimeGreenToRed > 0) {
+                await blinkPhase(currentPhase, pattern.blinkTimeGreenToRed);
+              }
+
+              if (pattern.amberEnabled && pattern.amberDurationGreenToRed > 0) {
+                await showAmber(currentPhase, pattern.amberDurationGreenToRed);
+              }
+
+              const nextIndex =
+                index + 1 >= pattern.configuredPhases.length ? 0 : index + 1;
+              setCurrentPhaseIndex(nextIndex);
+              startPhaseInterval(nextIndex);
+            } else {
+              showPhase(currentPhase, timeLeft);
+            }
+          }, 1000);
+
+          setIntervalId(id);
+        };
+
+        runPhase();
+      };
+
+      startPhaseInterval(currentPhaseIndex, startFromTime);
+    }
+  };
+
+  const stopPlayPhases = () => {
+    console.log("Pause Playing");
+
+    if (isPlaying && intervalId) {
+      clearInterval(intervalId);
+      setIsPlaying(false);
+      setIntervalId(null);
+    }
+  };
+
+  const handlePlayPause = (pattern: Pattern, index: number) => {
+    if (activePatternIndex !== index) {
+      setActivePatternIndex(index);
+      setCurrentPhaseIndex(0);
+      setActivePatternPhases(pattern.configuredPhases);
+      setIsPlaying(true);
+      startPlayPhases(pattern);
+    } else {
+      if (isPlaying) {
+        stopPlayPhases();
+      } else {
+        startPlayPhases(pattern, remainingTime || undefined);
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+  const goToNextPhase = () => {
+    const nextIndex = (currentPhaseIndex + 1) % activePatternPhases.length;
+    setCurrentPhaseIndex(nextIndex);
+    const nextPhase = activePatternPhases[nextIndex];
+
+    if (intervalId) {
+      clearInterval(intervalId);
+      setIntervalId(null);
+    }
+
+    setRemainingTime(nextPhase.duration);
+    setIsPlaying(false);
+
+    dispatch(
+      previewCreatedPatternPhase({
+        duration: nextPhase.duration,
+        signalString: nextPhase.signalString,
+      })
+    );
+  };
+
+  const goToPrevPhase = () => {
+    const prevIndex =
+      (currentPhaseIndex - 1 + activePatternPhases.length) %
+      activePatternPhases.length;
+    setCurrentPhaseIndex(prevIndex);
+    const prevPhase = activePatternPhases[prevIndex];
+
+    if (intervalId) {
+      clearInterval(intervalId);
+      setIntervalId(null);
+    }
+
+    setRemainingTime(prevPhase.duration);
+    setIsPlaying(false);
+
+    dispatch(
+      previewCreatedPatternPhase({
+        duration: prevPhase.duration,
+        signalString: prevPhase.signalString,
+      })
+    );
+  };
+  const isCurrentPatternPlaying = (index: number) =>
+    activePatternIndex === index;
+
+  useEffect(() => {
+    return () => {
+      if (intervalId) {
+        clearTimeout(intervalId);
+      }
+    };
+  }, [intervalId]);
 
   return (
     <div className="boxTwo">
@@ -634,24 +843,42 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                   <h3>{pattern.name}</h3>
                   <div>
                     {/* Show More (Ellipsis) Button */}
-                    <button
-                      className={activeAction === "more" ? "active" : ""}
-                      onClick={() => {
-                        handleActionClick("more");
-                        handleSelectPattern(pattern, index);
-                      }}
-                    >
-                      {showPatternPhases === index ? (
+                    {showPatternPhases === index ? (
+                      <button
+                        className={
+                          activeAction === "more" || showPatternPhases === index
+                            ? "active"
+                            : ""
+                        }
+                        onClick={() => {
+                          handleActionClick("more");
+                          handleSelectPattern(pattern, index);
+                        }}
+                      >
                         <MdExpandLess />
-                      ) : (
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          handleActionClick("more");
+                          handleSelectPattern(pattern, index);
+                        }}
+                      >
                         <MdExpandMore />
-                      )}
-                    </button>
+                      </button>
+                    )}
+
                     {/* Previous Button */}
                     <button
-                      className={activeAction === "prev" ? "active" : ""}
+                      disabled={!isCurrentPatternPlaying(index)} // Only enable if this pattern is active
+                      className={
+                        activeAction === "prev" && showPatternPhases === index
+                          ? "active"
+                          : ""
+                      }
                       onClick={() => {
                         handleActionClick("prev");
+                        goToPrevPhase();
                       }}
                     >
                       <FaArrowLeft />
@@ -659,26 +886,46 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
 
                     {/* Play/Pause Button */}
                     <button
-                      className={activeAction === "play" ? "active" : ""}
+                      className={
+                        activeAction === "play" && showPatternPhases === index
+                          ? "active"
+                          : ""
+                      }
                       onClick={() => {
                         handleActionClick("play");
+                        handlePlayPause(pattern, index);
                       }}
                     >
-                      <FaPlay />
-                      {/* {showPatternPhases === index ? <FaPause /> : <FaPlay />} */}
+                      {isPlaying && activePatternIndex === index ? (
+                        <FaPause />
+                      ) : (
+                        <FaPlay />
+                      )}
                     </button>
+
                     {/* Next Button */}
                     <button
-                      className={activeAction === "next" ? "active" : ""}
+                      disabled={!isCurrentPatternPlaying(index)} // Only enable if this pattern is active
+                      className={
+                        activeAction === "next" && showPatternPhases === index
+                          ? "active"
+                          : ""
+                      }
                       onClick={() => {
                         handleActionClick("next");
+                        goToNextPhase();
                       }}
                     >
                       <FaArrowRight />
                     </button>
+
                     {/* Delete Button */}
                     <button
-                      className={activeAction === "delete" ? "active" : ""}
+                      className={
+                        activeAction === "delete" && showPatternPhases === index
+                          ? "active"
+                          : ""
+                      }
                       onClick={() => {
                         handleActionClick("delete");
                         handleDeletePattern(pattern.name);

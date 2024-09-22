@@ -95,6 +95,7 @@ const signalConfigSlice = createSlice({
       state.createdPatternPhasePreviewing.duration = null;
       state.signalString = "*NRRRRRERRRRRSRRRRRWRRRRR#";
       state.createdPatternPhasePreviewing.showDuration = false;
+      state.isIntersectionConfigurable = false;
     },
   },
 });

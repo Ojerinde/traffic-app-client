@@ -64,7 +64,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
   );
   useEffect(() => {
     dispatch(setIsIntersectionConfigurable(false));
-  }, [dispatch]);
+  }, [dispatch, isIntersectionConfigurable]);
 
   return (
     <section className="device">

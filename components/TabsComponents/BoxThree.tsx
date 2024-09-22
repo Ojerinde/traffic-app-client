@@ -160,7 +160,7 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
       endTime: Yup.string().required("End time is required"),
     }),
     onSubmit: (values: any) => {
-      console.log("B", configuredPatterns, patternToConfigure);
+      console.log("B", patternToConfigure);
 
       dispatch(
         addOrUpdatePatternConfig({
@@ -245,6 +245,7 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
       }
     },
   });
+  console.log("Groups", groups);
   return (
     <div className="newGroup">
       <div className="newGroup__buttons">

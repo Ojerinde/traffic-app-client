@@ -23,8 +23,8 @@ const IntersectionConfigurationPage: React.FC<
 
   useEffect(() => {
     dispatch(setSignalState());
-    dispatch(setIsIntersectionConfigurable(true));
   }, [dispatch, signalString]);
+
   return (
     <section className="intersectionConfigPage">
       <h2 className="intersectionConfigPage__header">Traffic Flow Design</h2>
