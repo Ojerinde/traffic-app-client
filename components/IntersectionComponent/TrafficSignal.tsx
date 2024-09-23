@@ -7,6 +7,7 @@ import { useAppSelector } from "@/hooks/reduxHook";
 
 type Direction = "N" | "E" | "S" | "W";
 type LightColor = "R" | "A" | "G" | "B";
+type PedestrianLightColor = "R" | "G" | "B";
 
 interface TrafficSignalProps {
   direction: Direction;
@@ -14,7 +15,7 @@ interface TrafficSignalProps {
   straight: LightColor;
   right: LightColor;
   bike: LightColor;
-  pedestrian: LightColor;
+  pedestrian: PedestrianLightColor;
   position: { top: number; left: number };
   orientation: "horizontal" | "vertical";
   pedestrianPosition: {
@@ -62,7 +63,7 @@ const SignalLight = styled.div<{ color: LightColor; editable: boolean }>`
 
 const PedestrianSignalLight = styled.div<{
   orientation: "horizontal" | "vertical";
-  color: LightColor;
+  color: PedestrianLightColor;
   editable: boolean;
 }>`
   width: 1rem;
@@ -73,15 +74,9 @@ const PedestrianSignalLight = styled.div<{
   font-size: 1.2rem;
   font-weight: 600;
   color: ${({ color }) =>
-    color === "R"
-      ? "red"
-      : color === "A"
-      ? "orange"
-      : color === "G"
-      ? "green"
-      : "black"};
+    color === "R" ? "red" : color === "G" ? "green" : "black"};
   transform: ${({ orientation }) =>
-    orientation === "horizontal" ? "rotate(0deg)" : "rotate(90deg)"};
+    orientation === "horizontal" ? "rotate(0deg)" : "rotate(0deg)"};
   cursor: ${({ editable }) => (editable ? "pointer" : "default")};
 `;
 

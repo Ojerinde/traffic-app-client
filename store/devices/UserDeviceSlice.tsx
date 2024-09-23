@@ -6,25 +6,21 @@ interface InitialStateTypes {
   devices: any[];
   phases: any[];
   patterns: any[];
-  groups: any[];
   configuredPatterns: any[];
   configuredPhases: any[];
   isFetchingDevices: boolean;
   isFetchingPhases: boolean;
   isFetchingPatterns: boolean;
-  isFetchingGroups: boolean;
 }
 const initialState: InitialStateTypes = {
   devices: [],
   phases: [],
   patterns: [],
-  groups: [],
   configuredPatterns: [],
   configuredPhases: [],
   isFetchingDevices: false,
   isFetchingPhases: false,
   isFetchingPatterns: false,
-  isFetchingGroups: false,
 };
 
 export const getUserDevice = createAsyncThunk(
@@ -69,74 +65,49 @@ export const getUserPattern = createAsyncThunk(
     }
   }
 );
-export const getUserGroup = createAsyncThunk(
-  "userDevice/getUserGroup",
-  async (email: string) => {
-    try {
-      const {
-        data: { data },
-      } = await HttpRequest.get(`/groups/${email}`);
-      // emitToastMessage("Your group(s) are fetched successfully", "success");
-      return data;
-    } catch (error: any) {
-      emitToastMessage(error?.response.data.message, "error");
-    }
-  }
-);
 
 const UserDeviceSlice = createSlice({
   name: "userDevice",
   initialState: initialState,
   reducers: {
     // Groups Tab
-    addOrUpdatePatternConfig: (state, action) => {
-      const { name, startTime, endTime } = action.payload;
-      const existingPattern = state.configuredPatterns.find(
-        (p) => p.name === name
-      );
 
-      if (existingPattern) {
-        existingPattern.startTime = startTime;
-        existingPattern.name = name;
-        existingPattern.endTime = endTime;
-      } else {
-        state.configuredPatterns.push({
-          name,
-          startTime,
-          endTime,
-        });
-      }
-    },
-    removePatternConfig: (state, action) => {
-      const patternNameToRemove = action.payload;
-      state.configuredPatterns = state.configuredPatterns.filter(
-        (pattern) => pattern.name !== patternNameToRemove
-      );
-    },
     // Patterns Tab
     addOrUpdatePhaseConfig: (state, action) => {
-      const { phaseId, name, signalString, duration } = action.payload;
+      const { id, name, signalString, duration } = action.payload;
       const existingPhase = state.configuredPhases.find(
-        (phase) => phase.phaseId === phaseId
+        (phase) => phase.id === id
       );
 
       if (existingPhase) {
         existingPhase.name = name;
         existingPhase.duration = duration;
+        emitToastMessage(
+          "Phase configuration has been updated successfully.",
+          "success"
+        );
       } else {
         state.configuredPhases.push({
-          phaseId,
+          id,
           name,
           duration,
           signalString,
         });
+        emitToastMessage(
+          "Phase configuration has been added successfully.",
+          "success"
+        );
       }
     },
+
     removePhaseConfig: (state, action) => {
-      const nameOfPhaseToRemove = action.payload;
+      const phaseIdToRemove = action.payload;
       state.configuredPhases = state.configuredPhases.filter(
-        (phase) =>
-          phase.name.toLowerCase() !== nameOfPhaseToRemove.toLowerCase()
+        (phase) => phase.phaseId !== phaseIdToRemove
+      );
+      emitToastMessage(
+        "Phase configuration has been removed successfully.",
+        "success"
       );
     },
   },
@@ -171,23 +142,9 @@ const UserDeviceSlice = createSlice({
       })
       .addCase(getUserPattern.rejected, (state) => {
         state.isFetchingPatterns = false;
-      })
-      .addCase(getUserGroup.pending, (state) => {
-        state.isFetchingGroups = true;
-      })
-      .addCase(getUserGroup.fulfilled, (state, action) => {
-        state.groups = action.payload.reverse();
-        state.isFetchingGroups = false;
-      })
-      .addCase(getUserGroup.rejected, (state) => {
-        state.isFetchingGroups = false;
       });
   },
 });
-export const {
-  addOrUpdatePatternConfig,
-  removePatternConfig,
-  addOrUpdatePhaseConfig,
-  removePhaseConfig,
-} = UserDeviceSlice.actions;
+export const { addOrUpdatePhaseConfig, removePhaseConfig } =
+  UserDeviceSlice.actions;
 export default UserDeviceSlice.reducer;

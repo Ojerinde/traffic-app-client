@@ -5,7 +5,7 @@ export interface SignalState {
   straight: "R" | "A" | "G" | "B";
   right: "R" | "A" | "G" | "B";
   bike: "R" | "G" | "A" | "B";
-  pedestrian: "R" | "G" | "A" | "B";
+  pedestrian: "R" | "G" | "B";
 }
 
 interface SignalConfigState {
@@ -41,7 +41,7 @@ const initializeSignals = (
       signals[direction].straight = signalBlock[2] as "R" | "A" | "G" | "B";
       signals[direction].right = signalBlock[3] as "R" | "A" | "G" | "B";
       signals[direction].bike = signalBlock[4] as "R" | "A" | "G" | "B";
-      signals[direction].pedestrian = signalBlock[5] as "R" | "A" | "G" | "B";
+      signals[direction].pedestrian = signalBlock[5] as "R" | "G" | "B";
     });
   }
 

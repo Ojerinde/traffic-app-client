@@ -31,7 +31,7 @@ import { MdExpandLess, MdExpandMore } from "react-icons/md";
 interface BoxTwoProps {}
 
 interface PhaseConfigType {
-  _id: string;
+  id: string;
   name: string;
   data: string;
   duration: string;
@@ -68,7 +68,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
   const [updatedPatternPhases, setUpdatedPatternPhases] = useState<any[]>([]);
 
   // Logic for adding new pattern
-  const [selectedPhases, setSelectedPhases] = useState<string[]>([]);
+  const [selectedPhases, setSelectedPhases] = useState<any[]>([]);
   const [phaseToConfigure, setPhaseToConfigure] =
     useState<PhaseConfigType | null>(null);
   const [activeOrLastAddedPhase, setActiveOrLastAddedPhase] =
@@ -144,19 +144,16 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
   };
 
   // Logic for creating a new pattern
-  const handlePhaseSelect = (phaseName: string) => {
+  const handlePhaseSelect = (phase: any) => {
     setSelectedPhases((prev) => {
-      const isPhaseSelected = prev.includes(phaseName);
-      const newSelectedPhases = isPhaseSelected
-        ? prev.filter((p) => p !== phaseName)
-        : [...prev, phaseName];
-
-      if (isPhaseSelected) {
-        dispatch(removePhaseConfig(phaseName));
-      }
-
-      return newSelectedPhases;
+      const newPhaseInstance = { ...phase, id: `${phase.name}-${Date.now()}` };
+      return [...prev, newPhaseInstance];
     });
+  };
+  const handleRemovePhaseFromSelectedPhases = (phaseId: string) => {
+    setSelectedPhases((prev) => prev.filter((phase) => phase.id !== phaseId));
+
+    dispatch(removePhaseConfig(phaseId));
   };
 
   const handleDragEndCreate = (result: any) => {
@@ -200,10 +197,10 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
   };
 
   // Logic for configuring a pattern
-  const handleConfigurePhase = (phaseName: string) => {
+  const handleConfigurePhase = (phaseId: string, phaseName: string) => {
     if (
       phaseToConfigure &&
-      phaseToConfigure.name !== phaseName &&
+      phaseToConfigure.id !== phaseId &&
       phaseFormik.dirty
     ) {
       const confirmSwitch = window.confirm(
@@ -212,14 +209,15 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
       if (!confirmSwitch) return;
     }
 
-    const phaseToConfig = phases.find((p) => p.name === phaseName);
-    if (phaseToConfig) {
-      setPhaseToConfigure(phaseToConfig);
+    const foundPhase = phases.find((p) => p.name === phaseName);
+
+    if (foundPhase) {
+      setPhaseToConfigure({ ...foundPhase, id: phaseId });
       phaseFormik.resetForm({
         values: {
           duration:
-            configuredPhases.find((p) => p.phaseId === phaseToConfig._id)
-              ?.duration || "",
+            configuredPhases.find((p) => p.id === foundPhase.id)?.duration ||
+            "",
         },
       });
     }
@@ -229,7 +227,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
     enableReinitialize: true,
     initialValues: {
       duration: phaseToConfigure
-        ? configuredPhases.find((p) => p.phaseId === phaseToConfigure._id)
+        ? configuredPhases.find((p) => p.id === phaseToConfigure.id)
             ?.duration || ""
         : "",
     },
@@ -241,13 +239,12 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
     onSubmit: async (values) => {
       if (phaseToConfigure) {
         const configToSave = {
-          phaseId: phaseToConfigure._id,
+          id: phaseToConfigure.id,
           name: phaseToConfigure.name,
           signalString: phaseToConfigure.data,
           duration: values.duration,
         };
         dispatch(addOrUpdatePhaseConfig(configToSave));
-        emitToastMessage("Phase configuration saved temporarily.", "success");
         setPhaseToConfigure(null);
       }
     },
@@ -490,6 +487,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
       setIsPlaying(!isPlaying);
     }
   };
+
   const goToNextPhase = () => {
     const nextIndex = (currentPhaseIndex + 1) % activePatternPhases.length;
     setCurrentPhaseIndex(nextIndex);
@@ -543,7 +541,6 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
       }
     };
   }, [intervalId]);
-
   return (
     <div className="boxTwo">
       {/* Logic to add a new pattern */}
@@ -578,15 +575,13 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                   >
                     Preview
                   </button>
-                  <button onClick={() => handlePhaseSelect(phase.name)}>
-                    {selectedPhases.includes(phase.name) ? "Remove" : "Add"}
-                  </button>
+                  <button onClick={() => handlePhaseSelect(phase)}>Add</button>
                 </div>
               </li>
             ))}
           </ul>
 
-          {/* Drag and drop for creating a new pattern */}
+          {/* Selected Phases Section */}
           {selectedPhases?.length > 0 && (
             <div className="patterns__selected">
               <p>
@@ -598,10 +593,10 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                 <Droppable droppableId="selected-phases">
                   {(provided) => (
                     <ul {...provided.droppableProps} ref={provided.innerRef}>
-                      {selectedPhases?.map((phaseName, index) => (
+                      {selectedPhases?.map((phaseInstance, index) => (
                         <Draggable
-                          key={phaseName}
-                          draggableId={phaseName}
+                          key={phaseInstance.id}
+                          draggableId={phaseInstance.id}
                           index={index}
                         >
                           {(provided) => (
@@ -611,10 +606,10 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                               {...provided.dragHandleProps}
                             >
                               <div className="row">
-                                <h3>{phaseName}</h3>
+                                <h3>{phaseInstance.name}</h3>
                                 <form onSubmit={phaseFormik.handleSubmit}>
                                   {phaseToConfigure &&
-                                  phaseToConfigure.name === phaseName ? (
+                                  phaseToConfigure.id === phaseInstance.id ? (
                                     <>
                                       <input
                                         id="duration"
@@ -637,13 +632,14 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                                   ) : (
                                     <>
                                       {configuredPhases.find(
-                                        (p) => p.name === phaseName
+                                        (p) => p.phaseId === phaseInstance.id
                                       )?.duration ? (
                                         <span>
                                           Dur:{" "}
                                           {
                                             configuredPhases.find(
-                                              (p) => p.name === phaseName
+                                              (p) =>
+                                                p.phaseId === phaseInstance.id
                                             )?.duration
                                           }
                                         </span>
@@ -651,11 +647,14 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                                       <button
                                         type="button"
                                         onClick={() =>
-                                          handleConfigurePhase(phaseName)
+                                          handleConfigurePhase(
+                                            phaseInstance.id,
+                                            phaseInstance.name
+                                          )
                                         }
                                       >
                                         {configuredPhases.find(
-                                          (p) => p.name === phaseName
+                                          (p) => p.phaseId === phaseInstance.id
                                         )?.duration
                                           ? "Edit Duration"
                                           : "Set Duration"}
@@ -663,6 +662,15 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                                     </>
                                   )}
                                 </form>
+                                <button
+                                  onClick={() =>
+                                    handleRemovePhaseFromSelectedPhases(
+                                      phaseInstance.id
+                                    )
+                                  }
+                                >
+                                  Remove
+                                </button>
                               </div>
                             </li>
                           )}

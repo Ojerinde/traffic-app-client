@@ -8,7 +8,6 @@ const Tabs: React.FC<TabsProps> = ({ currentStep, onChangeTab }) => {
     { step: 1, value: "Phases" },
     { step: 2, value: "Patterns" },
     { step: 3, value: "Time Segments" },
-    { step: 4, value: "Segment Plan" },
   ];
 
   return (
@@ -21,9 +20,7 @@ const Tabs: React.FC<TabsProps> = ({ currentStep, onChangeTab }) => {
           key={tab.step}
           onClick={() => onChangeTab(tab.step)}
         >
-          {/* <p>{tab.step}</p> */}
-          {/* {currentStep === tab.step && <span>{tab.value}</span>} */}
-          <span>{tab.value}</span>
+          {tab.value}
         </li>
       ))}
     </ul>

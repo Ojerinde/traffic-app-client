@@ -15,7 +15,7 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
   return (
     <section className="intersectionConfiguration">
       <div className="intersectionConfiguration__header">
-        <h2>Interface Configuration</h2>
+        <h2>Intersection Configuration</h2>
         <button
           type="button"
           onClick={() => router.push(`${pathname}/intersection_configuration`)}

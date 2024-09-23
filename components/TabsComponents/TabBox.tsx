@@ -11,8 +11,6 @@ const TabBox: React.FC<TabBoxProps> = ({ currentStep }) => {
       {currentStep === 1 && <BoxOne />}
       {currentStep === 2 && <BoxTwo />}
       {currentStep === 3 && <BoxThree />}
-      {currentStep === 4 && <div>Box 4</div>}
-      {currentStep === 5 && <div>Box 5</div>}
     </div>
   );
 };
