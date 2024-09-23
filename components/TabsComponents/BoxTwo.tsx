@@ -15,6 +15,7 @@ import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
 import { emitToastMessage } from "@/utils/toastFunc";
 import {
   addOrUpdatePhaseConfig,
+  clearPhaseConfig,
   getUserPattern,
   removePhaseConfig,
 } from "@/store/devices/UserDeviceSlice";
@@ -108,12 +109,11 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
     );
     if (!confirmResult) return;
     const pattern = patterns?.find((p) => p.name === patternName);
-    const patternId = pattern?._id;
 
     try {
       const email = GetItemFromLocalStorage("user").email;
       const { data } = await HttpRequest.delete(
-        `/patterns/${patternId}/${email}`
+        `/patterns/${pattern?.name}/${email}`
       );
       emitToastMessage(data.message, "success");
       dispatch(getUserPattern(email));
@@ -255,12 +255,6 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
     selectedPhases.every((phase) =>
       configuredPhases.some((p) => p.id === phase.id)
     );
-  console.log(
-    "allPhasesConfigured",
-    allPhasesConfigured,
-    configuredPhases.length,
-    selectedPhases.length
-  );
 
   const handleCancel = () => {
     setShowAllAvailablePhases(false);
@@ -340,6 +334,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
 
         emitToastMessage(data.message, "success");
         dispatch(getUserPattern(email));
+        dispatch(clearPhaseConfig());
         handleCancel();
       } catch (error: any) {
         emitToastMessage(

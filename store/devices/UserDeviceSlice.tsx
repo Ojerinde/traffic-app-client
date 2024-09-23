@@ -110,6 +110,9 @@ const UserDeviceSlice = createSlice({
         "success"
       );
     },
+    clearPhaseConfig: (state) => {
+      state.configuredPhases = [];
+    },
   },
   extraReducers(builder) {
     builder
@@ -145,6 +148,6 @@ const UserDeviceSlice = createSlice({
       });
   },
 });
-export const { addOrUpdatePhaseConfig, removePhaseConfig } =
+export const { addOrUpdatePhaseConfig, removePhaseConfig, clearPhaseConfig } =
   UserDeviceSlice.actions;
 export default UserDeviceSlice.reducer;
