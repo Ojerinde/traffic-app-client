@@ -6,7 +6,7 @@
 
 .schedule__table-wrapper {
   max-height: 70vh;
-  overflow-y: auto;
+  overflow-y: scroll;
   border: 1px solid #ccc;
 }
 
@@ -47,6 +47,14 @@
 .schedule__select {
   padding: 0.2rem;
   background-color: #fff;
+
+  &-field {
+    padding: 0.4rem 0;
+    margin: 0.5rem 0;
+    border: 0.1rem solid #ccc;
+    font-size: 1.2rem;
+    letter-spacing: 0.02rem;
+  }
 }
 
 .schedule__actions {
@@ -67,38 +75,37 @@
 }
 
 .schedule__button {
-  padding: 0.75rem 1.5rem;
+  color: $color-black-light;
+  border-radius: 0.5rem;
+  font-size: 1.2rem;
+  letter-spacing: 0.08rem;
+  padding: 0.6rem 0.8rem;
+  margin-left: 0.7rem;
   border: none;
-  border-radius: 0.25rem;
-  color: #fff;
   cursor: pointer;
-  font-size: 1rem;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
-}
+  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+  transition: all 0.3s;
 
-.schedule__button--blue {
-  background-color: #3498db;
-}
-
-.schedule__button--blue:hover {
-  background-color: #2980b9;
-}
-
-.schedule__button--red {
-  background-color: #e74c3c;
-}
-
-.schedule__button--red:hover {
-  background-color: #c0392b;
-}
-
-.schedule__button--green {
-  background-color: #2ecc71;
-}
-
-.schedule__button--green:hover {
-  background-color: #27ae60;
+  &:hover {
+    background-color: rgba($color-yellow, 0.8);
+    color: $color-white;
+  }
+  &:active {
+    background-color: rgba($color-yellow, 0.8);
+    box-shadow: rgba(0, 0, 0, 0.45) 0px 25px 20px -20px;
+    color: $color-white;
+  }
+  &.active {
+    background-color: rgba($color-yellow, 0.8);
+    box-shadow: rgba(0, 0, 0, 0.45) 0px 25px 20px -20px;
+    color: $color-white;
+  }
+  &:disabled {
+    cursor: not-allowed;
+    background-color: rgba($color-black-dark, 0.4);
+    color: $color-white;
+  }
 }
 
 .schedule__select-day {

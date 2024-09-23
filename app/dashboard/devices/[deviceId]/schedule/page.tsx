@@ -1,9 +1,11 @@
 "use client";
 import React, { useState, useCallback } from "react";
-import ScheduleSelectField, {
-  Option,
-} from "@/components/UI/SelectField/ScheduleSelectField";
 import { useAppSelector } from "@/hooks/reduxHook";
+
+interface Option {
+  value: string;
+  label: string;
+}
 
 interface ScheduleData {
   [day: string]: {
@@ -42,7 +44,7 @@ const ScheduleTemplate: React.FC = () => {
     value: pattern.name.toLowerCase(),
     label: pattern.name,
   }));
-
+  const [dayToClear, setDayToClear] = useState<string>("");
   const [schedule, setSchedule] = useState<ScheduleData>({});
   const [sourceDayToDuplicate, setSourceDayToDuplicate] =
     useState<string>("Monday");
@@ -50,7 +52,10 @@ const ScheduleTemplate: React.FC = () => {
     useState<string>("All");
 
   const handleChange = useCallback(
-    (day: string, time: string, selectedOption: Option | null) => {
+    (day: string, time: string, selectedValue: string) => {
+      const selectedOption =
+        patternsOptions.find((option) => option.value === selectedValue) ||
+        null;
       setSchedule((prevSchedule) => ({
         ...prevSchedule,
         [day]: {
@@ -59,7 +64,7 @@ const ScheduleTemplate: React.FC = () => {
         },
       }));
     },
-    []
+    [patternsOptions]
   );
 
   const duplicateDay = () => {
@@ -79,10 +84,10 @@ const ScheduleTemplate: React.FC = () => {
     });
   };
 
-  const clearDay = (day: string) => {
+  const clearDay = () => {
     setSchedule((prevSchedule) => {
       const newSchedule = { ...prevSchedule };
-      delete newSchedule[day];
+      delete newSchedule[dayToClear];
       return newSchedule;
     });
   };
@@ -92,7 +97,7 @@ const ScheduleTemplate: React.FC = () => {
   };
 
   const saveSchedule = () => {
-    console.log(schedule);
+    console.log("Schedule", schedule);
   };
 
   return (
@@ -117,14 +122,18 @@ const ScheduleTemplate: React.FC = () => {
                 <td className="schedule__time">{time}</td>
                 {daysOfWeek.map((day) => (
                   <td key={`${day}-${time}`} className="schedule__select">
-                    <ScheduleSelectField
-                      onChange={(selectedOption) =>
-                        handleChange(day, time, selectedOption)
-                      }
-                      value={schedule[day]?.[time] || null}
-                      options={patternsOptions}
-                      placeholder="Select"
-                    />
+                    <select
+                      onChange={(e) => handleChange(day, time, e.target.value)}
+                      value={schedule[day]?.[time]?.value || ""}
+                      className="schedule__select-field"
+                    >
+                      <option value="">Select</option>
+                      {patternsOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
                   </td>
                 ))}
               </tr>
@@ -167,9 +176,9 @@ const ScheduleTemplate: React.FC = () => {
         </div>
         <div className="schedule__clear-controls">
           <select
-            onChange={(e) => e.target.value && clearDay(e.target.value)}
-            value=""
+            value={dayToClear}
             className="schedule__select-day"
+            onChange={(e) => setDayToClear(e.target.value)}
           >
             <option value="">Select day to clear</option>
             {daysOfWeek.map((day) => (
@@ -178,6 +187,12 @@ const ScheduleTemplate: React.FC = () => {
               </option>
             ))}
           </select>
+          <button
+            onClick={clearDay}
+            className="schedule__button schedule__button--red"
+          >
+            Clear Day
+          </button>
           <button
             onClick={clearAllDays}
             className="schedule__button schedule__button--red"
