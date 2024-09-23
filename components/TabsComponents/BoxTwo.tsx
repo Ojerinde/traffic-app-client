@@ -253,8 +253,14 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
   const allPhasesConfigured =
     selectedPhases.length > 0 &&
     selectedPhases.every((phase) =>
-      configuredPhases.some((p) => p.name === phase)
+      configuredPhases.some((p) => p.id === phase.id)
     );
+  console.log(
+    "allPhasesConfigured",
+    allPhasesConfigured,
+    configuredPhases.length,
+    selectedPhases.length
+  );
 
   const handleCancel = () => {
     setShowAllAvailablePhases(false);
