@@ -27,7 +27,8 @@ import {
   FaArrowRight,
   FaArrowLeft,
 } from "react-icons/fa";
-import { MdExpandLess, MdExpandMore } from "react-icons/md";
+import { MdExpandLess, MdExpandMore, MdModeEdit } from "react-icons/md";
+import { IoDuplicate } from "react-icons/io5";
 
 interface BoxTwoProps {}
 
@@ -133,6 +134,29 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
   const editPatternHandler = async () => {
     console.log("Saving updated phases for a pattern", updatedPatternPhases);
     // Implement backend call here
+  };
+
+  const duplicatePatternHandler = async (patternName: string) => {
+    const newPatternName = prompt("Enter a name for the pattern");
+    const pattern = patterns.find((pattern) => pattern.name === patternName);
+    try {
+      const email = GetItemFromLocalStorage("user").email;
+      const { data } = await HttpRequest.post("/patterns", {
+        ...pattern,
+        email,
+        name: newPatternName,
+      });
+
+      emitToastMessage("Pattern duplicated successfully", "success");
+      dispatch(getUserPattern(email));
+      dispatch(clearPhaseConfig());
+      handleCancel();
+    } catch (error: any) {
+      emitToastMessage(
+        error?.response?.data?.message || "An error occurred",
+        "error"
+      );
+    }
   };
 
   const handleDragEndEdit = (result: any) => {
@@ -928,6 +952,22 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                       <FaArrowRight />
                     </button>
 
+                    {/* Duplicate Button */}
+                    <button
+                      className={
+                        activeAction === "duplicate" &&
+                        showPatternPhases === index
+                          ? "active"
+                          : ""
+                      }
+                      onClick={() => {
+                        handleActionClick("duplicate");
+                        duplicatePatternHandler(pattern.name);
+                      }}
+                    >
+                      <IoDuplicate />
+                    </button>
+
                     {/* Delete Button */}
                     <button
                       className={
@@ -949,7 +989,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                 {showPatternPhases === index && (
                   <ul className="patterns__phases">
                     <h2 className="patterns__phases--header">
-                      {pattern.name} phases{" "}
+                      {pattern.name} phases
                       <span
                         onClick={() =>
                           setPatternPhaseIsEditable(!patternPhaseIsEditable)

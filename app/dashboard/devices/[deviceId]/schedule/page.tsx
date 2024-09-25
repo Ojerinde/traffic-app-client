@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useCallback } from "react";
 import { useAppSelector } from "@/hooks/reduxHook";
+import Select, { ActionMeta, SingleValue } from "react-select";
 
 interface Option {
   value: string;
@@ -122,18 +123,27 @@ const ScheduleTemplate: React.FC = () => {
                 <td className="schedule__time">{time}</td>
                 {daysOfWeek.map((day) => (
                   <td key={`${day}-${time}`} className="schedule__select">
-                    <select
-                      onChange={(e) => handleChange(day, time, e.target.value)}
-                      value={schedule[day]?.[time]?.value || ""}
+                    <Select
+                      onChange={(
+                        newValue: SingleValue<string | Option>,
+                        actionMeta: ActionMeta<string | Option>
+                      ) => {
+                        const selectedValue =
+                          typeof newValue === "string"
+                            ? newValue
+                            : newValue?.value || "";
+                        handleChange(day, time, selectedValue);
+                      }}
+                      options={patternsOptions}
+                      value={
+                        patternsOptions.find(
+                          (option) =>
+                            option.value === schedule[day]?.[time]?.value
+                        ) || ""
+                      }
                       className="schedule__select-field"
-                    >
-                      <option value="">Select</option>
-                      {patternsOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
+                      isSearchable
+                    />
                   </td>
                 ))}
               </tr>
@@ -187,23 +197,14 @@ const ScheduleTemplate: React.FC = () => {
               </option>
             ))}
           </select>
-          <button
-            onClick={clearDay}
-            className="schedule__button schedule__button--red"
-          >
+          <button onClick={clearDay} className="schedule__button">
             Clear Day
           </button>
-          <button
-            onClick={clearAllDays}
-            className="schedule__button schedule__button--red"
-          >
+          <button onClick={clearAllDays} className="schedule__button">
             Clear All Days
           </button>
         </div>
-        <button
-          onClick={saveSchedule}
-          className="schedule__button schedule__button--green"
-        >
+        <button onClick={saveSchedule} className="schedule__button">
           Save Schedule
         </button>
       </div>

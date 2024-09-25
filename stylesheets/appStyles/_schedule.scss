@@ -5,7 +5,7 @@
 }
 
 .schedule__table-wrapper {
-  max-height: 50vh;
+  max-height: 55vh;
   overflow-y: scroll;
   border: 1px solid #ccc;
 }
@@ -53,11 +53,8 @@
 
   &-field {
     width: 100%;
-    padding: 0.4rem 0;
     margin: 0.5rem 0;
-    border: 0.1rem solid #ccc;
     font-size: 1.2rem;
-    letter-spacing: 0.02rem;
 
     &:focus {
       outline: none;
@@ -69,9 +66,9 @@
 .schedule__actions {
   margin-top: 1rem;
   display: flex;
-  flex-direction: column;
   align-items: flex-start;
   gap: 1rem;
+  font-size: 1.4rem;
 }
 
 .schedule__duplicate-controls,
@@ -81,14 +78,16 @@
   align-items: center;
   flex-wrap: wrap;
   justify-content: center;
+  border: 0.1px solid $color-white-dark;
+  padding: 0.2rem;
 }
 
 .schedule__button {
   color: $color-black-light;
   border-radius: 0.5rem;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   letter-spacing: 0.08rem;
-  padding: 0.6rem 0.8rem;
+  padding: 0.8rem 0.9rem;
   margin-left: 0.7rem;
   border: none;
   cursor: pointer;
@@ -121,7 +120,7 @@
   padding: 0.5rem;
   border-radius: 0.25rem;
   border: 1px solid #ccc;
-  font-size: 1rem;
+  font-size: 1.3rem;
 }
 
 @media (max-width: 1200px) {

@@ -10,6 +10,7 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
     pathname.slice(0, pathname.lastIndexOf("/")) + "/schedule";
   return (
     <div className="boxThree">
+      {/* */}
       <button onClick={() => router.push(newPathname)}>
         Go to schedule page
       </button>
