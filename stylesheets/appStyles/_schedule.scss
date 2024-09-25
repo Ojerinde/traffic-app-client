@@ -1,160 +1,130 @@
-.schedule__container {
-  padding: 1rem;
-  max-width: 100%;
-  overflow-x: auto;
-}
+.schedule {
+  &__container {
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+  }
 
-.schedule__table-wrapper {
-  max-height: 55vh;
-  overflow-y: scroll;
-  border: 1px solid #ccc;
-}
+  &__left {
+    flex-basis: 50%;
+  }
 
-.schedule__table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  table-layout: fixed;
-}
+  &__right {
+    flex-basis: 48%;
+  }
 
-.schedule__header,
-.schedule__time,
-.schedule__select {
-  text-align: center;
-  border: 1px solid #ccc;
-  min-width: 120px;
-}
+  &__controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 50;
+  }
 
-.schedule__header {
-  position: sticky;
-  top: 0;
-  background-color: #f0f0f0;
-  font-weight: bold;
-  font-size: 1.4rem;
-  color: $color-yellow-light;
-  z-index: 10;
-  padding: 1rem 0;
-}
+  &__select-field {
+    width: 200px;
+    z-index: 50;
+    font-size: 1.5rem;
+  }
 
-.schedule__time {
-  position: sticky;
-  left: 0;
-  background-color: #e0e0e0;
-  font-weight: bold;
-  font-size: 1.2rem;
-  z-index: 5;
-  color: $color-yellow-light;
-  padding: 0.2rem;
-}
+  &__datepicker {
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid #ccc;
+    font-size: 1.3rem;
+  }
 
-.schedule__select {
-  padding: 0.2rem;
-  background-color: #fff;
+  &__table-wrapper {
+    max-height: 55vh;
+    overflow-y: scroll;
+    border: 1px solid #ccc;
+    z-index: 1;
+  }
 
-  &-field {
+  &__table {
     width: 100%;
-    margin: 0.5rem 0;
-    font-size: 1.2rem;
+    border-collapse: separate;
+    border-spacing: 0;
+    // table-layout: fixed;
+  }
 
-    &:focus {
-      outline: none;
-      border-color: $color-yellow;
+  &__header,
+  &__time,
+  &__select {
+    text-align: center;
+    border: 1px solid #ccc;
+  }
+
+  &__header {
+    position: sticky;
+    top: 0;
+    background-color: #f0f0f0;
+    font-weight: bold;
+    font-size: 1.4rem;
+    color: $color-yellow-light;
+    z-index: 10;
+    padding: 1rem 0;
+  }
+
+  &__time {
+    background-color: #e0e0e0;
+    font-weight: bold;
+    font-size: 1.2rem;
+    z-index: 5;
+    color: $color-yellow-light;
+    padding: 0.2rem;
+    width: 80px;
+  }
+
+  &__select {
+    padding: 0.3rem;
+    background-color: #fff;
+    width: 200px;
+    z-index: 50;
+
+    &--field {
+      font-size: 1.2rem;
     }
   }
-}
 
-.schedule__actions {
-  margin-top: 1rem;
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  font-size: 1.4rem;
-}
+  &__actions {
+    margin-top: 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    font-size: 1.4rem;
+  }
 
-.schedule__duplicate-controls,
-.schedule__clear-controls {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  flex-wrap: wrap;
-  justify-content: center;
-  border: 0.1px solid $color-white-dark;
-  padding: 0.2rem;
-}
+  &__button {
+    color: $color-black-light;
+    border-radius: 0.5rem;
+    font-size: 1.4rem;
+    letter-spacing: 0.08rem;
+    padding: 0.8rem 0.9rem;
+    border: none;
+    cursor: pointer;
+    box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
+      rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+      rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+    transition: all 0.3s;
+  }
 
-.schedule__button {
-  color: $color-black-light;
-  border-radius: 0.5rem;
-  font-size: 1.4rem;
-  letter-spacing: 0.08rem;
-  padding: 0.8rem 0.9rem;
-  margin-left: 0.7rem;
-  border: none;
-  cursor: pointer;
-  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
-    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
-  transition: all 0.3s;
-
-  &:hover {
-    background-color: rgba($color-yellow, 0.8);
+  &__button:hover {
+    background-color: rgba($color-yellow, 0.8), 0.8;
     color: $color-white;
   }
-  &:active {
-    background-color: rgba($color-yellow, 0.8);
+
+  &__button:active,
+  .schedule__button.active {
+    background-color: rgba($color-yellow, 0.8), 0.8;
     box-shadow: rgba(0, 0, 0, 0.45) 0px 25px 20px -20px;
     color: $color-white;
   }
-  &.active {
-    background-color: rgba($color-yellow, 0.8);
-    box-shadow: rgba(0, 0, 0, 0.45) 0px 25px 20px -20px;
-    color: $color-white;
-  }
-  &:disabled {
+
+  &__button:disabled {
     cursor: not-allowed;
-    background-color: rgba($color-black-dark, 0.4);
+    background-color: rgba($color-black-dark, 0.8), 0.4;
     color: $color-white;
-  }
-}
-
-.schedule__select-day {
-  padding: 0.5rem;
-  border-radius: 0.25rem;
-  border: 1px solid #ccc;
-  font-size: 1.3rem;
-}
-
-@media (max-width: 1200px) {
-  .schedule__header,
-  .schedule__time,
-  .schedule__select {
-    font-size: 0.9rem;
-    padding: 0.4rem;
-    min-width: 100px;
-  }
-}
-
-@media (max-width: 768px) {
-  .schedule__header,
-  .schedule__time,
-  .schedule__select {
-    font-size: 0.8rem;
-    padding: 0.3rem;
-    min-width: 80px;
-  }
-
-  .schedule__duplicate-controls,
-  .schedule__clear-controls {
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
-
-@media (max-width: 480px) {
-  .schedule__header,
-  .schedule__time,
-  .schedule__select {
-    font-size: 0.7rem;
-    padding: 0.2rem;
-    min-width: 60px;
   }
 }

@@ -6,21 +6,25 @@ interface InitialStateTypes {
   devices: any[];
   phases: any[];
   patterns: any[];
+  plans: any[];
   configuredPatterns: any[];
   configuredPhases: any[];
   isFetchingDevices: boolean;
   isFetchingPhases: boolean;
   isFetchingPatterns: boolean;
+  isFetchingPlans: boolean;
 }
 const initialState: InitialStateTypes = {
   devices: [],
   phases: [],
   patterns: [],
+  plans: [],
   configuredPatterns: [],
   configuredPhases: [],
   isFetchingDevices: false,
   isFetchingPhases: false,
   isFetchingPatterns: false,
+  isFetchingPlans: false,
 };
 
 export const getUserDevice = createAsyncThunk(
@@ -65,6 +69,20 @@ export const getUserPattern = createAsyncThunk(
     }
   }
 );
+export const getUserPlan = createAsyncThunk(
+  "userDevice/getUserPlan",
+  async (email: string) => {
+    try {
+      const {
+        data: { data },
+      } = await HttpRequest.get(`/plans/${email}`);
+      // emitToastMessage("Your pattern(s) are fetched successfully", "success");
+      return data;
+    } catch (error: any) {
+      emitToastMessage(error?.response.data.message, "error");
+    }
+  }
+);
 
 const UserDeviceSlice = createSlice({
   name: "userDevice",
@@ -82,10 +100,10 @@ const UserDeviceSlice = createSlice({
       if (existingPhase) {
         existingPhase.name = name;
         existingPhase.duration = duration;
-        emitToastMessage(
-          "Phase configuration has been updated successfully.",
-          "success"
-        );
+        // emitToastMessage(
+        //   "Phase configuration has been updated successfully.",
+        //   "success"
+        // );
       } else {
         state.configuredPhases.push({
           id,
@@ -93,10 +111,10 @@ const UserDeviceSlice = createSlice({
           duration,
           signalString,
         });
-        emitToastMessage(
-          "Phase configuration has been added successfully.",
-          "success"
-        );
+        // emitToastMessage(
+        //   "Phase configuration has been added successfully.",
+        //   "success"
+        // );
       }
     },
 
@@ -145,7 +163,17 @@ const UserDeviceSlice = createSlice({
       })
       .addCase(getUserPattern.rejected, (state) => {
         state.isFetchingPatterns = false;
-      });
+      })
+      .addCase(getUserPlan.pending, (state) => {
+        state.isFetchingPlans = true;
+      })
+      .addCase(getUserPlan.fulfilled, (state, action) => {
+        state.plans = action.payload.plans.reverse();
+        state.isFetchingPlans = false;
+      })
+      .addCase(getUserPlan.rejected, (state) => {
+        state.isFetchingPlans = false;
+      })
   },
 });
 export const { addOrUpdatePhaseConfig, removePhaseConfig, clearPhaseConfig } =
