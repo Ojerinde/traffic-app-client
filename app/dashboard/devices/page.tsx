@@ -12,7 +12,8 @@ import { useAppSelector } from "@/hooks/reduxHook";
 import LoadingSpinner from "@/components/UI/LoadingSpinner/LoadingSpinner";
 import { useDeviceStatus } from "@/hooks/useDeviceStatus";
 
-export const getDeviceStatus = (statuses: any, deviceId: string) => {
+
+ const getDeviceStatus = (statuses: any, deviceId: string) => {
   const deviceStatus = statuses.find((status: any) => status.id === deviceId);
   return deviceStatus ? deviceStatus.status : false;
 };
