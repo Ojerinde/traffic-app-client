@@ -55,7 +55,7 @@ const SignalLight = styled.div<{ color: LightColor; editable: boolean }>`
       ? "orange"
       : color === "G"
       ? "green"
-      : "black"};
+      : "grey"};
   margin: 1px;
   border-radius: 50%;
   cursor: ${({ editable }) => (editable ? "pointer" : "default")};
@@ -74,7 +74,7 @@ const PedestrianSignalLight = styled.div<{
   font-size: 1.2rem;
   font-weight: 600;
   color: ${({ color }) =>
-    color === "R" ? "red" : color === "G" ? "green" : "black"};
+    color === "R" ? "red" : color === "G" ? "green" : "grey"};
   transform: ${({ orientation }) =>
     orientation === "horizontal" ? "rotate(0deg)" : "rotate(0deg)"};
   cursor: ${({ editable }) => (editable ? "pointer" : "default")};

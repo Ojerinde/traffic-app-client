@@ -258,10 +258,10 @@ const ScheduleTemplate: React.FC = () => {
         customDate:
           dayType.value === "custom" ? customDate || undefined : undefined,
       });
-
       emitToastMessage(data.message, "success");
       dispatch(getUserPlan(email));
       setSchedule({});
+      setSelectedPattern(null);
     } catch (error: any) {
       emitToastMessage(
         error?.response?.data?.message || "An error occurred",

@@ -1,4 +1,5 @@
 import { getWebSocket } from "@/app/dashboard/websocket";
+import { emitToastMessage } from "@/utils/toastFunc";
 import { useState, useEffect } from "react";
 
 interface DeviceStatus {
@@ -18,6 +19,15 @@ export const useDeviceStatus = () => {
       setStatuses((prevStatuses) => {
         const existingStatus = prevStatuses.find((s) => s.id === id);
         if (existingStatus) {
+          if (existingStatus.status !== status) {
+            // Trigger an alert when the status changes
+            emitToastMessage(
+              `Device ID: ${id} changed status to ${
+                status ? "Online" : "Offline"
+              }`,
+              "success"
+            );
+          }
           return prevStatuses.map((s) => (s.id === id ? { ...s, status } : s));
         } else {
           return [...prevStatuses, { id, status }];
@@ -34,10 +44,8 @@ export const useDeviceStatus = () => {
       ) {
         const deviceId = message.source.id;
 
-        // Set the device status to online
         updateDeviceStatus(deviceId, true);
 
-        // Clear the timeout and set a new one to mark the device as offline if no ping is received
         clearTimeout(timeoutMap[deviceId]);
         timeoutMap[deviceId] = setTimeout(() => {
           updateDeviceStatus(deviceId, false);

@@ -12,6 +12,11 @@ import { useAppSelector } from "@/hooks/reduxHook";
 import LoadingSpinner from "@/components/UI/LoadingSpinner/LoadingSpinner";
 import { useDeviceStatus } from "@/hooks/useDeviceStatus";
 
+export const getDeviceStatus = (statuses: any, deviceId: string) => {
+  const deviceStatus = statuses.find((status: any) => status.id === deviceId);
+  return deviceStatus ? deviceStatus.status : false;
+};
+
 const UserDevices = () => {
   const { devices, isFetchingDevices } = useAppSelector(
     (state) => state.userDevice
@@ -28,11 +33,6 @@ const UserDevices = () => {
   };
 
   if (isFetchingDevices) return <LoadingSpinner color="blue" height="big" />;
-
-  const getDeviceStatus = (deviceId: string) => {
-    const deviceStatus = statuses.find((status) => status.id === deviceId);
-    return deviceStatus ? deviceStatus.status : false;
-  };
 
   return (
     <aside>
@@ -75,7 +75,7 @@ const UserDevices = () => {
             </div>
             <p className="devices-item__status">
               Status:
-              {getDeviceStatus(device.deviceId) ? (
+              {getDeviceStatus(statuses, device.deviceId) ? (
                 <div className="devices_on">
                   <p>ON</p>
                 </div>
