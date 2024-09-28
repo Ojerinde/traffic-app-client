@@ -12,16 +12,14 @@ import { useAppSelector } from "@/hooks/reduxHook";
 import LoadingSpinner from "@/components/UI/LoadingSpinner/LoadingSpinner";
 import { useDeviceStatus } from "@/hooks/useDeviceStatus";
 import { getDeviceStatus } from "@/utils/misc";
-import { getWebSocket } from "../websocket";
+import { initializeWebSocket } from "../websocket";
 
 const UserDevices = () => {
   const { devices, isFetchingDevices } = useAppSelector(
     (state) => state.userDevice
   );
 
-  useEffect(() => {
-    getWebSocket();
-  }, []);
+  initializeWebSocket();
 
   const statuses = useDeviceStatus();
   console.log("Status for Device Page", statuses);

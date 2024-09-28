@@ -31,11 +31,12 @@ const initializeSignals = (
   };
 
   const trimmedString = signalString.slice(1, -1);
-  const signalBlocks = trimmedString.match(/.{6}/g);
-
+  const signalBlocks = trimmedString.match(/.{7}/g);
+  console.log("SignalBlocks Outside", signalBlocks);
   if (signalBlocks && signalBlocks.length === 4) {
     signalBlocks.forEach((signalBlock) => {
       const direction = signalBlock[0] as keyof typeof signals;
+      console.log("SignalBlocks Inside", signalBlock);
 
       signals[direction].left = signalBlock[1] as "R" | "A" | "G" | "X";
       signals[direction].straight = signalBlock[2] as "R" | "A" | "G" | "X";
@@ -71,13 +72,13 @@ const signalConfigSlice = createSlice({
       state.signals = initializeSignals(state.signalString);
     },
     setSignalStringToAllRed(state) {
-      state.signalString = "*NRRRRRERRRRRSRRRRRWRRRRR#";
+      state.signalString = "*NRRRRRRERRRRRRSRRRRRRWRRRRRR#";
     },
     setSignalStringToAllAmber(state) {
-      state.signalString = "*NAAAAAEAAAAASAAAAAWAAAAA#";
+      state.signalString = "*NAAAAAAEAAAAAASAAAAAAWAAAAAA#";
     },
     setSignalStringToAllBlank(state) {
-      state.signalString = "*NBBBBBEBBBBBSBBBBBWBBBBB#";
+      state.signalString = "*NXXXXXXEXXXXXXSXXXXXXWXXXXXX#";
     },
     allowConflictConfig(state, action: PayloadAction<boolean>) {
       state.allowConflictingConfig = action.payload;
@@ -93,7 +94,7 @@ const signalConfigSlice = createSlice({
     },
     closePreviewCreatedPatternPhase(state) {
       state.createdPatternPhasePreviewing.duration = null;
-      state.signalString = "*NRRRRRERRRRRSRRRRRWRRRRR#";
+      state.signalString = "*NRRRRRRERRRRRRSRRRRRRWRRRRRR#";
       state.createdPatternPhasePreviewing.showDuration = false;
       state.isIntersectionConfigurable = false;
     },
