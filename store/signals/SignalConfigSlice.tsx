@@ -79,7 +79,6 @@ const signalConfigSlice = createSlice({
     setSignalStringToAllBlank(state) {
       state.signalString = "*NBBBBBEBBBBBSBBBBBWBBBBB#";
     },
-
     allowConflictConfig(state, action: PayloadAction<boolean>) {
       state.allowConflictingConfig = action.payload;
     },

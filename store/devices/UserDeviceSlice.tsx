@@ -7,7 +7,6 @@ interface InitialStateTypes {
   phases: any[];
   patterns: any[];
   plans: any[];
-
   configuredPatterns: any[];
   configuredPhases: any[];
   isFetchingDevices: boolean;
@@ -18,13 +17,14 @@ interface InitialStateTypes {
     Bat: string;
     Temp: string;
     Rtc: string;
-    Id: string;
+    JunctionId: string;
   };
   activePhaseSignal: {
     Countdown: string;
     Phase: string;
   };
 }
+
 const initialState: InitialStateTypes = {
   devices: [],
   phases: [],
@@ -40,7 +40,7 @@ const initialState: InitialStateTypes = {
     Bat: "",
     Temp: "",
     Rtc: "",
-    Id: "",
+    JunctionId: "",
   },
   activePhaseSignal: {
     Countdown: "",

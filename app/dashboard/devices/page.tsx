@@ -19,6 +19,7 @@ const UserDevices = () => {
   );
 
   const statuses = useDeviceStatus();
+  console.log("Status for First Page", statuses);
 
   const pathname = usePathname();
   const router = useRouter();

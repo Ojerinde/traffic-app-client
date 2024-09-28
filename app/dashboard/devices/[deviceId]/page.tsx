@@ -65,7 +65,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
               Bat: "",
               Temp: "",
               Rtc: "",
-              Id: "",
+              JunctionId: "",
             })
           );
           emitToastMessage("Could not fetch device info data", "error");
@@ -136,7 +136,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
   const intersectionConfigItems: IntersectionConfigItem[] = [
     {
       label: "Intersection Name or ID",
-      value: currentDeviceInfoData?.Id || "Nill",
+      value: currentDeviceInfoData?.JunctionId || "Nill",
     },
     {
       label: "Active Plan",
