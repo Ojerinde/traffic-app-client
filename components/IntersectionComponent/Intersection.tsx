@@ -130,7 +130,7 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
   const handleSignalClick = (
     direction: "N" | "E" | "S" | "W",
     signalType: string,
-    color: "R" | "A" | "G" | "B"
+    color: "R" | "A" | "G" | "X"
   ) => {
     setSignals((prevSignals) =>
       prevSignals.map((signal) =>

@@ -18,10 +18,12 @@ interface InitialStateTypes {
     Temp: string;
     Rtc: string;
     JunctionId: string;
+    DeviceID: string;
   };
   activePhaseSignal: {
     Countdown: string;
     Phase: string;
+    DeviceID: string;
   };
 }
 
@@ -41,10 +43,12 @@ const initialState: InitialStateTypes = {
     Temp: "",
     Rtc: "",
     JunctionId: "",
+    DeviceID: "",
   },
   activePhaseSignal: {
     Countdown: "",
     Phase: "",
+    DeviceID: "",
   },
 };
 

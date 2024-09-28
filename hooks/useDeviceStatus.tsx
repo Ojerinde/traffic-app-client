@@ -20,7 +20,6 @@ export const useDeviceStatus = () => {
         const existingStatus = prevStatuses.find((s) => s.id === id);
         if (existingStatus) {
           if (existingStatus.status !== status) {
-            // Trigger an alert when the status changes
             emitToastMessage(
               `Device ID: ${id} changed status to ${
                 status ? "Online" : "Offline"

@@ -1,11 +1,11 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface SignalState {
-  left: "R" | "A" | "G" | "B";
-  straight: "R" | "A" | "G" | "B";
-  right: "R" | "A" | "G" | "B";
-  bike: "R" | "G" | "A" | "B";
-  pedestrian: "R" | "G" | "B";
+  left: "R" | "A" | "G" | "X";
+  straight: "R" | "A" | "G" | "X";
+  right: "R" | "A" | "G" | "X";
+  bike: "R" | "G" | "A" | "X";
+  pedestrian: "R" | "G" | "X";
 }
 
 interface SignalConfigState {
@@ -37,11 +37,11 @@ const initializeSignals = (
     signalBlocks.forEach((signalBlock) => {
       const direction = signalBlock[0] as keyof typeof signals;
 
-      signals[direction].left = signalBlock[1] as "R" | "A" | "G" | "B";
-      signals[direction].straight = signalBlock[2] as "R" | "A" | "G" | "B";
-      signals[direction].right = signalBlock[3] as "R" | "A" | "G" | "B";
-      signals[direction].bike = signalBlock[4] as "R" | "A" | "G" | "B";
-      signals[direction].pedestrian = signalBlock[5] as "R" | "G" | "B";
+      signals[direction].left = signalBlock[1] as "R" | "A" | "G" | "X";
+      signals[direction].straight = signalBlock[2] as "R" | "A" | "G" | "X";
+      signals[direction].right = signalBlock[3] as "R" | "A" | "G" | "X";
+      signals[direction].bike = signalBlock[4] as "R" | "A" | "G" | "X";
+      signals[direction].pedestrian = signalBlock[5] as "R" | "G" | "X";
     });
   }
 

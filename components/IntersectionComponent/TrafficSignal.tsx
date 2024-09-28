@@ -6,8 +6,8 @@ import { checkForConflicts } from "@/utils/conflictChecker";
 import { useAppSelector } from "@/hooks/reduxHook";
 
 type Direction = "N" | "E" | "S" | "W";
-type LightColor = "R" | "A" | "G" | "B";
-type PedestrianLightColor = "R" | "G" | "B";
+type LightColor = "R" | "A" | "G" | "X";
+type PedestrianLightColor = "R" | "G" | "X";
 
 interface TrafficSignalProps {
   direction: Direction;

@@ -12,14 +12,16 @@ import { useAppSelector } from "@/hooks/reduxHook";
 import LoadingSpinner from "@/components/UI/LoadingSpinner/LoadingSpinner";
 import { useDeviceStatus } from "@/hooks/useDeviceStatus";
 import { getDeviceStatus } from "@/utils/misc";
+import { getWebSocket } from "../websocket";
 
 const UserDevices = () => {
   const { devices, isFetchingDevices } = useAppSelector(
     (state) => state.userDevice
   );
+  getWebSocket();
 
   const statuses = useDeviceStatus();
-  console.log("Status for First Page", statuses);
+  console.log("Status for Device Page", statuses);
 
   const pathname = usePathname();
   const router = useRouter();

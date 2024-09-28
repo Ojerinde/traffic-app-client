@@ -11,7 +11,6 @@ export default function Layout({
   children: React.ReactNode;
 }>) {
   const router = useRouter();
-  const statuses = useDeviceStatus();
   return (
     <SendUserDeviceRequests>
       <div>
