@@ -75,7 +75,7 @@ const signalConfigSlice = createSlice({
       state.signalString = "*NRRRRRRERRRRRRSRRRRRRWRRRRRR#";
     },
     setSignalStringToAllAmber(state) {
-      state.signalString = "*NAAAAAAEAAAAAASAAAAAAWAAAAAA#";
+      state.signalString = "*NAAAAXXEAAAAXXSAAAAXXWAAAAXX#";
     },
     setSignalStringToAllBlank(state) {
       state.signalString = "*NXXXXXXEXXXXXXSXXXXXXWXXXXXX#";
