@@ -35,9 +35,7 @@ export interface IntersectionConfigItem {
 const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
   const dispatch = useAppDispatch();
 
-  useEffect(() => {
-    getWebSocket();
-  }, []);
+  getWebSocket();
 
   const statuses = useDeviceStatus();
 
@@ -78,6 +76,37 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
           // emitToastMessage("Device Info data fetched succesfully", "success");
         }
       }
+
+      let countdownInterval: ReturnType<typeof setInterval> | null = null;
+
+      // Function to handle the countdown logic
+      const startCountdown = (initialDuration: number) => {
+        let timeLeft = initialDuration;
+
+        countdownInterval = setInterval(() => {
+          if (timeLeft > 0) {
+            timeLeft -= 1;
+
+            // Dispatch the updated countdown
+            dispatch(
+              previewCreatedPatternPhase({
+                duration: timeLeft, // Decrease duration
+                signalString: feedback.payload.Phase, // Keep the phase same
+              })
+            );
+
+            // Optionally store the current signal state
+            dispatch(setSignalState());
+
+            // Log the time left for debugging purposes
+            console.log(`Countdown: ${timeLeft}`);
+          } else {
+            clearInterval(countdownInterval!);
+            countdownInterval = null;
+          }
+        }, 1000); // Update every second
+      };
+
       if (feedback.event === "sign_feedback") {
         if (feedback.payload.error) {
           dispatch(
@@ -89,13 +118,15 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
           emitToastMessage("Could not fetch device signal data", "error");
         } else {
           console.log("Phase Feedback", feedback.payload);
-          dispatch(
-            previewCreatedPatternPhase({
-              duration: feedback.payload.Countdown,
-              signalString: feedback.payload.Phase,
-            })
-          );
-          dispatch(setSignalState());
+          startCountdown(feedback.payload.Countdown);
+
+          // dispatch(
+          //   previewCreatedPatternPhase({
+          //     duration: feedback.payload.Countdown,
+          //     signalString: feedback.payload.Phase,
+          //   })
+          // );
+          // dispatch(setSignalState());
           dispatch(addCurrentDeviceSignalData(feedback.payload));
           // emitToastMessage("Device signal data fetched succesfully", "success");
         }

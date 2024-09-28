@@ -73,8 +73,7 @@ const PedestrianSignalLight = styled.div<{
   align-items: center;
   font-size: 1.2rem;
   font-weight: 600;
-  color: ${({ color }) =>
-    color === "R" ? "red" : color === "G" ? "green" : "grey"};
+  color: "white";
   transform: ${({ orientation }) =>
     orientation === "horizontal" ? "rotate(0deg)" : "rotate(0deg)"};
   cursor: ${({ editable }) => (editable ? "pointer" : "default")};
@@ -159,7 +158,13 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
                 position: "absolute",
                 top: pedestrianPosition.first.top,
                 left: pedestrianPosition.first.left,
-                backgroundColor: "#fff",
+                color: "white",
+                backgroundColor:
+                  pedestrian === "R"
+                    ? "red"
+                    : pedestrian === "G"
+                    ? "green"
+                    : "grey",
                 padding: ".5rem",
                 borderRadius: "50%",
               }}
@@ -179,7 +184,13 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
                 position: "absolute",
                 top: pedestrianPosition.second.top,
                 left: pedestrianPosition.second.left,
-                backgroundColor: "#fff",
+                color: "white",
+                backgroundColor:
+                  pedestrian === "R"
+                    ? "red"
+                    : pedestrian === "G"
+                    ? "green"
+                    : "grey",
                 padding: ".5rem",
                 borderRadius: "50%",
               }}
@@ -242,7 +253,13 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
                 position: "absolute",
                 top: pedestrianPosition.first.top,
                 left: pedestrianPosition.first.left,
-                backgroundColor: "#fff",
+                color: "white",
+                backgroundColor:
+                  pedestrian === "R"
+                    ? "red"
+                    : pedestrian === "G"
+                    ? "green"
+                    : "grey",
                 padding: ".5rem",
                 borderRadius: "50%",
               }}
@@ -262,7 +279,13 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
                 position: "absolute",
                 top: pedestrianPosition.second.top,
                 left: pedestrianPosition.second.left,
-                backgroundColor: "#fff",
+                color: "white",
+                backgroundColor:
+                  pedestrian === "R"
+                    ? "red"
+                    : pedestrian === "G"
+                    ? "green"
+                    : "grey",
                 padding: ".5rem",
                 borderRadius: "50%",
               }}

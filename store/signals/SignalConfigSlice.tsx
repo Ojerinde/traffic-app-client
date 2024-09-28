@@ -32,12 +32,9 @@ const initializeSignals = (
 
   const trimmedString = signalString.slice(1, -1);
   const signalBlocks = trimmedString.match(/.{7}/g);
-  console.log("SignalBlocks Outside", signalBlocks);
   if (signalBlocks && signalBlocks.length === 4) {
     signalBlocks.forEach((signalBlock) => {
       const direction = signalBlock[0] as keyof typeof signals;
-      console.log("SignalBlocks Inside", signalBlock);
-
       signals[direction].left = signalBlock[1] as "R" | "A" | "G" | "X";
       signals[direction].straight = signalBlock[2] as "R" | "A" | "G" | "X";
       signals[direction].right = signalBlock[3] as "R" | "A" | "G" | "X";
@@ -87,7 +84,6 @@ const signalConfigSlice = createSlice({
       state.isIntersectionConfigurable = action.payload;
     },
     previewCreatedPatternPhase(state, action) {
-      console.log("Action", action.payload);
       state.createdPatternPhasePreviewing.duration = action.payload.duration;
       state.signalString = action.payload.signalString;
       state.createdPatternPhasePreviewing.showDuration = true;

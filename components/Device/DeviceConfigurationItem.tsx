@@ -1,6 +1,6 @@
 import { DeviceConfigItem } from "@/app/dashboard/devices/[deviceId]/page";
 import { FaTemperatureHalf } from "react-icons/fa6";
-import { IoMdCalendar, IoMdCloseCircle } from "react-icons/io";
+import { IoMdCalendar, IoMdClock } from "react-icons/io";
 import { MdBatteryFull, MdOutlineWifiProtectedSetup } from "react-icons/md";
 
 interface DeviceConfigItemProps {
@@ -20,7 +20,7 @@ const DeviceConfigurationItem: React.FC<DeviceConfigItemProps> = ({ item }) => {
       Icon = <MdOutlineWifiProtectedSetup />;
       break;
     case "clock":
-      Icon = <IoMdCloseCircle />;
+      Icon = <IoMdClock />;
       break;
     case "temp":
       Icon = <FaTemperatureHalf />;
