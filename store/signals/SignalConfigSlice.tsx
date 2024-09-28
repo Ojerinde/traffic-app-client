@@ -87,6 +87,7 @@ const signalConfigSlice = createSlice({
       state.isIntersectionConfigurable = action.payload;
     },
     previewCreatedPatternPhase(state, action) {
+      console.log("Action", action.payload);
       state.createdPatternPhasePreviewing.duration = action.payload.duration;
       state.signalString = action.payload.signalString;
       state.createdPatternPhasePreviewing.showDuration = true;

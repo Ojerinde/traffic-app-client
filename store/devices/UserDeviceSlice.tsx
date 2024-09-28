@@ -7,18 +7,23 @@ interface InitialStateTypes {
   phases: any[];
   patterns: any[];
   plans: any[];
-  currentDeviceInfoData: {
-    Bat: string;
-    Temp: string;
-    Rtc: string;
-    Id: string;
-  };
+
   configuredPatterns: any[];
   configuredPhases: any[];
   isFetchingDevices: boolean;
   isFetchingPhases: boolean;
   isFetchingPatterns: boolean;
   isFetchingPlans: boolean;
+  currentDeviceInfoData: {
+    Bat: string;
+    Temp: string;
+    Rtc: string;
+    Id: string;
+  };
+  activePhaseSignal: {
+    Countdown: string;
+    Phase: string;
+  };
 }
 const initialState: InitialStateTypes = {
   devices: [],
@@ -27,16 +32,20 @@ const initialState: InitialStateTypes = {
   plans: [],
   configuredPatterns: [],
   configuredPhases: [],
+  isFetchingDevices: false,
+  isFetchingPhases: false,
+  isFetchingPatterns: false,
+  isFetchingPlans: false,
   currentDeviceInfoData: {
     Bat: "",
     Temp: "",
     Rtc: "",
     Id: "",
   },
-  isFetchingDevices: false,
-  isFetchingPhases: false,
-  isFetchingPatterns: false,
-  isFetchingPlans: false,
+  activePhaseSignal: {
+    Countdown: "",
+    Phase: "",
+  },
 };
 
 export const getUserDevice = createAsyncThunk(
@@ -143,6 +152,9 @@ const UserDeviceSlice = createSlice({
     addCurrentDeviceInfoData(state, action) {
       state.currentDeviceInfoData = action.payload;
     },
+    addCurrentDeviceSignalData(state, action) {
+      state.activePhaseSignal = action.payload;
+    },
   },
   extraReducers(builder) {
     builder
@@ -193,5 +205,6 @@ export const {
   removePhaseConfig,
   clearPhaseConfig,
   addCurrentDeviceInfoData,
+  addCurrentDeviceSignalData,
 } = UserDeviceSlice.actions;
 export default UserDeviceSlice.reducer;

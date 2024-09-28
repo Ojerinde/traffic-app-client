@@ -4,14 +4,20 @@ import DeviceConfiguration from "@/components/Device/DeviceConfiguration";
 import IntersectionConfiguration from "@/components/Device/IntersectionConfiguration";
 import FourWayIntersection from "@/components/IntersectionComponent/FourWayIntersection";
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
-import { setIsIntersectionConfigurable } from "@/store/signals/SignalConfigSlice";
+import {
+  previewCreatedPatternPhase,
+  setIsIntersectionConfigurable,
+  setSignalState,
+} from "@/store/signals/SignalConfigSlice";
 import { useEffect, useState } from "react";
 import { getWebSocket } from "../../websocket";
 import { emitToastMessage } from "@/utils/toastFunc";
 import { useDeviceStatus } from "@/hooks/useDeviceStatus";
-import { getDeviceStatus } from "../page";
-import { formatRtcDate, formatRtcTime } from "@/utils/misc";
-import { addCurrentDeviceInfoData } from "@/store/devices/UserDeviceSlice";
+import { formatRtcDate, formatRtcTime, getDeviceStatus } from "@/utils/misc";
+import {
+  addCurrentDeviceInfoData,
+  addCurrentDeviceSignalData,
+} from "@/store/devices/UserDeviceSlice";
 
 interface DeviceDetailsProps {
   params: any;
@@ -61,10 +67,32 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
               Id: "",
             })
           );
-          emitToastMessage("Could not fetch device info   data", "error");
+          emitToastMessage("Could not fetch device info data", "error");
         } else {
           dispatch(addCurrentDeviceInfoData(feedback.payload));
-          emitToastMessage("Device Info data fetched succesfully", "success");
+          // emitToastMessage("Device Info data fetched succesfully", "success");
+        }
+      }
+      if (feedback.event === "sign_feedback") {
+        if (feedback.payload.error) {
+          dispatch(
+            addCurrentDeviceSignalData({
+              Countdown: "",
+              Phase: "",
+            })
+          );
+          emitToastMessage("Could not fetch device signal data", "error");
+        } else {
+          console.log("Phase Feedback", feedback.payload);
+          dispatch(
+            previewCreatedPatternPhase({
+              duration: feedback.payload.Countdown,
+              signalString: feedback.payload.Phase,
+            })
+          );
+          dispatch(setSignalState());
+          dispatch(addCurrentDeviceSignalData(feedback.payload));
+          // emitToastMessage("Device signal data fetched succesfully", "success");
         }
       }
     };
@@ -90,12 +118,12 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
     {
       iconName: "temp",
       label: "Enclosed Temp.",
-      value: currentDeviceInfoData?.Temp || "Fetching",
+      value: currentDeviceInfoData?.Temp || "Nill",
     },
     {
       iconName: "battery-charging",
       label: "Battery Status",
-      value: `${currentDeviceInfoData?.Bat || "Fetching"}`,
+      value: `${currentDeviceInfoData?.Bat || "Nill"}`,
     },
     {
       iconName: "wifi",
@@ -107,7 +135,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
   const intersectionConfigItems: IntersectionConfigItem[] = [
     {
       label: "Intersection Name or ID",
-      value: currentDeviceInfoData?.Id,
+      value: currentDeviceInfoData?.Id || "Nill",
     },
     {
       label: "Active Plan",

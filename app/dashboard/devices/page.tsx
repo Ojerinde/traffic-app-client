@@ -11,12 +11,7 @@ import { RiCreativeCommonsZeroFill } from "react-icons/ri";
 import { useAppSelector } from "@/hooks/reduxHook";
 import LoadingSpinner from "@/components/UI/LoadingSpinner/LoadingSpinner";
 import { useDeviceStatus } from "@/hooks/useDeviceStatus";
-
-
- const getDeviceStatus = (statuses: any, deviceId: string) => {
-  const deviceStatus = statuses.find((status: any) => status.id === deviceId);
-  return deviceStatus ? deviceStatus.status : false;
-};
+import { getDeviceStatus } from "@/utils/misc";
 
 const UserDevices = () => {
   const { devices, isFetchingDevices } = useAppSelector(
