@@ -3,7 +3,7 @@
 import AddDeviceModal from "@/components/Modals/AddDeviceModal";
 import OverlayModal from "@/components/Modals/OverlayModal";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { BsDeviceSsd } from "react-icons/bs";
 import { RiCreativeCommonsZeroFill } from "react-icons/ri";
@@ -18,7 +18,10 @@ const UserDevices = () => {
   const { devices, isFetchingDevices } = useAppSelector(
     (state) => state.userDevice
   );
-  getWebSocket();
+
+  useEffect(() => {
+    getWebSocket();
+  }, []);
 
   const statuses = useDeviceStatus();
   console.log("Status for Device Page", statuses);

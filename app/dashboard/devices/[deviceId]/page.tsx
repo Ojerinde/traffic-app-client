@@ -34,7 +34,11 @@ export interface IntersectionConfigItem {
 
 const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
   const dispatch = useAppDispatch();
-  getWebSocket();
+
+  useEffect(() => {
+    getWebSocket();
+  }, []);
+
   const statuses = useDeviceStatus();
 
   const deviceId = params.deviceId;
