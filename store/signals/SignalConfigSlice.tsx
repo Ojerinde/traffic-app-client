@@ -72,13 +72,13 @@ const signalConfigSlice = createSlice({
       state.signals = initializeSignals(state.signalString);
     },
     setSignalStringToAllRed(state) {
-      state.signalString = "*NRRRRRERRRRRSRRRRRWRRRRR#";
+      state.signalString = "*NRRRRRRERRRRRRSRRRRRRWRRRRRR#";
     },
     setSignalStringToAllAmber(state) {
-      state.signalString = "*NAAAAXEAAAAXSAAAAXWAAAAX#";
+      state.signalString = "*NAAAAXXEAAAAXXSAAAAXXWAAAAXX#";
     },
     setSignalStringToAllBlank(state) {
-      state.signalString = "*NXXXXXEXXXXXSXXXXXWXXXXX#";
+      state.signalString = "*NXXXXXXEXXXXXXSXXXXXXWXXXXXX#";
     },
     allowConflictConfig(state, action: PayloadAction<boolean>) {
       state.allowConflictingConfig = action.payload;
@@ -94,7 +94,7 @@ const signalConfigSlice = createSlice({
     },
     closePreviewCreatedPatternPhase(state) {
       state.createdPatternPhasePreviewing.duration = null;
-      state.signalString = "*NRRRRRERRRRRSRRRRRWRRRRR#";
+      state.signalString = "*NRRRRRRERRRRRRSRRRRRRWRRRRRR#";
       state.createdPatternPhasePreviewing.showDuration = false;
       state.isIntersectionConfigurable = false;
     },
