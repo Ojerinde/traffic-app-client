@@ -112,6 +112,7 @@ const ScheduleTemplate: React.FC = () => {
       dispatch(addOrUpdatePhaseConfig(phase));
     });
   };
+
   const handleAvailablePhaseSelect = (phase: any) => {
     const updatedPhases = [
       ...updatedPatternPhases,
@@ -157,6 +158,7 @@ const ScheduleTemplate: React.FC = () => {
       });
     }
   };
+
   const phaseFormik = useFormik({
     enableReinitialize: true,
     initialValues: {
@@ -213,6 +215,7 @@ const ScheduleTemplate: React.FC = () => {
   const handleDateChange = (date: Date | null) => {
     setCustomDate(date);
   };
+
   const handleChange = useCallback(
     (time: string, selectedValue: string) => {
       const selectedOption =
@@ -225,6 +228,7 @@ const ScheduleTemplate: React.FC = () => {
     },
     [patterns, patternsOptions]
   );
+
   const handleDayTypeChange = (newValue: SingleValue<Option>) => {
     if (newValue) {
       setDayType(newValue);
@@ -233,20 +237,24 @@ const ScheduleTemplate: React.FC = () => {
       }
     }
   };
+
   const handlePlanChange = (newValue: SingleValue<Option>) => {
+    console.log("Plan Change", newValue);
     if (newValue) {
       setSelectedPlan(newValue);
-      const plan = plans.find((p) => p.id === newValue.value);
+      const plan = plans.find((plan) => plan.name === newValue.value);
+
       if (plan) {
-        setSchedule(plan.schedule);
-        setDayType(
-          dayTypeOptions.find((option) => option.value === plan.dayType) ||
-            dayTypeOptions[0]
-        );
-        setCustomDate(plan.customDate || null);
+        const fullSchedule: ScheduleData = {};
+        timeSegments.forEach((time) => {
+          fullSchedule[time] = plan.schedule[time] || null;
+        });
+
+        setSchedule(fullSchedule);
       }
     }
   };
+
   const saveSchedule = async () => {
     try {
       const { data } = await HttpRequest.post("/plans", {
@@ -269,6 +277,11 @@ const ScheduleTemplate: React.FC = () => {
       );
     }
   };
+  console.log("Plans", plans);
+
+  useEffect(() => {
+    dispatch(getUserPlan(email));
+  }, []);
 
   return (
     <div className="schedule__container">
@@ -325,11 +338,7 @@ const ScheduleTemplate: React.FC = () => {
                         handleSelectPattern(selectedValue);
                       }}
                       options={patternsOptions}
-                      value={
-                        patternsOptions.find(
-                          (option) => option.value === schedule[time]?.value
-                        ) || null
-                      }
+                      value={schedule[time] || null}
                       className="schedule__select--field"
                       placeholder="Select pattern"
                       isSearchable
