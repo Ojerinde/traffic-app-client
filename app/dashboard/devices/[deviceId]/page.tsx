@@ -56,6 +56,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
     // function to handle info data feedback
     const handleDataFeedback = (event: MessageEvent) => {
       const feedback = JSON.parse(event.data);
+      console.log("Feedback", feedback);
 
       if (feedback.event === "info_feedback") {
         if (feedback.payload.error) {
