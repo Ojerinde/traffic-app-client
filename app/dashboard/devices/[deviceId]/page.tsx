@@ -122,7 +122,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
     },
     {
       iconName: "temp",
-      label: "Enclosed Temp.",
+      label: "Enclosure Temp.",
       value: currentDeviceInfoData?.Temp || "Nill",
     },
     {

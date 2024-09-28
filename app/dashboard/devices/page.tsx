@@ -3,7 +3,7 @@
 import AddDeviceModal from "@/components/Modals/AddDeviceModal";
 import OverlayModal from "@/components/Modals/OverlayModal";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { BsDeviceSsd } from "react-icons/bs";
 import { RiCreativeCommonsZeroFill } from "react-icons/ri";
@@ -12,17 +12,16 @@ import { useAppSelector } from "@/hooks/reduxHook";
 import LoadingSpinner from "@/components/UI/LoadingSpinner/LoadingSpinner";
 import { useDeviceStatus } from "@/hooks/useDeviceStatus";
 import { getDeviceStatus } from "@/utils/misc";
-import { initializeWebSocket } from "../websocket";
+import { getWebSocket } from "../websocket";
 
 const UserDevices = () => {
   const { devices, isFetchingDevices } = useAppSelector(
     (state) => state.userDevice
   );
-
-  initializeWebSocket();
+  getWebSocket();
 
   const statuses = useDeviceStatus();
-  console.log("Status for Device Page", statuses);
+  console.log("Status for First Page", statuses);
 
   const pathname = usePathname();
   const router = useRouter();
