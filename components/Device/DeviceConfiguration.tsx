@@ -12,7 +12,6 @@ const DeviceConfiguration: React.FC<DeviceConfigurationProps> = ({
 }) => {
   const router = useRouter();
   const pathname = usePathname();
-  console.log(pathname);
   return (
     <section className="deviceConfiguration">
       <div className="deviceConfiguration__header">

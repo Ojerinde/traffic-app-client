@@ -7,7 +7,6 @@ export const useLogoutFunc = () => {
   const pathname = usePathname();
 
   const logout = (url: string) => {
-    console.log("pathname from logout", pathname);
     if (pathname.startsWith("/admin")) {
       removeItemFromCookie("adminToken");
       RemoveItemFromLocalStorage("adminUser");
