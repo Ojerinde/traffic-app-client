@@ -23,9 +23,20 @@ export function generatePhaseString(phaseData: PhaseData): string {
 
 export const formatRtcDate = (rtc: string | undefined) => {
   if (!rtc) return "Nill";
+
   const [day, month, yearTime] = rtc.split("-");
   const [year, time] = yearTime.split(" ");
-  return new Date(`${year}-${month}-${day}T${time}`).toLocaleDateString();
+
+  const date = new Date(`${year}-${month}-${day}T${time}`);
+
+  const formattedDate = date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    weekday: "long",
+  });
+
+  return formattedDate;
 };
 
 export const formatRtcTime = (rtc: string | undefined) => {

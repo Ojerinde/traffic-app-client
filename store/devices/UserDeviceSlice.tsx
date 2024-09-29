@@ -17,13 +17,18 @@ interface InitialStateTypes {
     Bat: string;
     Temp: string;
     Rtc: string;
-    JunctionId: string;
     DeviceID: string;
   };
   activePhaseSignal: {
     Countdown: string;
     Phase: string;
     DeviceID: string;
+  };
+  deviceActiveState: {
+    DeviceID: string;
+    Plan: string;
+    Period: string;
+    JunctionId: string;
   };
 }
 
@@ -42,13 +47,18 @@ const initialState: InitialStateTypes = {
     Bat: "",
     Temp: "",
     Rtc: "",
-    JunctionId: "",
     DeviceID: "",
   },
   activePhaseSignal: {
     Countdown: "",
     Phase: "",
     DeviceID: "",
+  },
+  deviceActiveState: {
+    DeviceID: "",
+    Plan: "",
+    Period: "",
+    JunctionId: "",
   },
 };
 
@@ -108,6 +118,20 @@ export const getUserPlan = createAsyncThunk(
   }
 );
 
+export const getUserDeviceActiveState = createAsyncThunk(
+  "userDevice/getUserDeviceActiveState",
+  async (deviceId: string) => {
+    try {
+      const {
+        data: { data },
+      } = await HttpRequest.get(`/activity/${deviceId}`);
+      return data;
+    } catch (error: any) {
+      emitToastMessage(error?.response.data.message, "error");
+    }
+  }
+);
+
 const UserDeviceSlice = createSlice({
   name: "userDevice",
   initialState: initialState,
@@ -159,6 +183,9 @@ const UserDeviceSlice = createSlice({
     addCurrentDeviceSignalData(state, action) {
       state.activePhaseSignal = action.payload;
     },
+    addCurrentDeviceStateData(state, action) {
+      state.deviceActiveState = action.payload;
+    },
   },
   extraReducers(builder) {
     builder
@@ -166,7 +193,7 @@ const UserDeviceSlice = createSlice({
         state.isFetchingDevices = true;
       })
       .addCase(getUserDevice.fulfilled, (state, action) => {
-        state.devices = action.payload.devices;
+        state.devices = action.payload?.devices;
         state.isFetchingDevices = false;
       })
       .addCase(getUserDevice.rejected, (state) => {
@@ -176,7 +203,7 @@ const UserDeviceSlice = createSlice({
         state.isFetchingPhases = true;
       })
       .addCase(getUserPhase.fulfilled, (state, action) => {
-        state.phases = action.payload.phases.reverse();
+        state.phases = action.payload?.phases.reverse();
         state.isFetchingPhases = false;
       })
       .addCase(getUserPhase.rejected, (state) => {
@@ -186,7 +213,7 @@ const UserDeviceSlice = createSlice({
         state.isFetchingPatterns = true;
       })
       .addCase(getUserPattern.fulfilled, (state, action) => {
-        state.patterns = action.payload.patterns.reverse();
+        state.patterns = action.payload?.patterns.reverse();
         state.isFetchingPatterns = false;
       })
       .addCase(getUserPattern.rejected, (state) => {
@@ -196,11 +223,14 @@ const UserDeviceSlice = createSlice({
         state.isFetchingPlans = true;
       })
       .addCase(getUserPlan.fulfilled, (state, action) => {
-        state.plans = action.payload.plans.reverse();
+        state.plans = action.payload?.plans.reverse();
         state.isFetchingPlans = false;
       })
       .addCase(getUserPlan.rejected, (state) => {
         state.isFetchingPlans = false;
+      })
+      .addCase(getUserDeviceActiveState.fulfilled, (state, action) => {
+        state.deviceActiveState = action.payload;
       });
   },
 });
@@ -210,5 +240,6 @@ export const {
   clearPhaseConfig,
   addCurrentDeviceInfoData,
   addCurrentDeviceSignalData,
+  addCurrentDeviceStateData,
 } = UserDeviceSlice.actions;
 export default UserDeviceSlice.reducer;

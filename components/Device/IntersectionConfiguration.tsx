@@ -3,6 +3,11 @@
 import { IntersectionConfigItem } from "@/app/dashboard/devices/[deviceId]/page";
 import { useRouter, usePathname } from "next/navigation";
 import IntersectionConfigurationItem from "./IntersectionConfigurationItem";
+import { useAppDispatch } from "@/hooks/reduxHook";
+import {
+  closePreviewCreatedPatternPhase,
+  previewCreatedPatternPhase,
+} from "@/store/signals/SignalConfigSlice";
 
 interface DeviceConfigurationProps {
   intersectionConfigItems: IntersectionConfigItem[];
@@ -12,13 +17,17 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
 }) => {
   const router = useRouter();
   const pathname = usePathname();
+  const dispatch = useAppDispatch();
+
   return (
     <section className="intersectionConfiguration">
       <div className="intersectionConfiguration__header">
         <h2>Intersection Configuration</h2>
         <button
           type="button"
-          onClick={() => router.push(`${pathname}/intersection_configuration`)}
+          onClick={() => {
+            router.push(`${pathname}/intersection_configuration`);
+          }}
         >
           Configure
         </button>

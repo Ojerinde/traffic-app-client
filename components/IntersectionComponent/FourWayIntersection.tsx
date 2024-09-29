@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import IntersectionDisplay from "./Intersection";
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
+import { usePathname } from "next/navigation";
+import { setIsIntersectionConfigurable } from "@/store/signals/SignalConfigSlice";
 
 const getPosition = (direction: "N" | "E" | "S" | "W") => {
   switch (direction) {
@@ -51,6 +53,7 @@ const getOrientation = (
 
 const FourWayIntersection = ({ editable }: { editable: boolean }) => {
   const dispatch = useAppDispatch();
+  const pathname = usePathname();
   const { signals: trafficSignals, createdPatternPhasePreviewing } =
     useAppSelector((state) => state.signalConfig);
 

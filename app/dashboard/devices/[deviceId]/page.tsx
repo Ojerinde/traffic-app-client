@@ -5,6 +5,7 @@ import IntersectionConfiguration from "@/components/Device/IntersectionConfigura
 import FourWayIntersection from "@/components/IntersectionComponent/FourWayIntersection";
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
 import {
+  closePreviewCreatedPatternPhase,
   previewCreatedPatternPhase,
   setIsIntersectionConfigurable,
   setSignalState,
@@ -17,6 +18,8 @@ import { formatRtcDate, formatRtcTime, getDeviceStatus } from "@/utils/misc";
 import {
   addCurrentDeviceInfoData,
   addCurrentDeviceSignalData,
+  addCurrentDeviceStateData,
+  getUserDeviceActiveState,
 } from "@/store/devices/UserDeviceSlice";
 
 interface DeviceDetailsProps {
@@ -41,12 +44,13 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
 
   const deviceId = params.deviceId;
   const icon = getDeviceStatus(statuses, deviceId) ? "ON" : "OFF";
-  console.log(deviceId, statuses, icon);
 
   const { isIntersectionConfigurable } = useAppSelector(
     (state) => state.signalConfig
   );
-  const { currentDeviceInfoData } = useAppSelector((state) => state.userDevice);
+  const { currentDeviceInfoData, deviceActiveState } = useAppSelector(
+    (state) => state.userDevice
+  );
 
   useEffect(() => {
     dispatch(setIsIntersectionConfigurable(false));
@@ -54,90 +58,111 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
 
   useEffect(() => {
     const socket = getWebSocket();
+    let countdownInterval: ReturnType<typeof setInterval> | null = null;
 
-    // function to handle info data feedback
+    const startCountdown = (initialDuration: number, signalString: string) => {
+      let timeLeft = initialDuration;
+
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+      }
+
+      countdownInterval = setInterval(() => {
+        if (timeLeft > 0) {
+          timeLeft -= 1;
+          dispatch(
+            previewCreatedPatternPhase({
+              duration: timeLeft,
+              signalString: signalString,
+            })
+          );
+          dispatch(setSignalState());
+        } else {
+          clearInterval(countdownInterval!);
+          countdownInterval = null;
+          dispatch(closePreviewCreatedPatternPhase());
+        }
+      }, 1000);
+    };
+
     const handleDataFeedback = (event: MessageEvent) => {
       const feedback = JSON.parse(event.data);
       console.log("Feedback", feedback);
 
-      if (feedback.event === "info_feedback") {
-        if (feedback.payload.error) {
-          dispatch(
-            addCurrentDeviceInfoData({
-              Bat: "",
-              Temp: "",
-              Rtc: "",
-              JunctionId: "",
-            })
-          );
-          emitToastMessage("Could not fetch device info data", "error");
-        } else {
-          dispatch(addCurrentDeviceInfoData(feedback.payload));
-          // emitToastMessage("Device Info data fetched succesfully", "success");
-        }
-      }
-
-      let countdownInterval: ReturnType<typeof setInterval> | null = null;
-
-      // Function to handle the countdown logic
-      const startCountdown = (initialDuration: number) => {
-        let timeLeft = initialDuration;
-
-        countdownInterval = setInterval(() => {
-          if (timeLeft > 0) {
-            timeLeft -= 1;
-
-            // Dispatch the updated countdown
+      switch (feedback.event) {
+        case "info_feedback":
+          if (feedback.payload.error) {
             dispatch(
-              previewCreatedPatternPhase({
-                duration: timeLeft, // Decrease duration
-                signalString: feedback.payload.Phase, // Keep the phase same
+              addCurrentDeviceInfoData({
+                Bat: "",
+                Temp: "",
+                Rtc: "",
+                DeviceID: "",
               })
             );
-
-            // Optionally store the current signal state
-            dispatch(setSignalState());
-
-            // Log the time left for debugging purposes
-            console.log(`Countdown: ${timeLeft}`);
+            emitToastMessage("Could not fetch device info data", "error");
           } else {
-            clearInterval(countdownInterval!);
+            dispatch(addCurrentDeviceInfoData(feedback.payload));
+          }
+          break;
+
+        case "sign_feedback":
+          if (countdownInterval) {
+            clearInterval(countdownInterval);
             countdownInterval = null;
           }
-        }, 1000); // Update every second
-      };
 
-      if (feedback.event === "sign_feedback") {
-        if (feedback.payload.error) {
-          dispatch(
-            addCurrentDeviceSignalData({
-              Countdown: "",
-              Phase: "",
-            })
-          );
-          emitToastMessage("Could not fetch device signal data", "error");
-        } else {
-          console.log("Phase Feedback", feedback.payload);
-          startCountdown(feedback.payload.Countdown);
+          if (feedback.payload.error) {
+            dispatch(
+              addCurrentDeviceSignalData({
+                Countdown: "",
+                Phase: "",
+                DeviceID: "",
+              })
+            );
+            emitToastMessage("Could not fetch device signal data", "error");
+          } else {
+            startCountdown(feedback.payload.Countdown, feedback.payload.Phase);
+            dispatch(addCurrentDeviceSignalData(feedback.payload));
+          }
+          break;
 
-          // dispatch(
-          //   previewCreatedPatternPhase({
-          //     duration: feedback.payload.Countdown,
-          //     signalString: feedback.payload.Phase,
-          //   })
-          // );
-          // dispatch(setSignalState());
-          dispatch(addCurrentDeviceSignalData(feedback.payload));
-          // emitToastMessage("Device signal data fetched succesfully", "success");
-        }
+        case "state_feedback":
+          if (feedback.payload.error) {
+            dispatch(
+              addCurrentDeviceStateData({
+                DeviceID: "",
+                Plan: "",
+                Period: "",
+                JunctionId: "",
+              })
+            );
+            emitToastMessage("Could not fetch device prog data", "error");
+          } else {
+            startCountdown(feedback.payload.Countdown, feedback.payload.Phase);
+            dispatch(addCurrentDeviceStateData(feedback.payload));
+          }
+          break;
+
+        default:
+          console.log("Unhandled event type:", feedback.event);
       }
     };
 
     socket?.addEventListener("message", handleDataFeedback);
 
     return () => {
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+      }
       socket?.removeEventListener("message", handleDataFeedback);
+      dispatch(closePreviewCreatedPatternPhase());
     };
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (!deviceActiveState?.JunctionId)
+      dispatch(getUserDeviceActiveState(params.deviceId));
   }, []);
 
   const deviceConfigItems: DeviceConfigItem[] = [
@@ -154,12 +179,16 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
     {
       iconName: "temp",
       label: "Enclosure Temp.",
-      value: currentDeviceInfoData?.Temp || "Nill",
+      value: currentDeviceInfoData?.Temp
+        ? `${currentDeviceInfoData.Temp}°C`
+        : "Nill",
     },
     {
       iconName: "battery-charging",
       label: "Battery Status",
-      value: `${currentDeviceInfoData?.Bat || "Nill"}`,
+      value: currentDeviceInfoData?.Bat
+        ? `${currentDeviceInfoData.Bat}V`
+        : "Nill",
     },
     {
       iconName: "wifi",
@@ -171,11 +200,15 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
   const intersectionConfigItems: IntersectionConfigItem[] = [
     {
       label: "Intersection Name",
-      value: currentDeviceInfoData?.JunctionId || "Nill",
+      value: deviceActiveState?.JunctionId || "Nill",
     },
     {
       label: "Active Plan",
-      value: "Weekday",
+      value: deviceActiveState?.Plan || "Nill",
+    },
+    {
+      label: "Period",
+      value: deviceActiveState?.Period || "Nill",
     },
   ];
 

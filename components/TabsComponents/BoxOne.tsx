@@ -27,7 +27,6 @@ const BoxOne: React.FC<BoxOneProps> = ({}) => {
   const [searchedResult, setSearchedResult] = useState<any[]>([]);
   const [showSearchedResult, setShowSearchedResult] = useState<boolean>(false);
   const [inputtedPhaseName, setInputtedPhaseName] = useState<string>("");
-
   const searchPhaseByName = (phaseName: string) => {
     const matchedPhases = phases.filter((phase) =>
       phase.name.toLowerCase().includes(phaseName.toLowerCase())
@@ -65,13 +64,12 @@ const BoxOne: React.FC<BoxOneProps> = ({}) => {
 
   useEffect(() => {
     dispatch(getUserPhase(email));
-    dispatch(closePreviewCreatedPatternPhase());
     dispatch(setIsIntersectionConfigurable(true));
   }, [dispatch]);
 
   return (
     <div className="boxOne">
-      {phases?.length > 0 ? (
+      {phases && phases?.length > 0 ? (
         <>
           <div className="phases__header">
             <h2>Available Phase(s)</h2>
@@ -159,7 +157,7 @@ const BoxOne: React.FC<BoxOneProps> = ({}) => {
           emitToastMessage("Signal configuration cleared", "success");
         }}
       />
-      {phases?.length == 0 ? (
+      {!phases || phases?.length === 0 ? (
         <p>
           To create a phase, configure each signal by toggling the corresponding
           lights. If a potential conflict arises, you will receive a
@@ -206,13 +204,13 @@ const BoxOne: React.FC<BoxOneProps> = ({}) => {
           </div>
         </div>
       )}
-      {phases?.length == 0 && (
+      {!phases || phases?.length === 0 ? (
         <p>
           Once you have completed the signal configuration, click on the add
           icon at the center of the intersection. You will be prompted to enter
           a name for the phase before submitting.
         </p>
-      )}
+      ) : null}
     </div>
   );
 };
