@@ -18,6 +18,7 @@ import { getUserPhase } from "@/store/devices/UserDeviceSlice";
 
 interface BoxOneProps {}
 const BoxOne: React.FC<BoxOneProps> = ({}) => {
+  const email = GetItemFromLocalStorage("user")?.email;
   const [checked, setChecked] = useState<number>(1);
   const { phases } = useAppSelector((state) => state.userDevice);
   const dispatch = useAppDispatch();
@@ -53,7 +54,6 @@ const BoxOne: React.FC<BoxOneProps> = ({}) => {
     const phaseId = phase?._id;
 
     try {
-      const email = GetItemFromLocalStorage("user").email;
       const { data } = await HttpRequest.delete(`/phases/${phaseId}/${email}`);
       emitToastMessage(data.message, "success");
       dispatch(getUserPhase(email));
@@ -64,6 +64,7 @@ const BoxOne: React.FC<BoxOneProps> = ({}) => {
   };
 
   useEffect(() => {
+    dispatch(getUserPhase(email));
     dispatch(closePreviewCreatedPatternPhase());
     dispatch(setIsIntersectionConfigurable(true));
   }, [dispatch]);

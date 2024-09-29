@@ -24,8 +24,8 @@ const SendUserDeviceRequests: React.FC<SendUserDeviceRequestsProps> = ({
   useEffect(() => {
     (async () => {
       dispatch(getUserDevice(user.email));
-      dispatch(getUserPhase(user.email));
-      dispatch(getUserPattern(user.email));
+      // dispatch(getUserPhase(user.email));
+      // dispatch(getUserPattern(user.email));
     })();
   }, [dispatch]);
 

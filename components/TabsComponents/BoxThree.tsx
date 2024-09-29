@@ -6,7 +6,7 @@ import HttpRequest from "@/store/services/HttpRequest";
 import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
 import { emitToastMessage } from "@/utils/toastFunc";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaTrashAlt } from "react-icons/fa";
 
 interface BoxThreeProps {}
@@ -44,12 +44,16 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
       emitToastMessage(error?.response.data.message, "error");
     }
   };
+  useEffect(() => {
+    dispatch(getUserPlan(email));
+  }, [dispatch]);
+
   return (
     <div className="boxThree">
       <div>
         {plans?.length > 0 ? (
           <>
-            <div className="patterns__header">
+            <div className="plans__header">
               <h2>Available Plan(s)</h2>
               <form
                 action=""
@@ -70,10 +74,10 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
                 />
               </form>
             </div>
-            <ul className="patterns">
+            <ul className="plans">
               {plansToShow?.map((plan, index) => (
-                <li className="patterns__list" key={index}>
-                  <div className="patterns__list--item">
+                <li className="plans__list" key={index}>
+                  <div className="plans__list--item">
                     <h3>{plan.name}</h3>
 
                     {/* Delete Button */}
@@ -90,8 +94,8 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
             </ul>
           </>
         ) : (
-          <div className="patterns__noPattern">
-            You have not created any pattern yet.
+          <div className="plans__noPlan">
+            You have not created any schedule yet.
           </div>
         )}
       </div>

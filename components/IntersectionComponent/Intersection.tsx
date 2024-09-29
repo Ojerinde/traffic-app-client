@@ -20,7 +20,6 @@ export interface Signal extends SignalState {
   };
   orientation: "horizontal" | "vertical";
 }
-
 interface IntersectionDisplayProps {
   initialSignals: Signal[];
   backgroundImage: string;
@@ -41,7 +40,6 @@ const Background = styled.div<{ $backgroundImage: string }>`
   background-size: cover;
   background-position: center;
 `;
-
 const PhaseContainer = styled.div`
   position: absolute;
   top: 1rem;
@@ -55,7 +53,6 @@ const PhaseContainer = styled.div`
   align-items: flex-start;
   gap: 0.6rem;
 `;
-
 const PhaseNameInput = styled.input`
   padding: 0.5rem;
   border: 0.1rem solid #ccc;
@@ -72,7 +69,6 @@ const PhaseNameInput = styled.input`
     border-color: #2a2a29;
   }
 `;
-
 const AddPhaseButton = styled.button`
   padding: 0.8rem 1rem;
   background-color: #514604;
@@ -152,21 +148,57 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
     setIsCreatingPhase(true);
     const user = GetItemFromLocalStorage("user");
     console.log("Sending Phase Data:", phaseName, user);
+
+    const getAdjacentPedestrianSignal = (
+      signals: Signal[],
+      direction: "N" | "E" | "S" | "W"
+    ): "R" | "G" | "X" => {
+      // Find the adjacent signal direction based on the current direction
+      let adjacentDirection: "N" | "E" | "S" | "W";
+
+      switch (direction) {
+        case "S":
+          adjacentDirection = "E";
+          break;
+        case "E":
+          adjacentDirection = "N";
+          break;
+        case "N":
+          adjacentDirection = "W";
+          break;
+        case "W":
+          adjacentDirection = "S";
+          break;
+        default:
+          adjacentDirection = "N";
+      }
+
+      // Find the signal with the adjacent direction and return its pedestrian signal
+      const adjacentSignal = signals.find(
+        (signal) => signal.direction === adjacentDirection
+      );
+
+      return adjacentSignal ? adjacentSignal.pedestrian : "X";
+    };
+
     try {
       const encodeSignals = () => {
         return (
           "*" +
           signals
             .map((signal) => {
-              return `${signal.direction}${signal.left}${signal.straight}${signal.right}${signal.bike}${signal.pedestrian}`;
+              const adjacentPedestrian = getAdjacentPedestrianSignal(
+                signals,
+                signal.direction
+              );
+
+              return `${signal.direction}${signal.left}${signal.straight}${signal.right}${signal.bike}${signal.pedestrian}${adjacentPedestrian}`;
             })
             .join("") +
           "#"
         );
       };
-
       const encodedSignals = encodeSignals();
-
       const { data } = await HttpRequest.post("/phases", {
         email: user.email,
         phaseName,

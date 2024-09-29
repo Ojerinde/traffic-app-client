@@ -185,6 +185,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
   };
 
   useEffect(() => {
+    dispatch(getUserPattern(email));
     dispatch(setIsIntersectionConfigurable(false));
   }, [dispatch]);
 
