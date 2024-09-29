@@ -94,7 +94,7 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
             </ul>
           </>
         ) : (
-          <div className="plans__noPlan">
+          <div className="plans__noPlans">
             You have not created any schedule yet.
           </div>
         )}

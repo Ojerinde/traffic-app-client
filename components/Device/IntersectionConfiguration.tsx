@@ -31,6 +31,10 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
           )
         )}
       </ul>
+      <div>
+        <h2>Intersection Commands Control</h2>
+        <p>The buttons comes here</p>
+      </div>
     </section>
   );
 };

@@ -170,16 +170,12 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
 
   const intersectionConfigItems: IntersectionConfigItem[] = [
     {
-      label: "Intersection Name or ID",
+      label: "Intersection Name",
       value: currentDeviceInfoData?.JunctionId || "Nill",
     },
     {
       label: "Active Plan",
       value: "Weekday",
-    },
-    {
-      label: "Selected Command",
-      value: "Auto",
     },
   ];
 

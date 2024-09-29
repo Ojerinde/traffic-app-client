@@ -147,7 +147,6 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
     }
     setIsCreatingPhase(true);
     const user = GetItemFromLocalStorage("user");
-    console.log("Sending Phase Data:", phaseName, user);
 
     const getAdjacentPedestrianSignal = (
       signals: Signal[],
