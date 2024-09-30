@@ -20,7 +20,7 @@ const IntersectionConfigurationPage: React.FC<
   const { signalString, isIntersectionConfigurable } = useAppSelector(
     (state) => state.signalConfig
   );
-  const { deviceActiveState } = useAppSelector((state) => state.userDevice);
+  const { deviceActiveProgData } = useAppSelector((state) => state.userDevice);
 
   useEffect(() => {
     dispatch(setSignalState());
@@ -29,7 +29,7 @@ const IntersectionConfigurationPage: React.FC<
   return (
     <section className="intersectionConfigPage">
       <h2 className="intersectionConfigPage__header">
-        {deviceActiveState.JunctionId}
+        {deviceActiveProgData.JunctionId}
       </h2>
       <div className="intersectionConfigPage__box">
         <div className="intersectionConfigPage__box--left">

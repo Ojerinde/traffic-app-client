@@ -18,9 +18,11 @@ import { formatRtcDate, formatRtcTime, getDeviceStatus } from "@/utils/misc";
 import {
   addCurrentDeviceInfoData,
   addCurrentDeviceSignalData,
-  addCurrentDeviceStateData,
-  getUserDeviceActiveState,
+  addCurrentDeviceProgData,
+  getUserdeviceActiveProgData,
+  getUserDeviceInfoData,
   updateDeviceAvailability,
+  addCurrentDeviceStateData,
 } from "@/store/devices/UserDeviceSlice";
 
 interface DeviceDetailsProps {
@@ -37,7 +39,12 @@ export interface IntersectionConfigItem {
 }
 
 const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
-  const { deviceAvailability } = useAppSelector((state) => state.userDevice);
+  const {
+    deviceAvailability,
+    currentDeviceInfoData,
+    deviceActiveProgData,
+    deviceActiveStateData,
+  } = useAppSelector((state) => state.userDevice);
   const dispatch = useAppDispatch();
 
   getWebSocket();
@@ -53,9 +60,6 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
 
   const { isIntersectionConfigurable } = useAppSelector(
     (state) => state.signalConfig
-  );
-  const { currentDeviceInfoData, deviceActiveState } = useAppSelector(
-    (state) => state.userDevice
   );
 
   useEffect(() => {
@@ -94,7 +98,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
 
     const handleDataFeedback = (event: MessageEvent) => {
       const feedback = JSON.parse(event.data);
-      if (feedback.event === "ping_feedback") return;
+      if (feedback.event === "ping_received") return;
 
       console.log("Feedback", feedback);
       // I will Set the status to off anytme I fetch the state and the device power is off
@@ -142,10 +146,10 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
           }
           break;
 
-        case "state_feedback":
+        case "prog_feedback":
           if (feedback.payload.error) {
             dispatch(
-              addCurrentDeviceStateData({
+              addCurrentDeviceProgData({
                 DeviceID: "",
                 Plan: "",
                 Period: "",
@@ -154,8 +158,27 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
             );
             emitToastMessage("Could not fetch device prog data", "error");
           } else {
-            startCountdown(feedback.payload.Countdown, feedback.payload.Phase);
-            dispatch(addCurrentDeviceStateData(feedback.payload));
+            dispatch(addCurrentDeviceProgData(feedback.payload));
+          }
+          break;
+
+        case "state_feedback":
+          if (feedback.payload.error) {
+            dispatch(
+              addCurrentDeviceStateData({
+                DeviceID: "",
+                Auto: false,
+                Power: false,
+                Manual: false,
+                Next: false,
+                Hold: false,
+                Reset: false,
+                Restart: false,
+              })
+            );
+            emitToastMessage("Could not fetch device prog data", "error");
+          } else {
+            dispatch(addCurrentDeviceProgData(feedback.payload));
           }
           break;
 
@@ -177,8 +200,21 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
 
   // Fetch Intersection Config Data
   useEffect(() => {
-    if (!deviceActiveState?.JunctionId)
-      dispatch(getUserDeviceActiveState(params.deviceId));
+    if (!deviceActiveProgData?.JunctionId) {
+      dispatch(getUserdeviceActiveProgData(params.deviceId));
+    }
+    if (!currentDeviceInfoData?.Rtc) {
+      dispatch(getUserDeviceInfoData(params.deviceId));
+    }
+    const socket = getWebSocket();
+
+    if (!deviceActiveStateData?.DeviceID) {
+      socket.send(
+        JSON.stringify({
+          event: "state_request",
+        })
+      );
+    }
   }, []);
 
   const deviceConfigItems: DeviceConfigItem[] = [
@@ -215,15 +251,15 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
   const intersectionConfigItems: IntersectionConfigItem[] = [
     {
       label: "Intersection Name",
-      value: deviceActiveState?.JunctionId || "Nill",
+      value: deviceActiveProgData?.JunctionId || "Nill",
     },
     {
       label: "Active Plan",
-      value: deviceActiveState?.Plan || "Nill",
+      value: deviceActiveProgData?.Plan || "Nill",
     },
     {
       label: "Period",
-      value: deviceActiveState?.Period || "Nill",
+      value: deviceActiveProgData?.Period || "Nill",
     },
   ];
 

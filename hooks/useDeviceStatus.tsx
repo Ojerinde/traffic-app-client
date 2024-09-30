@@ -1,6 +1,8 @@
 import { getWebSocket } from "@/app/dashboard/websocket";
+import { updateDeviceAvailability } from "@/store/devices/UserDeviceSlice";
 import { emitToastMessage } from "@/utils/toastFunc";
 import { useState, useEffect } from "react";
+import { useAppDispatch } from "./reduxHook";
 
 interface DeviceStatus {
   id: string;
@@ -9,7 +11,7 @@ interface DeviceStatus {
 
 export const useDeviceStatus = () => {
   const [statuses, setStatuses] = useState<DeviceStatus[]>([]);
-
+  const dispatch = useAppDispatch();
   useEffect(() => {
     const ws = getWebSocket();
 
@@ -48,6 +50,9 @@ export const useDeviceStatus = () => {
         clearTimeout(timeoutMap[deviceId]);
         timeoutMap[deviceId] = setTimeout(() => {
           updateDeviceStatus(deviceId, false);
+          dispatch(
+            updateDeviceAvailability({ DeviceID: deviceId, status: false })
+          );
         }, 12000);
       }
     };

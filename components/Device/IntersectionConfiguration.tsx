@@ -4,8 +4,14 @@ import { IntersectionConfigItem } from "@/app/dashboard/devices/[deviceId]/page"
 import { useRouter, usePathname } from "next/navigation";
 import IntersectionConfigurationItem from "./IntersectionConfigurationItem";
 import { useAppDispatch } from "@/hooks/reduxHook";
-import { setManualMode } from "@/store/signals/SignalConfigSlice";
+import {
+  closePreviewCreatedPatternPhase,
+  setManualMode,
+} from "@/store/signals/SignalConfigSlice";
 import { getWebSocket } from "@/app/dashboard/websocket";
+import HttpRequest from "@/store/services/HttpRequest";
+import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
+import { emitToastMessage } from "@/utils/toastFunc";
 
 interface DeviceConfigurationProps {
   intersectionConfigItems: IntersectionConfigItem[];
@@ -19,17 +25,33 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
   const pathname = usePathname();
   const dispatch = useAppDispatch();
 
-  const handleRequest = (action: string, additionalData: any = {}) => {
-    console.log(`Action: ${action}`, additionalData);
-    if (action === "manual") {
-      dispatch(setManualMode(true));
+  const handleRequest = async (action: string) => {
+    console.log(`Action: ${action}`);
+    const password = prompt("Please enter your password to proceed");
+
+    if (!password) return;
+
+    try {
+      await HttpRequest.post("/confirm-password", {
+        email: GetItemFromLocalStorage("user").email,
+        password,
+      });
+    } catch (error: any) {
+      emitToastMessage(error?.response.data.message, "error");
       return;
     }
+
+    if (action === "manual") {
+      dispatch(setManualMode(true));
+      dispatch(closePreviewCreatedPatternPhase());
+      return;
+    }
+
     const socket = getWebSocket();
     socket.send(
       JSON.stringify({
         event: "intersection_control_request",
-        payload: { action: action, deviceId, ...additionalData },
+        payload: { action: action, DeviceID: deviceId },
       })
     );
   };
