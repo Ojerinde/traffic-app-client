@@ -75,7 +75,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
       }
 
       countdownInterval = setInterval(() => {
-        if (timeLeft > -1) {
+        if (timeLeft > 0) {
           timeLeft -= 1;
           dispatch(
             previewCreatedPatternPhase({
@@ -96,7 +96,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
       const feedback = JSON.parse(event.data);
       if (feedback.event === "ping_feedback") return;
 
-      // console.log("Feedback", feedback);
+      console.log("Feedback", feedback);
       // I will Set the status to off anytme I fetch the state and the device power is off
       dispatch(
         updateDeviceAvailability({
