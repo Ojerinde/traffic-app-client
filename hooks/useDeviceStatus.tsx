@@ -56,12 +56,12 @@ export const useDeviceStatus = () => {
       ws.onmessage = handleWebSocketMessage;
     }
 
-    return () => {
-      if (ws) {
-        ws.close();
-      }
-      Object.values(timeoutMap).forEach(clearTimeout);
-    };
+    // return () => {
+    //   if (ws) {
+    //     ws.close();
+    //   }
+    //   Object.values(timeoutMap).forEach(clearTimeout);
+    // };
   }, []);
 
   return statuses;

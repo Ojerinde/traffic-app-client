@@ -39,7 +39,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
   const [deviceStatus, setDeviceStatus] = useState<boolean>(false);
   const dispatch = useAppDispatch();
 
-  const socket = getWebSocket();
+ getWebSocket();
 
   const statuses = useDeviceStatus();
 
@@ -168,20 +168,6 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
     if (!deviceActiveState?.JunctionId)
       dispatch(getUserDeviceActiveState(params.deviceId));
   }, []);
-
-  // Send request to fetch device info data
-  // useEffect(() => {
-  //   if (!currentDeviceInfoData?.Rtc && socket.OPEN) {
-  //     socket?.send(
-  //       JSON.stringify({
-  //         event: "info_request",
-  //         payload: {
-  //           DeviceID: params.deviceId,
-  //         },
-  //       })
-  //     );
-  //   }
-  // }, []);
 
   const deviceConfigItems: DeviceConfigItem[] = [
     {
