@@ -80,13 +80,13 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
       <div>
         <h2>Intersection Commands Control</h2>
         <div className="intersectionConfiguration__commands">
-          <button onClick={() => handleRequest("auto")}>Auto</button>
-          <button onClick={() => handleRequest("manual")}>Manual</button>
-          <button onClick={() => handleRequest("hold")}>Hold</button>
-          <button onClick={() => handleRequest("next")}>Next</button>
-          <button onClick={() => handleRequest("restart")}>Restart</button>
-          <button onClick={() => handleRequest("power")}>Power</button>
-          <button onClick={() => handleRequest("reset")}>Reset</button>
+          <button onClick={() => handleRequest("Auto")}>Auto</button>
+          <button onClick={() => handleRequest("Manual")}>Manual</button>
+          <button onClick={() => handleRequest("Hold")}>Hold</button>
+          <button onClick={() => handleRequest("Next")}>Next</button>
+          <button onClick={() => handleRequest("Restart")}>Restart</button>
+          <button onClick={() => handleRequest("Power")}>Power</button>
+          <button onClick={() => handleRequest("Reset")}>Reset</button>
         </div>
       </div>
     </section>
