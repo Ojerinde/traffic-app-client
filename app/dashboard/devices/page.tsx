@@ -15,13 +15,12 @@ import { getDeviceStatus } from "@/utils/misc";
 import { getWebSocket } from "../websocket";
 
 const UserDevices = () => {
-  const { devices, isFetchingDevices } = useAppSelector(
+  const { devices, isFetchingDevices, deviceAvailability } = useAppSelector(
     (state) => state.userDevice
   );
   getWebSocket();
 
   const statuses = useDeviceStatus();
-  console.log("Status for First Page", statuses);
 
   const pathname = usePathname();
   const router = useRouter();
@@ -74,7 +73,9 @@ const UserDevices = () => {
             </div>
             <p className="devices-item__status">
               Status:
-              {getDeviceStatus(statuses, device.deviceId) ? (
+              {getDeviceStatus(statuses, device.deviceId) ||
+              (deviceAvailability.Status &&
+                deviceAvailability.DeviceID === device.deviceId) ? (
                 <div className="devices_on">
                   <p>ON</p>
                 </div>

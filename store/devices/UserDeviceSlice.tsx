@@ -30,6 +30,10 @@ interface InitialStateTypes {
     Period: string;
     JunctionId: string;
   };
+  deviceAvailability: {
+    DeviceID: string;
+    Status: boolean;
+  };
 }
 
 const initialState: InitialStateTypes = {
@@ -59,6 +63,10 @@ const initialState: InitialStateTypes = {
     Plan: "",
     Period: "",
     JunctionId: "",
+  },
+  deviceAvailability: {
+    DeviceID: "",
+    Status: false,
   },
 };
 
@@ -186,6 +194,9 @@ const UserDeviceSlice = createSlice({
     addCurrentDeviceStateData(state, action) {
       state.deviceActiveState = action.payload;
     },
+    updateDeviceAvailability(state, action) {
+      state.deviceAvailability = action.payload;
+    },
   },
   extraReducers(builder) {
     builder
@@ -241,5 +252,6 @@ export const {
   addCurrentDeviceInfoData,
   addCurrentDeviceSignalData,
   addCurrentDeviceStateData,
+  updateDeviceAvailability,
 } = UserDeviceSlice.actions;
 export default UserDeviceSlice.reducer;

@@ -20,6 +20,7 @@ import {
   addCurrentDeviceSignalData,
   addCurrentDeviceStateData,
   getUserDeviceActiveState,
+  updateDeviceAvailability,
 } from "@/store/devices/UserDeviceSlice";
 
 interface DeviceDetailsProps {
@@ -36,16 +37,19 @@ export interface IntersectionConfigItem {
 }
 
 const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
-  const [deviceStatus, setDeviceStatus] = useState<boolean>(false);
+  const { deviceAvailability } = useAppSelector((state) => state.userDevice);
   const dispatch = useAppDispatch();
 
- getWebSocket();
+  getWebSocket();
 
   const statuses = useDeviceStatus();
 
   const deviceId = params.deviceId;
   const icon =
-    getDeviceStatus(statuses, deviceId) || deviceStatus ? "ON" : "OFF";
+    getDeviceStatus(statuses, deviceId) ||
+    (deviceAvailability.Status && deviceAvailability.DeviceID === deviceId)
+      ? "ON"
+      : "OFF";
 
   const { isIntersectionConfigurable } = useAppSelector(
     (state) => state.signalConfig
@@ -71,7 +75,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
       }
 
       countdownInterval = setInterval(() => {
-        if (timeLeft > 0) {
+        if (timeLeft > -1) {
           timeLeft -= 1;
           dispatch(
             previewCreatedPatternPhase({
@@ -90,8 +94,16 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
 
     const handleDataFeedback = (event: MessageEvent) => {
       const feedback = JSON.parse(event.data);
-      console.log("Feedback", feedback);
-      setDeviceStatus(true);
+      if (feedback.event === "ping_feedback") return;
+
+      // console.log("Feedback", feedback);
+      // I will Set the status to off anytme I fetch the state and the device power is off
+      dispatch(
+        updateDeviceAvailability({
+          DeviceID: feedback.payload.DeviceID,
+          Status: true,
+        })
+      );
       switch (feedback.event) {
         case "info_feedback":
           if (feedback.payload.error) {

@@ -22,7 +22,7 @@ export const useDeviceStatus = () => {
           if (existingStatus.status !== status) {
             emitToastMessage(
               `Device ID: ${id} changed status to ${
-                status ? "Online" : "Offline"
+                status === true ? "Online" : "Offline"
               }`,
               "success"
             );
