@@ -18,6 +18,7 @@ interface SignalConfigState {
     duration: number | null;
     showDuration: boolean;
   };
+  manualMode: boolean;
 }
 
 const initializeSignals = (
@@ -56,6 +57,7 @@ const initialConfig: SignalConfigState = {
     duration: null,
     showDuration: false,
   },
+  manualMode: false,
 };
 
 const signalConfigSlice = createSlice({
@@ -94,6 +96,9 @@ const signalConfigSlice = createSlice({
       state.createdPatternPhasePreviewing.showDuration = false;
       state.isIntersectionConfigurable = false;
     },
+    setManualMode(state, action: PayloadAction<boolean>) {
+      state.manualMode = action.payload;
+    },
   },
 });
 
@@ -107,5 +112,6 @@ export const {
   setIsIntersectionConfigurable,
   previewCreatedPatternPhase,
   closePreviewCreatedPatternPhase,
+  setManualMode,
 } = signalConfigSlice.actions;
 export default signalConfigSlice.reducer;

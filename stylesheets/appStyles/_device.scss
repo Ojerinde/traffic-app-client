@@ -151,4 +151,36 @@
       }
     }
   }
+  &__commands {
+    margin-top: 0.7rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    column-gap: 0.2rem;
+    row-gap: 0.6rem;
+    & button {
+      color: $color-black-light;
+      border-radius: 0.5rem;
+      font-size: 1.2rem;
+      letter-spacing: 0.08rem;
+      padding: 0.6rem 0.8rem;
+      margin-left: 0.7rem;
+      border: none;
+      cursor: pointer;
+      box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
+        rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+        rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+      transition: all 0.3s;
+
+      &:hover {
+        background-color: rgba($color-yellow, 0.8);
+        color: $color-white;
+      }
+      &:active {
+        background-color: rgba($color-yellow, 0.8);
+        box-shadow: rgba(0, 0, 0, 0.45) 0px 25px 20px -20px;
+        color: $color-white;
+      }
+    }
+  }
 }

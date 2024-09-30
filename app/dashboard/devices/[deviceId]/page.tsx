@@ -36,14 +36,16 @@ export interface IntersectionConfigItem {
 }
 
 const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
+  const [deviceStatus, setDeviceStatus] = useState<boolean>(false);
   const dispatch = useAppDispatch();
 
-  getWebSocket();
+  const socket = getWebSocket();
 
   const statuses = useDeviceStatus();
 
   const deviceId = params.deviceId;
-  const icon = getDeviceStatus(statuses, deviceId) ? "ON" : "OFF";
+  const icon =
+    getDeviceStatus(statuses, deviceId) || deviceStatus ? "ON" : "OFF";
 
   const { isIntersectionConfigurable } = useAppSelector(
     (state) => state.signalConfig
@@ -56,6 +58,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
     dispatch(setIsIntersectionConfigurable(false));
   }, [dispatch, isIntersectionConfigurable]);
 
+  // Fetch Device Config Data
   useEffect(() => {
     const socket = getWebSocket();
     let countdownInterval: ReturnType<typeof setInterval> | null = null;
@@ -88,7 +91,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
     const handleDataFeedback = (event: MessageEvent) => {
       const feedback = JSON.parse(event.data);
       console.log("Feedback", feedback);
-
+      setDeviceStatus(true);
       switch (feedback.event) {
         case "info_feedback":
           if (feedback.payload.error) {
@@ -160,10 +163,25 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
     };
   }, [dispatch]);
 
+  // Fetch Intersection Config Data
   useEffect(() => {
     if (!deviceActiveState?.JunctionId)
       dispatch(getUserDeviceActiveState(params.deviceId));
   }, []);
+
+  // Send request to fetch device info data
+  // useEffect(() => {
+  //   if (!currentDeviceInfoData?.Rtc && socket.OPEN) {
+  //     socket?.send(
+  //       JSON.stringify({
+  //         event: "info_request",
+  //         payload: {
+  //           DeviceID: params.deviceId,
+  //         },
+  //       })
+  //     );
+  //   }
+  // }, []);
 
   const deviceConfigItems: DeviceConfigItem[] = [
     {
@@ -196,7 +214,6 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
       value: icon,
     },
   ];
-
   const intersectionConfigItems: IntersectionConfigItem[] = [
     {
       label: "Intersection Name",
@@ -224,6 +241,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
         <div className="device__right--bottom">
           <IntersectionConfiguration
             intersectionConfigItems={intersectionConfigItems}
+            deviceId={params.deviceId}
           />
         </div>
       </div>

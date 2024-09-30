@@ -4,7 +4,6 @@ import React, { useEffect, useMemo } from "react";
 import IntersectionDisplay from "./Intersection";
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
 import { usePathname } from "next/navigation";
-import { setIsIntersectionConfigurable } from "@/store/signals/SignalConfigSlice";
 
 const getPosition = (direction: "N" | "E" | "S" | "W") => {
   switch (direction) {
@@ -54,8 +53,11 @@ const getOrientation = (
 const FourWayIntersection = ({ editable }: { editable: boolean }) => {
   const dispatch = useAppDispatch();
   const pathname = usePathname();
-  const { signals: trafficSignals, createdPatternPhasePreviewing } =
-    useAppSelector((state) => state.signalConfig);
+  const {
+    signals: trafficSignals,
+    createdPatternPhasePreviewing,
+    manualMode,
+  } = useAppSelector((state) => state.signalConfig);
 
   const signalsArray = useMemo(
     () =>
@@ -81,6 +83,7 @@ const FourWayIntersection = ({ editable }: { editable: boolean }) => {
         initialSignals={signalsArray}
         backgroundImage="/images/cross.png"
         editable={editable}
+        manualMode={manualMode}
         createdPatternPhasePreviewing={createdPatternPhasePreviewing}
       />
     </div>

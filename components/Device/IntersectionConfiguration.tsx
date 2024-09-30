@@ -4,20 +4,35 @@ import { IntersectionConfigItem } from "@/app/dashboard/devices/[deviceId]/page"
 import { useRouter, usePathname } from "next/navigation";
 import IntersectionConfigurationItem from "./IntersectionConfigurationItem";
 import { useAppDispatch } from "@/hooks/reduxHook";
-import {
-  closePreviewCreatedPatternPhase,
-  previewCreatedPatternPhase,
-} from "@/store/signals/SignalConfigSlice";
+import { setManualMode } from "@/store/signals/SignalConfigSlice";
+import { getWebSocket } from "@/app/dashboard/websocket";
 
 interface DeviceConfigurationProps {
   intersectionConfigItems: IntersectionConfigItem[];
+  deviceId: string;
 }
 const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
   intersectionConfigItems,
+  deviceId,
 }) => {
   const router = useRouter();
   const pathname = usePathname();
   const dispatch = useAppDispatch();
+
+  const handleRequest = (action: string, additionalData: any = {}) => {
+    console.log(`Action: ${action}`, additionalData);
+    if (action === "manual") {
+      dispatch(setManualMode(true));
+      return;
+    }
+    const socket = getWebSocket();
+    socket.send(
+      JSON.stringify({
+        event: "intersection_control_request",
+        payload: { action: action, deviceId, ...additionalData },
+      })
+    );
+  };
 
   return (
     <section className="intersectionConfiguration">
@@ -42,7 +57,15 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
       </ul>
       <div>
         <h2>Intersection Commands Control</h2>
-        <p>The buttons comes here</p>
+        <div className="intersectionConfiguration__commands">
+          <button onClick={() => handleRequest("auto")}>Auto</button>
+          <button onClick={() => handleRequest("manual")}>Manual</button>
+          <button onClick={() => handleRequest("hold")}>Hold</button>
+          <button onClick={() => handleRequest("next")}>Next</button>
+          <button onClick={() => handleRequest("restart")}>Restart</button>
+          <button onClick={() => handleRequest("power")}>Power</button>
+          <button onClick={() => handleRequest("reset")}>Reset</button>
+        </div>
       </div>
     </section>
   );

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import TrafficSignal from "./TrafficSignal";
 import { IoMdAddCircle } from "react-icons/io";
+import { IoCheckmarkDoneCircleSharp } from "react-icons/io5";
 import { motion } from "framer-motion";
 import HttpRequest from "@/store/services/HttpRequest";
 import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
@@ -9,7 +10,7 @@ import { emitToastMessage } from "@/utils/toastFunc";
 import { MdCancel } from "react-icons/md";
 import { getUserPhase } from "@/store/devices/UserDeviceSlice";
 import { useAppDispatch } from "@/hooks/reduxHook";
-import { SignalState } from "@/store/signals/SignalConfigSlice";
+import { setManualMode, SignalState } from "@/store/signals/SignalConfigSlice";
 
 export interface Signal extends SignalState {
   direction: "N" | "E" | "S" | "W";
@@ -28,6 +29,7 @@ interface IntersectionDisplayProps {
     duration: number | null;
     showDuration: boolean;
   };
+  manualMode: boolean;
 }
 
 const Background = styled.div<{ $backgroundImage: string }>`
@@ -92,6 +94,16 @@ const AddPhaseIcon = styled(motion.div)`
   cursor: pointer;
   border-radius: 50%;
 `;
+const AddManualIcon = styled(motion.div)`
+  position: absolute;
+  top: 44.4%;
+  left: 45%;
+  color: black;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+`;
+
 const DurationDisplay = styled.div`
   position: absolute;
   top: 44.4%;
@@ -110,6 +122,7 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
   initialSignals,
   backgroundImage,
   editable,
+  manualMode,
   createdPatternPhasePreviewing,
 }) => {
   const [signals, setSignals] = useState<Signal[]>(initialSignals);
@@ -215,6 +228,65 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
       setIsCreatingPhase(false);
     }
   };
+
+  const handleManualPhase = async () => {
+    const user = GetItemFromLocalStorage("user");
+
+    const getAdjacentPedestrianSignal = (
+      signals: Signal[],
+      direction: "N" | "E" | "S" | "W"
+    ): "R" | "G" | "X" => {
+      let adjacentDirection: "N" | "E" | "S" | "W";
+
+      switch (direction) {
+        case "S":
+          adjacentDirection = "E";
+          break;
+        case "E":
+          adjacentDirection = "N";
+          break;
+        case "N":
+          adjacentDirection = "W";
+          break;
+        case "W":
+          adjacentDirection = "S";
+          break;
+        default:
+          adjacentDirection = "N";
+      }
+
+      const adjacentSignal = signals.find(
+        (signal) => signal.direction === adjacentDirection
+      );
+
+      return adjacentSignal ? adjacentSignal.pedestrian : "X";
+    };
+
+    const encodeSignals = () => {
+      return (
+        "*" +
+        signals
+          .map((signal) => {
+            const adjacentPedestrian = getAdjacentPedestrianSignal(
+              signals,
+              signal.direction
+            );
+
+            return `${signal.direction}${signal.left}${signal.straight}${signal.right}${signal.bike}${signal.pedestrian}${adjacentPedestrian}`;
+          })
+          .join("") +
+        "#"
+      );
+    };
+    const encodedSignals = encodeSignals();
+    const promptResult = prompt(
+      `Enter the duration in seconds for ${encodedSignals} phase`
+    );
+    // Send a webscoket event to the device to start the phase
+    // Listen for web scoket feedback from the device
+    dispatch(setManualMode(false));
+  };
+
   return (
     <Background $backgroundImage={backgroundImage}>
       {signals.map((signal) => (
@@ -222,6 +294,7 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
           key={signal.direction}
           {...signal}
           editable={editable}
+          manualMode={manualMode}
           onSignalClick={(direction, signalType, color) =>
             handleSignalClick(direction, signalType, color)
           }
@@ -241,6 +314,16 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
             <MdCancel size={52} />
           )}
         </AddPhaseIcon>
+      )}
+      {manualMode && (
+        <AddManualIcon
+          whileHover={{ scale: 1.2 }}
+          whileTap={{ scale: 0.9 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          onClick={handleManualPhase}
+        >
+          <IoCheckmarkDoneCircleSharp size={52} />
+        </AddManualIcon>
       )}
       {createdPatternPhasePreviewing.showDuration &&
         createdPatternPhasePreviewing.duration !== null && (
