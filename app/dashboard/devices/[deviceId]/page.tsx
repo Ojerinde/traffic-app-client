@@ -212,6 +212,9 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
       socket.send(
         JSON.stringify({
           event: "state_request",
+          payload: {
+            DeviceID: params.deviceId,
+          },
         })
       );
     }
