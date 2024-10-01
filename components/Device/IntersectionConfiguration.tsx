@@ -10,7 +10,11 @@ import {
 } from "@/store/signals/SignalConfigSlice";
 import { getWebSocket } from "@/app/dashboard/websocket";
 import HttpRequest from "@/store/services/HttpRequest";
-import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
+import {
+  GetItemFromLocalStorage,
+  RemoveItemFromLocalStorage,
+  SetItemToLocalStorage,
+} from "@/utils/localStorageFunc";
 import { emitToastMessage } from "@/utils/toastFunc";
 
 interface DeviceConfigurationProps {
@@ -26,7 +30,15 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
   const dispatch = useAppDispatch();
 
   const handleRequest = async (action: string) => {
-    console.log(`Action: ${action}`);
+    const isPasswordVerified = GetItemFromLocalStorage("isPasswordVerified");
+    //  Verify password before sending request
+    if (isPasswordVerified) {
+      if (Date.now() - isPasswordVerified.time > 60000) {
+        RemoveItemFromLocalStorage("isPasswordVerified");
+        return;
+      }
+    }
+    // Prompt user to enter password
     const password = prompt("Please enter your password to proceed");
 
     if (!password) return;
@@ -35,6 +47,10 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
       await HttpRequest.post("/confirm-password", {
         email: GetItemFromLocalStorage("user").email,
         password,
+      });
+      SetItemToLocalStorage("isPasswordVerified", {
+        isPasswordVerified: true,
+        time: Date.now(),
       });
     } catch (error: any) {
       emitToastMessage(error?.response.data.message, "error");

@@ -49,7 +49,7 @@ const SignalWrapper = styled.div<{
 const SignalLight = styled.div<{
   color: LightColor;
   editable: boolean;
-  manualMode: boolean;
+  $manualMode: boolean;
 }>`
   width: 1.6rem;
   height: 1.6rem;
@@ -63,15 +63,15 @@ const SignalLight = styled.div<{
       : "grey"};
   margin: 1px;
   border-radius: 50%;
-  cursor: ${({ editable, manualMode }) =>
-    editable || manualMode ? "pointer" : "default"};
+  cursor: ${({ editable, $manualMode }) =>
+    editable || $manualMode ? "pointer" : "default"};
 `;
 
 const PedestrianSignalLight = styled.div<{
   orientation: "horizontal" | "vertical";
   color: PedestrianLightColor;
   editable: boolean;
-  manualMode: boolean;
+  $manualMode: boolean;
 }>`
   width: 1rem;
   height: 1rem;
@@ -83,8 +83,8 @@ const PedestrianSignalLight = styled.div<{
   color: "white";
   transform: ${({ orientation }) =>
     orientation === "horizontal" ? "rotate(0deg)" : "rotate(0deg)"};
-  cursor: ${({ editable, manualMode }) =>
-    editable || manualMode ? "pointer" : "default"};
+  cursor: ${({ editable, $manualMode }) =>
+    editable || $manualMode ? "pointer" : "default"};
 `;
 
 const SignalGroup = styled.div<{ orientation: "horizontal" | "vertical" }>`
@@ -182,7 +182,7 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
                 color={signalColors.pedestrian}
                 orientation={orientation}
                 editable={editable}
-                manualMode={manualMode}
+                $manualMode={manualMode}
                 onClick={() => handleSignalClick("pedestrian")}
               >
                 {/* <ImManWoman fontSize={20} /> */}
@@ -209,7 +209,7 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
                 color={signalColors.pedestrian}
                 orientation={orientation}
                 editable={editable}
-                manualMode={manualMode}
+                $manualMode={manualMode}
                 onClick={() => handleSignalClick("pedestrian")}
               >
                 {/* <ImManWoman fontSize={20} /> */}
@@ -219,24 +219,24 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
             <SignalLight
               color={signalColors.bike}
               editable={editable}
-              manualMode={manualMode}
+              $manualMode={manualMode}
               onClick={() => handleSignalClick("bike")}
             />
             <SignalLight
               color={signalColors.right}
-              manualMode={manualMode}
+              $manualMode={manualMode}
               editable={editable}
               onClick={() => handleSignalClick("right")}
             />
             <SignalLight
               color={signalColors.straight}
-              manualMode={manualMode}
+              $manualMode={manualMode}
               editable={editable}
               onClick={() => handleSignalClick("straight")}
             />
             <SignalLight
               color={signalColors.left}
-              manualMode={manualMode}
+              $manualMode={manualMode}
               editable={editable}
               onClick={() => handleSignalClick("left")}
             />
@@ -245,25 +245,25 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
           <>
             <SignalLight
               color={signalColors.left}
-              manualMode={manualMode}
+              $manualMode={manualMode}
               editable={editable}
               onClick={() => handleSignalClick("left")}
             />
             <SignalLight
               color={signalColors.straight}
-              manualMode={manualMode}
+              $manualMode={manualMode}
               editable={editable}
               onClick={() => handleSignalClick("straight")}
             />
             <SignalLight
               color={signalColors.right}
-              manualMode={manualMode}
+              $manualMode={manualMode}
               editable={editable}
               onClick={() => handleSignalClick("right")}
             />
             <SignalLight
               color={signalColors.bike}
-              manualMode={manualMode}
+              $manualMode={manualMode}
               editable={editable}
               onClick={() => handleSignalClick("bike")}
             />
@@ -286,7 +286,7 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
               <PedestrianSignalLight
                 color={signalColors.pedestrian}
                 orientation={orientation}
-                manualMode={manualMode}
+                $manualMode={manualMode}
                 editable={editable}
                 onClick={() => handleSignalClick("pedestrian")}
               >
@@ -313,7 +313,7 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
               <PedestrianSignalLight
                 color={signalColors.pedestrian}
                 orientation={orientation}
-                manualMode={manualMode}
+                $manualMode={manualMode}
                 editable={editable}
                 onClick={() => handleSignalClick("pedestrian")}
               >

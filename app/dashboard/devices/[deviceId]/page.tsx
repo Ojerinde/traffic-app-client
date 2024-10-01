@@ -206,9 +206,11 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
     if (!currentDeviceInfoData?.Rtc) {
       dispatch(getUserDeviceInfoData(params.deviceId));
     }
+
+    // Fetch Device State Data
     const socket = getWebSocket();
 
-    if (!deviceActiveStateData?.DeviceID) {
+    const sendMessage = () => {
       socket.send(
         JSON.stringify({
           event: "state_request",
@@ -217,7 +219,21 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
           },
         })
       );
+    };
+
+    if (socket.readyState === WebSocket.OPEN) {
+      sendMessage();
+    } else {
+      socket.onopen = () => {
+        sendMessage();
+      };
     }
+
+    return () => {
+      if (socket) {
+        socket.close();
+      }
+    };
   }, []);
 
   const deviceConfigItems: DeviceConfigItem[] = [
