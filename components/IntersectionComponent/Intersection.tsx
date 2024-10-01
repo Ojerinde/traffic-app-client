@@ -316,7 +316,7 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
 
     dispatch(setManualMode(false));
     dispatch(setSignalStringToAllRed());
-    // Listen for web scoket feedback from the device in a useEffect
+    // Listen for web socket feedback from the device in a useEffect
   };
 
   return (
