@@ -31,30 +31,26 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
 
   const handleRequest = async (action: string) => {
     const isPasswordVerified = GetItemFromLocalStorage("isPasswordVerified");
-    //  Verify password before sending request
-    if (isPasswordVerified) {
-      if (Date.now() - isPasswordVerified.time > 60000) {
-        RemoveItemFromLocalStorage("isPasswordVerified");
+
+    if (!isPasswordVerified || Date.now() - isPasswordVerified.time > 60000) {
+      const password = prompt("Please enter your password to proceed");
+
+      if (!password) return;
+
+      try {
+        await HttpRequest.post("/confirm-password", {
+          email: GetItemFromLocalStorage("user").email,
+          password,
+        });
+        emitToastMessage("Password verified and command sent", "success");
+        SetItemToLocalStorage("isPasswordVerified", {
+          isPasswordVerified: true,
+          time: Date.now(),
+        });
+      } catch (error: any) {
+        emitToastMessage(error?.response.data.message, "error");
         return;
       }
-    }
-    // Prompt user to enter password
-    const password = prompt("Please enter your password to proceed");
-
-    if (!password) return;
-
-    try {
-      await HttpRequest.post("/confirm-password", {
-        email: GetItemFromLocalStorage("user").email,
-        password,
-      });
-      SetItemToLocalStorage("isPasswordVerified", {
-        isPasswordVerified: true,
-        time: Date.now(),
-      });
-    } catch (error: any) {
-      emitToastMessage(error?.response.data.message, "error");
-      return;
     }
 
     if (action === "manual") {
@@ -64,12 +60,29 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
     }
 
     const socket = getWebSocket();
-    socket.send(
-      JSON.stringify({
-        event: "intersection_control_request",
-        payload: { action: action, DeviceID: deviceId },
-      })
-    );
+
+    const sendMessage = () => {
+      socket.send(
+        JSON.stringify({
+          event: "intersection_control_request",
+          payload: { action: action, DeviceID: deviceId },
+        })
+      );
+    };
+
+    if (socket.readyState === WebSocket.OPEN) {
+      sendMessage();
+    } else {
+      socket.onopen = () => {
+        sendMessage();
+      };
+    }
+
+    return () => {
+      if (socket) {
+        socket.close();
+      }
+    };
   };
 
   return (
