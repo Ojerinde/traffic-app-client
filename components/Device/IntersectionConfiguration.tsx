@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { IntersectionConfigItem } from "@/app/dashboard/devices/[deviceId]/page";
 import { useRouter, usePathname } from "next/navigation";
 import IntersectionConfigurationItem from "./IntersectionConfigurationItem";
@@ -12,7 +13,6 @@ import { getWebSocket } from "@/app/dashboard/websocket";
 import HttpRequest from "@/store/services/HttpRequest";
 import {
   GetItemFromLocalStorage,
-  RemoveItemFromLocalStorage,
   SetItemToLocalStorage,
 } from "@/utils/localStorageFunc";
 import { emitToastMessage } from "@/utils/toastFunc";
@@ -21,6 +21,7 @@ interface DeviceConfigurationProps {
   intersectionConfigItems: IntersectionConfigItem[];
   deviceId: string;
 }
+
 const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
   intersectionConfigItems,
   deviceId,
@@ -29,6 +30,9 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
   const pathname = usePathname();
   const dispatch = useAppDispatch();
 
+  // State to track the current mode (Auto or Manual)
+  const [isAutoMode, setIsAutoMode] = useState(true);
+
   const handleRequest = async (action: string) => {
     const isPasswordVerified = GetItemFromLocalStorage("isPasswordVerified");
 
@@ -36,12 +40,6 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
       const password = prompt("Please enter your password to proceed");
 
       if (!password) return;
-
-      if (action === "Manual") {
-        dispatch(setManualMode(true));
-        dispatch(closePreviewCreatedPatternPhase());
-        return;
-      }
 
       try {
         await HttpRequest.post("/confirm-password", {
@@ -57,6 +55,14 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
         emitToastMessage(error?.response.data.message, "error");
         return;
       }
+    }
+
+    if (action === "Manual") {
+      dispatch(setManualMode(true));
+      dispatch(closePreviewCreatedPatternPhase());
+    }
+    if (action === "Auto") {
+      dispatch(setManualMode(false));
     }
 
     const socket = getWebSocket();
@@ -106,11 +112,19 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
           )
         )}
       </ul>
+
       <div>
         <h2>Intersection Commands Control</h2>
         <div className="intersectionConfiguration__commands">
-          <button onClick={() => handleRequest("Auto")}>Auto</button>
-          <button onClick={() => handleRequest("Manual")}>Manual</button>
+          <button
+            onClick={() => {
+              const action = isAutoMode ? "Manual" : "Auto";
+              handleRequest(action);
+              setIsAutoMode(!isAutoMode);
+            }}
+          >
+            {isAutoMode ? "Switch to Manual" : "Switch to Auto"}
+          </button>
           <button onClick={() => handleRequest("Hold")}>Hold</button>
           <button onClick={() => handleRequest("Next")}>Next</button>
           <button onClick={() => handleRequest("Restart")}>Restart</button>

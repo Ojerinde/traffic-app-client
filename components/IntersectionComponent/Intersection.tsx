@@ -10,7 +10,13 @@ import { emitToastMessage } from "@/utils/toastFunc";
 import { MdCancel } from "react-icons/md";
 import { getUserPhase } from "@/store/devices/UserDeviceSlice";
 import { useAppDispatch } from "@/hooks/reduxHook";
-import { setManualMode, SignalState } from "@/store/signals/SignalConfigSlice";
+import {
+  setManualMode,
+  setSignalStringToAllRed,
+  SignalState,
+} from "@/store/signals/SignalConfigSlice";
+import { getWebSocket } from "@/app/dashboard/websocket";
+import { useParams } from "next/navigation";
 
 export interface Signal extends SignalState {
   direction: "N" | "E" | "S" | "W";
@@ -129,7 +135,8 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
   const [showInputModal, setShowInputModal] = useState<boolean>(false);
   const [isCreatingPhase, setIsCreatingPhase] = useState<boolean>(false);
   const [phaseName, setPhaseName] = useState<string>("");
-
+  const params = useParams();
+  console.log("params", params);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -283,8 +290,33 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
       `Enter the duration in seconds for ${encodedSignals} phase`
     );
     // Send a webscoket event to the device to start the phase
-    // Listen for web scoket feedback from the device
+    const socket = getWebSocket();
+
+    const sendMessage = () => {
+      socket.send(
+        JSON.stringify({
+          event: "intersection_control_request",
+          payload: {
+            action: "Manual",
+            DeviceID: params.deviceId,
+            signalString: encodedSignals,
+            duration: promptResult,
+          },
+        })
+      );
+    };
+
+    if (socket.readyState === WebSocket.OPEN) {
+      sendMessage();
+    } else {
+      socket.onopen = () => {
+        sendMessage();
+      };
+    }
+
     dispatch(setManualMode(false));
+    dispatch(setSignalStringToAllRed());
+    // Listen for web scoket feedback from the device in a useEffect
   };
 
   return (
