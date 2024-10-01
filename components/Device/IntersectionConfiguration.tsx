@@ -37,6 +37,12 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
 
       if (!password) return;
 
+      if (action === "Manual") {
+        dispatch(setManualMode(true));
+        dispatch(closePreviewCreatedPatternPhase());
+        return;
+      }
+
       try {
         await HttpRequest.post("/confirm-password", {
           email: GetItemFromLocalStorage("user").email,
@@ -51,12 +57,6 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
         emitToastMessage(error?.response.data.message, "error");
         return;
       }
-    }
-
-    if (action === "manual") {
-      dispatch(setManualMode(true));
-      dispatch(closePreviewCreatedPatternPhase());
-      return;
     }
 
     const socket = getWebSocket();
