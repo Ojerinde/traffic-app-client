@@ -11,6 +11,7 @@ import { emitToastMessage } from "@/utils/toastFunc";
 import {
   addOrUpdatePhaseConfig,
   clearPhaseConfig,
+  getUserdeviceActiveProgData,
   getUserPattern,
   getUserPlan,
   removePhaseConfig,
@@ -18,27 +19,19 @@ import {
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
+import { getWebSocket } from "@/app/dashboard/websocket";
 
 interface Option {
   value: string;
   label: string;
 }
+
 interface ScheduleData {
   [time: string]: Option | null;
 }
-interface Phase {
-  id: string;
-  name: string;
-  signalString: string;
-  duration: number;
-}
 
-interface Plan {
-  id: string;
-  name: string;
-  schedule: ScheduleData;
-  dayType: string;
-  customDate?: Date;
+interface ScheduleTemplateProps {
+  params: any;
 }
 
 function generateTimeSegments(): string[] {
@@ -70,15 +63,14 @@ const dayTypeOptions: Option[] = [
   { value: "custom", label: "Custom" },
 ];
 
-const ScheduleTemplate: React.FC = () => {
-  const { patterns, phases, plans, configuredPhases } = useAppSelector(
-    (state) => state.userDevice
-  );
+const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
+  const { patterns, phases, plans, configuredPhases, deviceActiveProgData } =
+    useAppSelector((state) => state.userDevice);
   const dispatch = useAppDispatch();
   const email = GetItemFromLocalStorage("user")?.email;
 
-  const patternsOptions: Option[] = patterns.map((pattern) => ({
-    value: pattern.name.toLowerCase(),
+  const patternsOptions: Option[] = patterns?.map((pattern) => ({
+    value: pattern.name?.toLowerCase(),
     label: pattern.name,
   }));
 
@@ -87,11 +79,25 @@ const ScheduleTemplate: React.FC = () => {
   const [customDate, setCustomDate] = useState<Date | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<Option | null>(null);
 
+  const [rightBoxContent, setRightBoxContent] = useState<
+    "patterns" | "upload" | "download" | null
+  >(null);
+  const [selectedUploadPlan, setSelectedUploadPlan] = useState<Option | null>(
+    null
+  );
+  const [selectedUploadTime, setSelectedUploadTime] = useState<Option | null>(
+    null
+  );
+  const [availableTimeSegments, setAvailableTimeSegments] = useState<Option[]>(
+    []
+  );
+
   const [selectedPattern, setSelectedPattern] = useState<any>(null);
   const [updatedPatternPhases, setUpdatedPatternPhases] = useState<any[]>([]);
   const [newPatternName, setNewPatternName] = useState<string>("");
   const [phaseToConfigure, setPhaseToConfigure] =
     useState<PhaseConfigType | null>(null);
+
   const handleDragEndEdit = (result: any) => {
     if (!result.destination) return;
     const reorderedPhases = [...updatedPatternPhases];
@@ -107,6 +113,7 @@ const ScheduleTemplate: React.FC = () => {
       (pattern) => pattern.name.toLowerCase() === patternName
     );
     setSelectedPattern(pattern);
+    setRightBoxContent("patterns");
     setUpdatedPatternPhases(pattern.configuredPhases);
     pattern?.configuredPhases.forEach((phase: any) => {
       dispatch(addOrUpdatePhaseConfig(phase));
@@ -239,7 +246,6 @@ const ScheduleTemplate: React.FC = () => {
   };
 
   const handlePlanChange = (newValue: SingleValue<Option>) => {
-    console.log("Plan Change", newValue);
     if (newValue) {
       setSelectedPlan(newValue);
       const plan = plans.find((plan) => plan.name === newValue.value);
@@ -256,6 +262,15 @@ const ScheduleTemplate: React.FC = () => {
   };
 
   const saveSchedule = async () => {
+    const existingPlan = plans?.find(
+      (plan) => plan.name.toUpperCase() === dayType.value.toUpperCase()
+    );
+    if (existingPlan) {
+      const userResponse = confirm(
+        `A plan for ${existingPlan.name} exist, do you want to override?`
+      );
+      if (!userResponse) return;
+    }
     try {
       const { data } = await HttpRequest.post("/plans", {
         id: Date.now().toString(),
@@ -277,11 +292,103 @@ const ScheduleTemplate: React.FC = () => {
       );
     }
   };
-  console.log("Plans", plans);
 
   useEffect(() => {
     dispatch(getUserPlan(email));
+    if (!deviceActiveProgData?.JunctionId) {
+      dispatch(getUserdeviceActiveProgData(params.deviceId));
+    }
   }, []);
+
+  // Uploading to device logic
+  const handleUploadPlanChange = (newValue: SingleValue<Option>) => {
+    if (newValue) {
+      setSelectedUploadPlan(newValue);
+      setSelectedUploadTime(null);
+
+      const selectedPlan = plans.find((plan) => plan.id === newValue.value);
+
+      if (selectedPlan && selectedPlan.schedule) {
+        const availableTimes = Object.entries(selectedPlan.schedule)
+          .filter(([_, value]) => value !== null)
+          .map(([time, value]) => ({
+            value: time,
+            label: `${time} - ${(value as Option).label}`,
+          }));
+        setAvailableTimeSegments(availableTimes);
+      } else {
+        setAvailableTimeSegments([]);
+      }
+    }
+  };
+
+  const handleUploadTimeChange = (newValue: SingleValue<Option>) => {
+    if (newValue) {
+      setSelectedUploadTime(newValue);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!selectedUploadPlan || !selectedUploadTime) {
+      emitToastMessage("Please select both a plan and a time segment", "error");
+      return;
+    }
+
+    const socket = getWebSocket();
+
+    const sendMessage = () => {
+      socket.send(
+        JSON.stringify({
+          event: "upload_request",
+          payload: {
+            DeviceID: params.deviceId,
+            email,
+            plan: selectedUploadPlan.label,
+            timeSegment: selectedUploadTime.value,
+            patternName: selectedUploadTime.label?.split("-")[1]?.trim(),
+            junctionId: deviceActiveProgData.JunctionId,
+          },
+        })
+      );
+    };
+
+    if (socket.readyState === WebSocket.OPEN) {
+      sendMessage();
+    } else {
+      socket.onopen = () => {
+        sendMessage();
+      };
+    }
+  };
+
+  const handleDownload = async () => {
+    // if (!selectedUploadPlan || !selectedUploadTime) {
+    //   emitToastMessage("Please select both a plan and a time segment", "error");
+    //   return;
+    // }
+    // const socket = getWebSocket();
+    // const sendMessage = () => {
+    //   socket.send(
+    //     JSON.stringify({
+    //       event: "download_request",
+    //       payload: {
+    //         DeviceID: params.deviceId,
+    //         email,
+    //         plan: selectedUploadPlan.label,
+    //         timeSegment: selectedUploadTime.value,
+    //         patternName: selectedUploadTime.label?.split("-")[1]?.trim(),
+    //       },
+    //     })
+    //   );
+    // };
+    // if (socket.readyState === WebSocket.OPEN) {
+    //   sendMessage();
+    // } else {
+    //   socket.onopen = () => {
+    //     sendMessage();
+    //   };
+    // }
+  };
 
   return (
     <div className="schedule__container">
@@ -294,7 +401,7 @@ const ScheduleTemplate: React.FC = () => {
             className="schedule__select-field"
           />
           <Select
-            options={plans.map((plan) => ({
+            options={plans?.map((plan) => ({
               value: plan.name,
               label: plan.name,
             }))}
@@ -321,7 +428,7 @@ const ScheduleTemplate: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {timeSegments.map((time) => (
+              {timeSegments?.map((time) => (
                 <tr key={time}>
                   <td className="schedule__time">{time}</td>
                   <td className="schedule__select">
@@ -353,137 +460,188 @@ const ScheduleTemplate: React.FC = () => {
           <button onClick={saveSchedule} className="schedule__button">
             Save Schedule
           </button>
+
+          <button
+            onClick={() => setRightBoxContent("upload")}
+            className="schedule__button"
+          >
+            Upload to Device
+          </button>
+          <button
+            onClick={() => setRightBoxContent("download")}
+            className="schedule__button"
+          >
+            Download from Device
+          </button>
         </div>
       </div>
 
       {/* Right div to show selected pattern and phases */}
       <div className="schedule__right">
-        {selectedPattern && (
-          <div className="patterns__selected">
-            <h3>Phases in "{selectedPattern.name}"</h3>
+        {rightBoxContent === "patterns" && (
+          <>
+            <div className="patterns__selected">
+              <h3>Phases in "{selectedPattern.name}"</h3>
 
-            <DragDropContext onDragEnd={handleDragEndEdit}>
-              <Droppable droppableId="selected-phases">
-                {(provided) => (
-                  <ul {...provided.droppableProps} ref={provided.innerRef}>
-                    {updatedPatternPhases?.map((phaseInstance, index) => (
-                      <Draggable
-                        key={phaseInstance.id}
-                        draggableId={`${phaseInstance.id}`}
-                        index={index}
-                      >
-                        {(provided) => {
-                          return (
-                            <li
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                            >
-                              <div className="row">
-                                <h3>{phaseInstance.name}</h3>
-                                <form onSubmit={phaseFormik.handleSubmit}>
-                                  {phaseToConfigure &&
-                                  phaseToConfigure.id === phaseInstance.id ? (
-                                    <>
-                                      <input
-                                        id="duration"
-                                        name="duration"
-                                        type="number"
-                                        value={phaseFormik.values.duration}
-                                        onChange={phaseFormik.handleChange}
-                                        onBlur={phaseFormik.handleBlur}
-                                      />
-                                      <button
-                                        type="submit"
-                                        disabled={
-                                          !phaseFormik.values.duration ||
-                                          !phaseFormik.dirty
-                                        }
-                                      >
-                                        Save
-                                      </button>
-                                    </>
-                                  ) : (
-                                    <>
-                                      {configuredPhases.find(
-                                        (p) => p.id === phaseInstance.id
-                                      )?.duration ? (
-                                        <span>
-                                          Dur:{" "}
-                                          {
-                                            configuredPhases.find(
-                                              (p) => p.id === phaseInstance.id
-                                            )?.duration
+              <DragDropContext onDragEnd={handleDragEndEdit}>
+                <Droppable droppableId="selected-phases">
+                  {(provided) => (
+                    <ul {...provided.droppableProps} ref={provided.innerRef}>
+                      {updatedPatternPhases?.map((phaseInstance, index) => (
+                        <Draggable
+                          key={phaseInstance.id}
+                          draggableId={`${phaseInstance.id}`}
+                          index={index}
+                        >
+                          {(provided) => {
+                            return (
+                              <li
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                              >
+                                <div className="row">
+                                  <h3>{phaseInstance.name}</h3>
+                                  <form onSubmit={phaseFormik.handleSubmit}>
+                                    {phaseToConfigure &&
+                                    phaseToConfigure.id === phaseInstance.id ? (
+                                      <>
+                                        <input
+                                          id="duration"
+                                          name="duration"
+                                          type="number"
+                                          value={phaseFormik.values.duration}
+                                          onChange={phaseFormik.handleChange}
+                                          onBlur={phaseFormik.handleBlur}
+                                        />
+                                        <button
+                                          type="submit"
+                                          disabled={
+                                            !phaseFormik.values.duration ||
+                                            !phaseFormik.dirty
                                           }
-                                        </span>
-                                      ) : null}
-                                      <button
-                                        type="button"
-                                        onClick={() =>
-                                          handleConfigurePhase(
-                                            phaseInstance.id,
-                                            phaseInstance.name
-                                          )
-                                        }
-                                      >
+                                        >
+                                          Save
+                                        </button>
+                                      </>
+                                    ) : (
+                                      <>
                                         {configuredPhases.find(
                                           (p) => p.id === phaseInstance.id
-                                        )?.duration
-                                          ? "Edit Duration"
-                                          : "Set Duration"}
-                                      </button>
-                                    </>
-                                  )}
-                                </form>
-                                <button
-                                  onClick={() =>
-                                    handleRemovePhaseFromSelectedPhases(
-                                      phaseInstance.id
-                                    )
-                                  }
-                                >
-                                  Remove
-                                </button>
-                              </div>
-                            </li>
-                          );
-                        }}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </ul>
-                )}
-              </Droppable>
-            </DragDropContext>
-            <div className="patterns__selected--ctn">
-              <input
-                type="text"
-                value={newPatternName}
-                onChange={(e) => setNewPatternName(e.target.value)}
-                placeholder="Enter new pattern name"
-              />
-              <button onClick={saveNewPattern}>Save New Pattern</button>
+                                        )?.duration ? (
+                                          <span>
+                                            Dur:{" "}
+                                            {
+                                              configuredPhases.find(
+                                                (p) => p.id === phaseInstance.id
+                                              )?.duration
+                                            }
+                                          </span>
+                                        ) : null}
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            handleConfigurePhase(
+                                              phaseInstance.id,
+                                              phaseInstance.name
+                                            )
+                                          }
+                                        >
+                                          {configuredPhases.find(
+                                            (p) => p.id === phaseInstance.id
+                                          )?.duration
+                                            ? "Edit Duration"
+                                            : "Set Duration"}
+                                        </button>
+                                      </>
+                                    )}
+                                  </form>
+                                  <button
+                                    onClick={() =>
+                                      handleRemovePhaseFromSelectedPhases(
+                                        phaseInstance.id
+                                      )
+                                    }
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
+                              </li>
+                            );
+                          }}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </ul>
+                  )}
+                </Droppable>
+              </DragDropContext>
+              <div className="patterns__selected--ctn">
+                <input
+                  type="text"
+                  value={newPatternName}
+                  onChange={(e) => setNewPatternName(e.target.value)}
+                  placeholder="Enter new pattern name"
+                />
+                <button onClick={saveNewPattern}>Save New Pattern</button>
+              </div>
             </div>
+            <div className="available-phases">
+              <h2 className="patterns__availablePhases--header">
+                Available Phases
+              </h2>
+              <ul className="patterns__availablePhases">
+                {phases?.map((phase: any, index: any) => (
+                  <li className={`patterns__availablePhases--item`} key={index}>
+                    <h3>{phase.name}</h3>
+                    <div>
+                      <button onClick={() => handleAvailablePhaseSelect(phase)}>
+                        Add
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </>
+        )}
+        {rightBoxContent === "download" && (
+          <div className="upload">
+            <h3>Download Plan from Device</h3>
+            <button onClick={handleDownload} className="upload__button">
+              Download from Device
+            </button>
           </div>
         )}
-
-        {selectedPattern && (
-          <div className="available-phases">
-            <h2 className="patterns__availablePhases--header">
-              Available Phases
-            </h2>
-            <ul className="patterns__availablePhases">
-              {phases?.map((phase: any, index: any) => (
-                <li className={`patterns__availablePhases--item`} key={index}>
-                  <h3>{phase.name}</h3>
-                  <div>
-                    <button onClick={() => handleAvailablePhaseSelect(phase)}>
-                      Add
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
+        {rightBoxContent === "upload" && (
+          <div className="upload">
+            <h3>Upload Plan to Device</h3>
+            <Select
+              options={plans?.map((plan) => ({
+                value: plan.id,
+                label: plan.name,
+              }))}
+              value={selectedUploadPlan}
+              onChange={handleUploadPlanChange}
+              className="upload__select--field"
+              placeholder="Select a plan to upload"
+            />
+            {selectedUploadPlan && (
+              <Select
+                options={availableTimeSegments}
+                value={selectedUploadTime}
+                onChange={handleUploadTimeChange}
+                className="upload__select--field"
+                placeholder="Select a time segment"
+              />
+            )}
+            <button
+              onClick={handleUpload}
+              className="upload__button"
+              disabled={!selectedUploadPlan || !selectedUploadTime}
+            >
+              Upload to Device
+            </button>
           </div>
         )}
       </div>

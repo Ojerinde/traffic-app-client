@@ -46,7 +46,7 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
           email: GetItemFromLocalStorage("user").email,
           password,
         });
-        emitToastMessage("Password verified and command sent", "success");
+        emitToastMessage("Password verified", "success");
         SetItemToLocalStorage("isPasswordVerified", {
           isPasswordVerified: true,
           time: Date.now(),
@@ -56,12 +56,14 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
         return;
       }
     }
-
+    console.log("I got here");
     if (action === "Manual") {
       dispatch(setManualMode(true));
+      setIsAutoMode(false);
       dispatch(closePreviewCreatedPatternPhase());
     }
     if (action === "Auto") {
+      setIsAutoMode(true);
       dispatch(setManualMode(false));
     }
 
@@ -83,6 +85,11 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
         sendMessage();
       };
     }
+    // Update the time since one of the button has been clicked again
+    SetItemToLocalStorage("isPasswordVerified", {
+      isPasswordVerified: true,
+      time: Date.now(),
+    });
 
     return () => {
       if (socket) {
@@ -120,7 +127,6 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
             onClick={() => {
               const action = isAutoMode ? "Manual" : "Auto";
               handleRequest(action);
-              setIsAutoMode(!isAutoMode);
             }}
           >
             {isAutoMode ? "Switch to Manual" : "Switch to Auto"}

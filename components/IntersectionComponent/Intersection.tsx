@@ -136,7 +136,6 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
   const [isCreatingPhase, setIsCreatingPhase] = useState<boolean>(false);
   const [phaseName, setPhaseName] = useState<string>("");
   const params = useParams();
-  console.log("params", params);
   const dispatch = useAppDispatch();
 
   useEffect(() => {

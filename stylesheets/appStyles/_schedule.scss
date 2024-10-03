@@ -108,23 +108,52 @@
       rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
       rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
     transition: all 0.3s;
+    &:hover {
+      background-color: rgba($color-yellow, 0.8), 0.8;
+      box-shadow: rgba(0, 0, 0, 0.45) 0px 25px 20px -20px;
+    }
+    &.active,
+    &:active {
+      background-color: rgba($color-yellow, 0.8), 0.8;
+      box-shadow: rgba(0, 0, 0, 0.45) 0px 20px 15px -10px;
+    }
+    &:disabled {
+      cursor: not-allowed;
+      background-color: rgba($color-black-dark, 0.8), 0.4;
+      color: $color-white;
+    }
+  }
+}
+
+.upload {
+  & h3 {
+    font-size: 1.7rem;
+    margin-bottom: 0.5rem;
   }
 
-  &__button:hover {
-    background-color: rgba($color-yellow, 0.8), 0.8;
-    color: $color-white;
+  &__select--field {
+    font-size: 1.2rem;
+    margin: 1rem 0;
   }
-
-  &__button:active,
-  .schedule__button.active {
-    background-color: rgba($color-yellow, 0.8), 0.8;
-    box-shadow: rgba(0, 0, 0, 0.45) 0px 25px 20px -20px;
-    color: $color-white;
-  }
-
-  &__button:disabled {
-    cursor: not-allowed;
-    background-color: rgba($color-black-dark, 0.8), 0.4;
-    color: $color-white;
+  &__button {
+    color: $color-black-light;
+    border-radius: 0.5rem;
+    font-size: 1.4rem;
+    letter-spacing: 0.08rem;
+    padding: 0.8rem 0.9rem;
+    border: none;
+    cursor: pointer;
+    box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
+      rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+      rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+    transition: all 0.3s;
+    &:hover {
+      background-color: rgba($color-yellow, 0.8), 0.8;
+      box-shadow: rgba(0, 0, 0, 0.45) 0px 25px 20px -20px;
+    }
+    &:active {
+      background-color: rgba($color-yellow, 0.8), 0.8;
+      box-shadow: rgba(0, 0, 0, 0.45) 0px 20px 15px -10px;
+    }
   }
 }

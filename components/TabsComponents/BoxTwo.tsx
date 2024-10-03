@@ -134,6 +134,9 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
 
   const duplicatePatternHandler = async (patternName: string) => {
     const newPatternName = prompt("Enter a name for the pattern");
+    if (!newPatternName)
+      return emitToastMessage("A new pattern name is required", "error");
+
     const pattern = patterns.find((pattern) => pattern.name === patternName);
     try {
       const { data } = await HttpRequest.post("/patterns", {

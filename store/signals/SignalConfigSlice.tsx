@@ -33,7 +33,6 @@ const initializeSignals = (
 
   const trimmedString = signalString.slice(1, -1);
   const signalBlocks = trimmedString.match(/.{7}/g);
-  console.log(signalBlocks);
   if (signalBlocks && signalBlocks.length === 4) {
     signalBlocks.forEach((signalBlock) => {
       const direction = signalBlock[0] as keyof typeof signals;
