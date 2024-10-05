@@ -9,6 +9,7 @@ import {
   previewCreatedPatternPhase,
   setIsIntersectionConfigurable,
   setSignalState,
+  setSignalString,
 } from "@/store/signals/SignalConfigSlice";
 import { useEffect, useState } from "react";
 import { getWebSocket } from "../../websocket";
@@ -67,14 +68,57 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
     const socket = getWebSocket();
     let countdownInterval: ReturnType<typeof setInterval> | null = null;
 
-    const startCountdown = (initialDuration: number, signalString: string) => {
-      let timeLeft = initialDuration;
+    const startCountdown = (
+      initialDuration: number | string,
+      signalString: string
+    ) => {
+      let timeLeft =
+        typeof initialDuration === "string"
+          ? parseInt(initialDuration, 10)
+          : initialDuration;
+      let isBlink = timeLeft === 0 || initialDuration === "X";
+      console.log(
+        "Starting Countdown",
+        initialDuration,
+        timeLeft,
+        signalString,
+        isBlink
+      );
 
       if (countdownInterval) {
         clearInterval(countdownInterval);
       }
 
+      // Check for Amber signal
+      if (signalString.includes("A")) {
+        console.log("Amber Signal", timeLeft, signalString);
+
+        dispatch(
+          previewCreatedPatternPhase({
+            duration: timeLeft,
+            signalString: signalString,
+          })
+        );
+        dispatch(setSignalState());
+
+        countdownInterval = setTimeout(() => {
+          clearInterval(countdownInterval!);
+          countdownInterval = null;
+          dispatch(closePreviewCreatedPatternPhase());
+        }, timeLeft * 1000); // Amber signal shown for `Countdown` seconds
+        return;
+      }
+
+      if (isBlink) {
+        console.log("Blink Signal", timeLeft, signalString);
+        dispatch(setSignalString(signalString));
+        dispatch(setSignalState());
+        return;
+      }
+
       countdownInterval = setInterval(() => {
+        // Handle Normal Signal
+        console.log("Normal Signal", timeLeft, signalString);
         if (timeLeft > 0) {
           timeLeft -= 1;
           dispatch(
@@ -91,7 +135,6 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
         }
       }, 1000);
     };
-
     const handleDataFeedback = (event: MessageEvent) => {
       const feedback = JSON.parse(event.data);
       if (feedback.event === "ping_received") return;

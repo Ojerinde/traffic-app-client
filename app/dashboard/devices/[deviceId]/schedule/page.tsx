@@ -91,6 +91,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
   const [availableTimeSegments, setAvailableTimeSegments] = useState<Option[]>(
     []
   );
+  const [isUploadinSchedule, setIsUploadingSchedule] = useState<boolean>(false);
 
   const [selectedPattern, setSelectedPattern] = useState<any>(null);
   const [updatedPatternPhases, setUpdatedPatternPhases] = useState<any[]>([]);
@@ -300,7 +301,6 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
     }
   }, []);
 
-  // Uploading to device logic
   const handleUploadPlanChange = (newValue: SingleValue<Option>) => {
     if (newValue) {
       setSelectedUploadPlan(newValue);
@@ -351,7 +351,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
         })
       );
     };
-
+    setIsUploadingSchedule(true);
     if (socket.readyState === WebSocket.OPEN) {
       sendMessage();
     } else {
@@ -362,33 +362,74 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
   };
 
   const handleDownload = async () => {
-    // if (!selectedUploadPlan || !selectedUploadTime) {
-    //   emitToastMessage("Please select both a plan and a time segment", "error");
-    //   return;
-    // }
-    // const socket = getWebSocket();
-    // const sendMessage = () => {
-    //   socket.send(
-    //     JSON.stringify({
-    //       event: "download_request",
-    //       payload: {
-    //         DeviceID: params.deviceId,
-    //         email,
-    //         plan: selectedUploadPlan.label,
-    //         timeSegment: selectedUploadTime.value,
-    //         patternName: selectedUploadTime.label?.split("-")[1]?.trim(),
-    //       },
-    //     })
-    //   );
-    // };
-    // if (socket.readyState === WebSocket.OPEN) {
-    //   sendMessage();
-    // } else {
-    //   socket.onopen = () => {
-    //     sendMessage();
-    //   };
-    // }
+    const socket = getWebSocket();
+    const sendMessage = () => {
+      socket.send(
+        JSON.stringify({
+          event: "download_request",
+          payload: {
+            DeviceID: params.deviceId,
+            email,
+          },
+        })
+      );
+    };
+    if (socket.readyState === WebSocket.OPEN) {
+      sendMessage();
+    } else {
+      socket.onopen = () => {
+        sendMessage();
+      };
+    }
   };
+
+  useEffect(() => {
+    const socket = getWebSocket();
+    // Listen to feedback for uploading and downloading
+    const handleDataFeedback = (event: MessageEvent) => {
+      const feedback = JSON.parse(event.data);
+      if (feedback.event === "ping_received") return;
+
+      console.log("Scheduling Feedback", feedback);
+
+      switch (feedback.event) {
+        case "upload_feedback":
+          if (feedback.payload.error) {
+            emitToastMessage("Could not upload schedule to device", "error");
+          } else {
+            setIsUploadingSchedule(false);
+            emitToastMessage(
+              "Schedule uploaded to device successfully",
+              "success"
+            );
+          }
+          break;
+
+        case "download_feedback":
+          if (feedback.payload.error) {
+            emitToastMessage(
+              "Could not download schedule from device",
+              "error"
+            );
+          } else {
+            emitToastMessage(
+              "Schedule downloaded from device successfully",
+              "success"
+            );
+          }
+          break;
+
+        default:
+          console.log("Unhandled Schedule event type:", feedback.event);
+      }
+    };
+
+    socket?.addEventListener("message", handleDataFeedback);
+
+    return () => {
+      socket?.removeEventListener("message", handleDataFeedback);
+    };
+  }, []);
 
   return (
     <div className="schedule__container">
@@ -640,7 +681,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
               className="upload__button"
               disabled={!selectedUploadPlan || !selectedUploadTime}
             >
-              Upload to Device
+              {isUploadinSchedule ? "Loading..." : "Upload to Device"}
             </button>
           </div>
         )}
