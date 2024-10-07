@@ -152,6 +152,7 @@ export const getUserdeviceActiveProgData = createAsyncThunk(
       const {
         data: { data },
       } = await HttpRequest.get(`/activity/${deviceId}`);
+      console.log("Activity", data, deviceId);
       return data;
     } catch (error: any) {
       emitToastMessage(error?.response.data.message, "error");
@@ -186,10 +187,6 @@ const UserDeviceSlice = createSlice({
       if (existingPhase) {
         existingPhase.name = name;
         existingPhase.duration = duration;
-        // emitToastMessage(
-        //   "Phase configuration has been updated successfully.",
-        //   "success"
-        // );
       } else {
         state.configuredPhases.push({
           id,
@@ -197,10 +194,6 @@ const UserDeviceSlice = createSlice({
           duration,
           signalString,
         });
-        // emitToastMessage(
-        //   "Phase configuration has been added successfully.",
-        //   "success"
-        // );
       }
     },
 

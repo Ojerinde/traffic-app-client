@@ -91,8 +91,6 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
 
       // Check for Amber signal
       if (signalString.includes("A")) {
-        console.log("Amber Signal", timeLeft, signalString);
-
         dispatch(
           previewCreatedPatternPhase({
             duration: timeLeft,
@@ -110,7 +108,6 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
       }
 
       if (isBlink) {
-        console.log("Blink Signal", timeLeft, signalString);
         dispatch(setSignalString(signalString));
         dispatch(setSignalState());
         return;
@@ -118,7 +115,6 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
 
       countdownInterval = setInterval(() => {
         // Handle Normal Signal
-        console.log("Normal Signal", timeLeft, signalString);
         if (timeLeft > 0) {
           timeLeft -= 1;
           dispatch(
@@ -245,6 +241,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
   // Fetch Intersection Config Data
   useEffect(() => {
     if (!deviceActiveProgData?.JunctionId) {
+      console.log("Fetching Device Active Program Data");
       dispatch(getUserdeviceActiveProgData(params.deviceId));
     }
     if (!currentDeviceInfoData?.Rtc) {
