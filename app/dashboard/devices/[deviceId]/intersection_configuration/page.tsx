@@ -3,10 +3,7 @@
 import { useEffect } from "react";
 import FourWayIntersection from "@/components/IntersectionComponent/FourWayIntersection";
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
-import {
-  setIsIntersectionConfigurable,
-  setSignalState,
-} from "@/store/signals/SignalConfigSlice";
+import { setSignalState } from "@/store/signals/SignalConfigSlice";
 import TabsContainer from "@/components/TabsComponents/TabsContainer";
 
 interface IntersectionConfigurationPageProps {
@@ -29,7 +26,7 @@ const IntersectionConfigurationPage: React.FC<
   return (
     <section className="intersectionConfigPage">
       <h2 className="intersectionConfigPage__header">
-        {currentDeviceInfoData.JunctionId}
+        {currentDeviceInfoData?.JunctionId}
       </h2>
       <div className="intersectionConfigPage__box">
         <div className="intersectionConfigPage__box--left">

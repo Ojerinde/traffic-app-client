@@ -147,7 +147,6 @@ export const getUserDeviceInfoData = createAsyncThunk(
       const {
         data: { data },
       } = await HttpRequest.get(`/info/${deviceId}`);
-      console.log("Got info message user device", data);
       return data;
     } catch (error: any) {
       emitToastMessage(error?.response.data.message, "error");

@@ -1,17 +1,20 @@
 "use client";
 
+import { getWebSocket } from "@/app/dashboard/websocket";
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
 import { getUserPlan } from "@/store/devices/UserDeviceSlice";
 import HttpRequest from "@/store/services/HttpRequest";
 import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
 import { emitToastMessage } from "@/utils/toastFunc";
-import { usePathname, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FaTrashAlt } from "react-icons/fa";
+import { MdUpload } from "react-icons/md";
 
 interface BoxThreeProps {}
 const BoxThree: React.FC<BoxThreeProps> = ({}) => {
   const router = useRouter();
+  const params = useParams();
   const pathname = usePathname();
   const newPathname =
     pathname.slice(0, pathname.lastIndexOf("/")) + "/schedule";
@@ -31,9 +34,13 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
   };
   const plansToShow = showSearchedResult ? searchedResult : plans;
 
+  useEffect(() => {
+    dispatch(getUserPlan(email));
+  }, [dispatch]);
+
   const handleDeletePlan = async (planId: string, planName: string) => {
     const confirmResult = confirm(
-      `Are you sure you want to delete "${planName}" pattern?`
+      `Are you sure you want to delete "${planName}" plan?`
     );
     if (!confirmResult) return;
     try {
@@ -44,9 +51,76 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
       emitToastMessage(error?.response.data.message, "error");
     }
   };
-  useEffect(() => {
-    dispatch(getUserPlan(email));
-  }, [dispatch]);
+
+  const handleUploadPlan = async (planId: string, planName: string) => {
+    const confirmResult = confirm(
+      `Are you sure you want to upload "${planName}" plan?`
+    );
+    if (!confirmResult) return;
+
+    try {
+      const plan = plans.find((plan) => plan.id === planId);
+      if (!plan || !plan.schedule) {
+        console.error("Invalid plan or missing schedule");
+        return;
+      }
+
+      const socket = getWebSocket();
+
+      const sendMessage = (timeSegmentKey: string, timeSegment: any) => {
+        return new Promise<void>((resolve) => {
+          socket.send(
+            JSON.stringify({
+              event: "upload_request",
+              payload: {
+                DeviceID: params.deviceId,
+                email,
+                plan: plan.name,
+                timeSegment: timeSegmentKey,
+                patternName: timeSegment.label,
+              },
+            })
+          );
+
+          // Listen for the response before proceeding
+          socket.onmessage = (event: any) => {
+            const response = JSON.parse(event.data);
+            if (response.event === "upload_feedback") {
+              console.log(
+                "Upload success for time segment:",
+                timeSegmentKey,
+                timeSegment.value
+              );
+              resolve();
+            }
+          };
+        });
+      };
+
+      for (const timeSegmentKey of Object.keys(plan.schedule)) {
+        const timeSegment = plan.schedule[timeSegmentKey];
+        console.log(
+          `%cTime Segment Key: ${timeSegmentKey}, Value:`,
+          "color:red;",
+          timeSegment
+        );
+
+        if (timeSegment.value) {
+          console.log(
+            `Uploading time segment: ${timeSegment.value} at ${timeSegmentKey}`
+          );
+          await sendMessage(timeSegmentKey, timeSegment);
+        }
+      }
+
+      console.log(`All segments uploaded for plan: ${plan.name}`);
+    } catch (error: any) {
+      emitToastMessage(
+        error?.response?.data?.message || "Upload failed",
+        "error"
+      );
+    }
+  };
 
   return (
     <div className="boxThree">
@@ -79,15 +153,22 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
                 <li className="plans__list" key={index}>
                   <div className="plans__list--item">
                     <h3>{plan.name}</h3>
-
-                    {/* Delete Button */}
-                    <button
-                      onClick={() => {
-                        handleDeletePlan(plan.id, plan.name);
-                      }}
-                    >
-                      <FaTrashAlt />
-                    </button>
+                    <div>
+                      <button
+                        onClick={() => {
+                          handleUploadPlan(plan.id, plan.name);
+                        }}
+                      >
+                        <MdUpload />
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleDeletePlan(plan.id, plan.name);
+                        }}
+                      >
+                        <FaTrashAlt />
+                      </button>
+                    </div>
                   </div>
                 </li>
               ))}

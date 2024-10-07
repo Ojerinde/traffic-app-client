@@ -53,7 +53,7 @@ export const useDeviceStatus = () => {
           dispatch(
             updateDeviceAvailability({ DeviceID: deviceId, status: false })
           );
-        }, 12000);
+        }, 30000);
       }
     };
 

@@ -57,9 +57,9 @@ const dayTypeOptions: Option[] = [
   { value: "friday", label: "Friday" },
   { value: "saturday", label: "Saturday" },
   { value: "sunday", label: "Sunday" },
-  { value: "weekdays", label: "Weekdays" },
-  { value: "weekend", label: "Weekend" },
-  { value: "allDays", label: "All Days" },
+  // { value: "weekdays", label: "Weekdays" },
+  // { value: "weekend", label: "Weekend" },
+  // { value: "allDays", label: "All Days" },
   { value: "custom", label: "Custom" },
 ];
 
@@ -70,8 +70,8 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
   const email = GetItemFromLocalStorage("user")?.email;
 
   const patternsOptions: Option[] = patterns?.map((pattern) => ({
-    value: pattern.name?.toLowerCase(),
-    label: pattern.name,
+    value: pattern?.name?.toLowerCase(),
+    label: pattern?.name,
   }));
 
   const [schedule, setSchedule] = useState<ScheduleData>({});
@@ -91,7 +91,11 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
   const [availableTimeSegments, setAvailableTimeSegments] = useState<Option[]>(
     []
   );
-  const [isUploadinSchedule, setIsUploadingSchedule] = useState<boolean>(false);
+  const [isUploadingSchedule, setIsUploadingSchedule] =
+    useState<boolean>(false);
+
+  const [selectedDownloadPlan, setSelectedDownloadPlan] =
+    useState<Option | null>(null);
 
   const [selectedPattern, setSelectedPattern] = useState<any>(null);
   const [updatedPatternPhases, setUpdatedPatternPhases] = useState<any[]>([]);
@@ -111,7 +115,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
     dispatch(clearPhaseConfig());
 
     const pattern = patterns.find(
-      (pattern) => pattern.name.toLowerCase() === patternName
+      (pattern) => pattern?.name.toLowerCase() === patternName
     );
     setSelectedPattern(pattern);
     setRightBoxContent("patterns");
@@ -126,7 +130,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
       ...updatedPatternPhases,
       {
         id: phase._id,
-        name: phase.name,
+        name: phase?.name,
         signalString: phase.data,
         duration: "",
       },
@@ -136,7 +140,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
 
   const handleRemovePhaseFromSelectedPhases = (phaseId: string) => {
     setUpdatedPatternPhases((prev) =>
-      prev.filter((phase) => phase.id !== phaseId)
+      prev.filter((phase) => phase?.id !== phaseId)
     );
     dispatch(removePhaseConfig(phaseId));
   };
@@ -144,7 +148,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
   const handleConfigurePhase = (phaseId: string, phaseName: string) => {
     if (
       phaseToConfigure &&
-      phaseToConfigure.id !== phaseId &&
+      phaseToConfigure?.id !== phaseId &&
       phaseFormik.dirty
     ) {
       const confirmSwitch = window.confirm(
@@ -153,14 +157,14 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
       if (!confirmSwitch) return;
     }
 
-    const foundPhase = phases.find((p) => p.name === phaseName);
+    const foundPhase = phases.find((p) => p?.name === phaseName);
 
     if (foundPhase) {
       setPhaseToConfigure({ ...foundPhase, id: phaseId });
       phaseFormik.resetForm({
         values: {
           duration:
-            configuredPhases.find((p) => p.id === foundPhase.id)?.duration ||
+            configuredPhases.find((p) => p?.id === foundPhase?.id)?.duration ||
             "",
         },
       });
@@ -171,7 +175,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
     enableReinitialize: true,
     initialValues: {
       duration: phaseToConfigure
-        ? configuredPhases.find((p) => p.id === phaseToConfigure.id)
+        ? configuredPhases.find((p) => p?.id === phaseToConfigure?.id)
             ?.duration || ""
         : "",
     },
@@ -183,8 +187,8 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
     onSubmit: async (values) => {
       if (phaseToConfigure) {
         const configToSave = {
-          id: phaseToConfigure.id,
-          name: phaseToConfigure.name,
+          id: phaseToConfigure?.id,
+          name: phaseToConfigure?.name,
           signalString: phaseToConfigure.data,
           duration: values.duration,
         };
@@ -249,7 +253,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
   const handlePlanChange = (newValue: SingleValue<Option>) => {
     if (newValue) {
       setSelectedPlan(newValue);
-      const plan = plans.find((plan) => plan.name === newValue.value);
+      const plan = plans.find((plan) => plan?.name === newValue.value);
 
       if (plan) {
         const fullSchedule: ScheduleData = {};
@@ -268,7 +272,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
     );
     if (existingPlan) {
       const userResponse = confirm(
-        `A plan for ${existingPlan.name} exist, do you want to override?`
+        `A plan for ${existingPlan?.name} exist, do you want to override?`
       );
       if (!userResponse) return;
     }
@@ -306,7 +310,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
       setSelectedUploadPlan(newValue);
       setSelectedUploadTime(null);
 
-      const selectedPlan = plans.find((plan) => plan.id === newValue.value);
+      const selectedPlan = plans.find((plan) => plan?.id === newValue.value);
 
       if (selectedPlan && selectedPlan.schedule) {
         const availableTimes = Object.entries(selectedPlan.schedule)
@@ -346,7 +350,6 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
             plan: selectedUploadPlan.label,
             timeSegment: selectedUploadTime.value,
             patternName: selectedUploadTime.label?.split("-")[1]?.trim(),
-            junctionId: currentDeviceInfoData.JunctionId,
           },
         })
       );
@@ -361,7 +364,16 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
     }
   };
 
+  const handleDownloadPlanChange = (newValue: SingleValue<Option>) => {
+    if (newValue) {
+      setSelectedDownloadPlan(newValue);
+    }
+  };
   const handleDownload = async () => {
+    if (!selectedDownloadPlan) {
+      emitToastMessage("Please select a plan", "error");
+      return;
+    }
     const socket = getWebSocket();
     const sendMessage = () => {
       socket.send(
@@ -369,6 +381,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
           event: "download_request",
           payload: {
             DeviceID: params.deviceId,
+            plan: selectedDownloadPlan?.label,
             email,
           },
         })
@@ -398,6 +411,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
             emitToastMessage("Could not upload schedule to device", "error");
           } else {
             setIsUploadingSchedule(false);
+            console.log("Downloaded schedule", feedback.payload);
             emitToastMessage(
               "Schedule uploaded to device successfully",
               "success"
@@ -412,6 +426,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
               "error"
             );
           } else {
+            console.log("Downloaded schedule", feedback.payload);
             emitToastMessage(
               "Schedule downloaded from device successfully",
               "success"
@@ -443,8 +458,8 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
           />
           <Select
             options={plans?.map((plan) => ({
-              value: plan.name,
-              label: plan.name,
+              value: plan?.name,
+              label: plan?.name,
             }))}
             value={selectedPlan}
             onChange={handlePlanChange}
@@ -522,7 +537,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
         {rightBoxContent === "patterns" && (
           <>
             <div className="patterns__selected">
-              <h3>Phases in "{selectedPattern.name}"</h3>
+              <h3>Phases in "{selectedPattern?.name}"</h3>
 
               <DragDropContext onDragEnd={handleDragEndEdit}>
                 <Droppable droppableId="selected-phases">
@@ -530,8 +545,8 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
                     <ul {...provided.droppableProps} ref={provided.innerRef}>
                       {updatedPatternPhases?.map((phaseInstance, index) => (
                         <Draggable
-                          key={phaseInstance.id}
-                          draggableId={`${phaseInstance.id}`}
+                          key={phaseInstance?.id}
+                          draggableId={`${phaseInstance?.id}`}
                           index={index}
                         >
                           {(provided) => {
@@ -542,10 +557,11 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
                                 {...provided.dragHandleProps}
                               >
                                 <div className="row">
-                                  <h3>{phaseInstance.name}</h3>
+                                  <h3>{phaseInstance?.name}</h3>
                                   <form onSubmit={phaseFormik.handleSubmit}>
                                     {phaseToConfigure &&
-                                    phaseToConfigure.id === phaseInstance.id ? (
+                                    phaseToConfigure?.id ===
+                                      phaseInstance?.id ? (
                                       <>
                                         <input
                                           id="duration"
@@ -568,13 +584,14 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
                                     ) : (
                                       <>
                                         {configuredPhases.find(
-                                          (p) => p.id === phaseInstance.id
+                                          (p) => p?.id === phaseInstance?.id
                                         )?.duration ? (
                                           <span>
                                             Dur:{" "}
                                             {
                                               configuredPhases.find(
-                                                (p) => p.id === phaseInstance.id
+                                                (p) =>
+                                                  p?.id === phaseInstance?.id
                                               )?.duration
                                             }
                                           </span>
@@ -583,13 +600,13 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
                                           type="button"
                                           onClick={() =>
                                             handleConfigurePhase(
-                                              phaseInstance.id,
-                                              phaseInstance.name
+                                              phaseInstance?.id,
+                                              phaseInstance?.name
                                             )
                                           }
                                         >
                                           {configuredPhases.find(
-                                            (p) => p.id === phaseInstance.id
+                                            (p) => p?.id === phaseInstance?.id
                                           )?.duration
                                             ? "Edit Duration"
                                             : "Set Duration"}
@@ -600,7 +617,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
                                   <button
                                     onClick={() =>
                                       handleRemovePhaseFromSelectedPhases(
-                                        phaseInstance.id
+                                        phaseInstance?.id
                                       )
                                     }
                                   >
@@ -634,7 +651,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
               <ul className="patterns__availablePhases">
                 {phases?.map((phase: any, index: any) => (
                   <li className={`patterns__availablePhases--item`} key={index}>
-                    <h3>{phase.name}</h3>
+                    <h3>{phase?.name}</h3>
                     <div>
                       <button onClick={() => handleAvailablePhaseSelect(phase)}>
                         Add
@@ -649,6 +666,16 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
         {rightBoxContent === "download" && (
           <div className="upload">
             <h3>Download Plan from Device</h3>
+            <Select
+              options={plans?.map((plan) => ({
+                value: plan?.id,
+                label: plan?.name,
+              }))}
+              value={selectedDownloadPlan}
+              onChange={handleDownloadPlanChange}
+              className="upload__select--field"
+              placeholder="Select a plan to download"
+            />
             <button onClick={handleDownload} className="upload__button">
               Download from Device
             </button>
@@ -659,8 +686,8 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
             <h3>Upload Plan to Device</h3>
             <Select
               options={plans?.map((plan) => ({
-                value: plan.id,
-                label: plan.name,
+                value: plan?.id,
+                label: plan?.name,
               }))}
               value={selectedUploadPlan}
               onChange={handleUploadPlanChange}
@@ -681,7 +708,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
               className="upload__button"
               disabled={!selectedUploadPlan || !selectedUploadTime}
             >
-              {isUploadinSchedule ? "Loading..." : "Upload to Device"}
+              {isUploadingSchedule ? "Loading..." : "Upload to Device"}
             </button>
           </div>
         )}
