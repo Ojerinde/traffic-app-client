@@ -11,7 +11,7 @@ import { emitToastMessage } from "@/utils/toastFunc";
 import {
   addOrUpdatePhaseConfig,
   clearPhaseConfig,
-  getUserdeviceActiveProgData,
+  getUserDeviceInfoData,
   getUserPattern,
   getUserPlan,
   removePhaseConfig,
@@ -64,7 +64,7 @@ const dayTypeOptions: Option[] = [
 ];
 
 const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
-  const { patterns, phases, plans, configuredPhases, deviceActiveProgData } =
+  const { patterns, phases, plans, configuredPhases, currentDeviceInfoData } =
     useAppSelector((state) => state.userDevice);
   const dispatch = useAppDispatch();
   const email = GetItemFromLocalStorage("user")?.email;
@@ -296,8 +296,8 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
 
   useEffect(() => {
     dispatch(getUserPlan(email));
-    if (!deviceActiveProgData?.JunctionId) {
-      dispatch(getUserdeviceActiveProgData(params.deviceId));
+    if (!currentDeviceInfoData?.JunctionId) {
+      dispatch(getUserDeviceInfoData(params.deviceId));
     }
   }, []);
 
@@ -346,7 +346,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
             plan: selectedUploadPlan.label,
             timeSegment: selectedUploadTime.value,
             patternName: selectedUploadTime.label?.split("-")[1]?.trim(),
-            junctionId: deviceActiveProgData.JunctionId,
+            junctionId: currentDeviceInfoData.JunctionId,
           },
         })
       );

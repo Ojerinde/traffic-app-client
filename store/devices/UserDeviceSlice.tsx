@@ -17,18 +17,15 @@ interface InitialStateTypes {
     Bat: string;
     Temp: string;
     Rtc: string;
+    Plan: string;
+    Period: string;
+    JunctionId: string;
     DeviceID: string;
   };
   activePhaseSignal: {
     Countdown: string;
     Phase: string;
     DeviceID: string;
-  };
-  deviceActiveProgData: {
-    DeviceID: string;
-    Plan: string;
-    Period: string;
-    JunctionId: string;
   };
   deviceAvailability: {
     DeviceID: string;
@@ -61,6 +58,9 @@ const initialState: InitialStateTypes = {
     Bat: "",
     Temp: "",
     Rtc: "",
+    Plan: "",
+    Period: "",
+    JunctionId: "",
     DeviceID: "",
   },
   activePhaseSignal: {
@@ -68,12 +68,7 @@ const initialState: InitialStateTypes = {
     Phase: "",
     DeviceID: "",
   },
-  deviceActiveProgData: {
-    DeviceID: "",
-    Plan: "",
-    Period: "",
-    JunctionId: "",
-  },
+
   deviceAvailability: {
     DeviceID: "",
     Status: false,
@@ -145,20 +140,6 @@ export const getUserPlan = createAsyncThunk(
     }
   }
 );
-export const getUserdeviceActiveProgData = createAsyncThunk(
-  "userDevice/getUserdeviceActiveProgData",
-  async (deviceId: string) => {
-    try {
-      const {
-        data: { data },
-      } = await HttpRequest.get(`/activity/${deviceId}`);
-      console.log("Activity", data, deviceId);
-      return data;
-    } catch (error: any) {
-      emitToastMessage(error?.response.data.message, "error");
-    }
-  }
-);
 export const getUserDeviceInfoData = createAsyncThunk(
   "userDevice/getUserDeviceInfoData",
   async (deviceId: string) => {
@@ -166,6 +147,7 @@ export const getUserDeviceInfoData = createAsyncThunk(
       const {
         data: { data },
       } = await HttpRequest.get(`/info/${deviceId}`);
+      console.log("Got info message user device", data);
       return data;
     } catch (error: any) {
       emitToastMessage(error?.response.data.message, "error");
@@ -216,9 +198,6 @@ const UserDeviceSlice = createSlice({
     addCurrentDeviceSignalData(state, action) {
       state.activePhaseSignal = action.payload;
     },
-    addCurrentDeviceProgData(state, action) {
-      state.deviceActiveProgData = action.payload;
-    },
     addCurrentDeviceStateData(state, action) {
       state.deviceActiveStateData = action.payload;
     },
@@ -268,9 +247,6 @@ const UserDeviceSlice = createSlice({
       .addCase(getUserPlan.rejected, (state) => {
         state.isFetchingPlans = false;
       })
-      .addCase(getUserdeviceActiveProgData.fulfilled, (state, action) => {
-        state.deviceActiveProgData = action.payload;
-      })
       .addCase(getUserDeviceInfoData.fulfilled, (state, action) => {
         state.currentDeviceInfoData = action.payload;
       });
@@ -282,7 +258,6 @@ export const {
   clearPhaseConfig,
   addCurrentDeviceInfoData,
   addCurrentDeviceSignalData,
-  addCurrentDeviceProgData,
   updateDeviceAvailability,
   addCurrentDeviceStateData,
 } = UserDeviceSlice.actions;

@@ -19,8 +19,6 @@ import { formatRtcDate, formatRtcTime, getDeviceStatus } from "@/utils/misc";
 import {
   addCurrentDeviceInfoData,
   addCurrentDeviceSignalData,
-  addCurrentDeviceProgData,
-  getUserdeviceActiveProgData,
   getUserDeviceInfoData,
   updateDeviceAvailability,
   addCurrentDeviceStateData,
@@ -40,8 +38,9 @@ export interface IntersectionConfigItem {
 }
 
 const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
-  const { deviceAvailability, currentDeviceInfoData, deviceActiveProgData } =
-    useAppSelector((state) => state.userDevice);
+  const { deviceAvailability, currentDeviceInfoData } = useAppSelector(
+    (state) => state.userDevice
+  );
   const dispatch = useAppDispatch();
 
   getWebSocket();
@@ -151,11 +150,15 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
                 Bat: "",
                 Temp: "",
                 Rtc: "",
+                Plan: "",
+                Period: "",
+                JunctionId: "",
                 DeviceID: "",
               })
             );
             emitToastMessage("Could not fetch device info data", "error");
           } else {
+            console.log("Got info message", feedback.payload);
             dispatch(addCurrentDeviceInfoData(feedback.payload));
           }
           break;
@@ -186,22 +189,6 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
           }
           break;
 
-        case "prog_feedback":
-          if (feedback.payload.error) {
-            dispatch(
-              addCurrentDeviceProgData({
-                DeviceID: "",
-                Plan: "",
-                Period: "",
-                JunctionId: "",
-              })
-            );
-            emitToastMessage("Could not fetch device prog data", "error");
-          } else {
-            dispatch(addCurrentDeviceProgData(feedback.payload));
-          }
-          break;
-
         case "state_feedback":
           if (feedback.payload.error) {
             dispatch(
@@ -216,9 +203,9 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
                 Restart: false,
               })
             );
-            emitToastMessage("Could not fetch device prog data", "error");
+            emitToastMessage("Could not fetch device state data", "error");
           } else {
-            dispatch(addCurrentDeviceProgData(feedback.payload));
+            dispatch(addCurrentDeviceStateData(feedback.payload));
           }
           break;
 
@@ -240,11 +227,8 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
 
   // Fetch Intersection Config Data
   useEffect(() => {
-    if (!deviceActiveProgData?.JunctionId) {
-      console.log("Fetching Device Active Program Data");
-      dispatch(getUserdeviceActiveProgData(params.deviceId));
-    }
     if (!currentDeviceInfoData?.Rtc) {
+      console.log("Fetching Device Info Data since it is not available");
       dispatch(getUserDeviceInfoData(params.deviceId));
     }
 
@@ -311,15 +295,15 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
   const intersectionConfigItems: IntersectionConfigItem[] = [
     {
       label: "Intersection Name",
-      value: deviceActiveProgData?.JunctionId || "Nill",
+      value: currentDeviceInfoData?.JunctionId || "Nill",
     },
     {
       label: "Active Plan",
-      value: deviceActiveProgData?.Plan || "Nill",
+      value: currentDeviceInfoData?.Plan || "Nill",
     },
     {
       label: "Period",
-      value: deviceActiveProgData?.Period || "Nill",
+      value: currentDeviceInfoData?.Period || "Nill",
     },
   ];
 

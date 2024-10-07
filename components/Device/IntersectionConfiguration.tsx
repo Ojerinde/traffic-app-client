@@ -56,7 +56,6 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
         return;
       }
     }
-    console.log("I got here");
     if (action === "Manual") {
       dispatch(setManualMode(true));
       setIsAutoMode(false);
