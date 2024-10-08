@@ -52,15 +52,20 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
     }
   };
 
-  const handleUploadPlan = async (planId: string, planName: string) => {
-    const confirmResult = confirm(
-      `Are you sure you want to upload "${planName}" plan?`
-    );
-    if (!confirmResult) return;
-
+  const handleUploadPlan = async (
+    planId: string,
+    planName: string,
+    showConfirmation = true
+  ) => {
+    if (showConfirmation) {
+      const confirmResult = confirm(
+        `Are you sure you want to upload "${planName}" plan?`
+      );
+      if (!confirmResult) return;
+    }
     try {
       const plan = plans.find((plan) => plan.id === planId);
-      console.log("The Selected Plan", plan.schedule);
+      console.log("The Selected Plan", plan?.schedule);
       if (!plan || !plan.schedule) {
         console.error("Invalid plan or missing schedule");
         return;
@@ -83,13 +88,11 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
             })
           );
 
-          // Listen for the response before proceeding
           socket.onmessage = (event: MessageEvent) => {
             const feedback = JSON.parse(event.data);
-            if (feedback.event === "ping_received") return;
+            if (feedback.event !== "upload_feedback") return;
             console.log(feedback, plan.name, timeSegmentKey);
             if (
-              feedback?.event === "upload_feedback" &&
               feedback.payload.Plan === plan.name &&
               feedback.payload.Period === timeSegmentKey
             ) {
@@ -100,13 +103,11 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
         });
       };
 
-      // Track the last valid time segment value
       let lastValidSegment = null;
 
       for (const timeSegmentKey of Object.keys(plan.schedule)) {
         let timeSegment = plan.schedule[timeSegmentKey];
 
-        // Use the last valid segment if the current one is null or invalid
         if (!timeSegment || !timeSegment.value) {
           if (lastValidSegment) {
             timeSegment = lastValidSegment;
@@ -115,7 +116,6 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
           lastValidSegment = timeSegment;
         }
 
-        // Upload the time segment
         if (timeSegment && timeSegment.value) {
           console.log(
             `Uploading time segment: ${timeSegment.value} at ${timeSegmentKey}`
@@ -128,6 +128,30 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
     } catch (error: any) {
       emitToastMessage(
         error?.response?.data?.message || "Upload failed",
+        "error"
+      );
+    }
+  };
+
+  const handleUploadAllPlan = async () => {
+    const confirmResult = confirm(
+      "Are you sure you want to upload all the plans?"
+    );
+    if (!confirmResult) return;
+
+    try {
+      for (const plan of plans) {
+        if (plan && plan.id && plan.name) {
+          console.log(`Uploading plan: ${plan.name}`);
+          await handleUploadPlan(plan.id, plan.name, false);
+        }
+      }
+
+      emitToastMessage("All plans uploaded successfully!", "success");
+    } catch (error: any) {
+      console.error("Error uploading all plans:", error);
+      emitToastMessage(
+        error?.response?.data?.message || "Failed to upload all plans",
         "error"
       );
     }
@@ -194,6 +218,7 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
       <button onClick={() => router.push(newPathname)}>
         Go to schedule page
       </button>
+      <button onClick={handleUploadAllPlan}>Upload All Plans</button>
     </div>
   );
 };
