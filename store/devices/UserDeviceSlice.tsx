@@ -35,7 +35,6 @@ interface InitialStateTypes {
     DeviceID: string;
     Auto: boolean;
     Power: boolean;
-    Manual: boolean;
     Next: boolean;
     Hold: boolean;
     Reset: boolean;
@@ -77,7 +76,6 @@ const initialState: InitialStateTypes = {
     DeviceID: "",
     Auto: false,
     Power: false,
-    Manual: false,
     Next: false,
     Hold: false,
     Reset: false,

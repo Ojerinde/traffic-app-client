@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IntersectionConfigItem } from "@/app/dashboard/devices/[deviceId]/page";
 import { useRouter, usePathname } from "next/navigation";
 import IntersectionConfigurationItem from "./IntersectionConfigurationItem";
-import { useAppDispatch } from "@/hooks/reduxHook";
+import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
 import {
   closePreviewCreatedPatternPhase,
   setManualMode,
@@ -29,9 +29,14 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
   const router = useRouter();
   const pathname = usePathname();
   const dispatch = useAppDispatch();
+  const { deviceActiveStateData } = useAppSelector((state) => state.userDevice);
 
   // State to track the current mode (Auto or Manual)
-  const [isAutoMode, setIsAutoMode] = useState(true);
+  const [isAutoMode, setIsAutoMode] = useState(deviceActiveStateData.Auto);
+
+  useEffect(() => {
+    setIsAutoMode(deviceActiveStateData.Auto);
+  }, [deviceActiveStateData]);
 
   const handleRequest = async (action: string) => {
     const isPasswordVerified = GetItemFromLocalStorage("isPasswordVerified");
@@ -105,6 +110,7 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
           type="button"
           onClick={() => {
             router.push(`${pathname}/intersection_configuration`);
+            dispatch(setManualMode(false));
           }}
         >
           Configure

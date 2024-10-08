@@ -60,6 +60,7 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
 
     try {
       const plan = plans.find((plan) => plan.id === planId);
+      console.log("The Selected Plan", plan.schedule);
       if (!plan || !plan.schedule) {
         console.error("Invalid plan or missing schedule");
         return;
@@ -83,29 +84,39 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
           );
 
           // Listen for the response before proceeding
-          socket.onmessage = (event: any) => {
-            const response = JSON.parse(event.data);
-            if (response.event === "upload_feedback") {
-              console.log(
-                "Upload success for time segment:",
-                timeSegmentKey,
-                timeSegment.value
-              );
+          socket.onmessage = (event: MessageEvent) => {
+            const feedback = JSON.parse(event.data);
+            if (feedback.event === "ping_received") return;
+            console.log(feedback, plan.name, timeSegmentKey);
+            if (
+              feedback?.event === "upload_feedback" &&
+              feedback.payload.Plan === plan.name &&
+              feedback.payload.Period === timeSegmentKey
+            ) {
+              console.log("Upload success for time segment:", feedback);
               resolve();
             }
           };
         });
       };
 
-      for (const timeSegmentKey of Object.keys(plan.schedule)) {
-        const timeSegment = plan.schedule[timeSegmentKey];
-        console.log(
-          `%cTime Segment Key: ${timeSegmentKey}, Value:`,
-          "color:red;",
-          timeSegment
-        );
+      // Track the last valid time segment value
+      let lastValidSegment = null;
 
-        if (timeSegment.value) {
+      for (const timeSegmentKey of Object.keys(plan.schedule)) {
+        let timeSegment = plan.schedule[timeSegmentKey];
+
+        // Use the last valid segment if the current one is null or invalid
+        if (!timeSegment || !timeSegment.value) {
+          if (lastValidSegment) {
+            timeSegment = lastValidSegment;
+          }
+        } else {
+          lastValidSegment = timeSegment;
+        }
+
+        // Upload the time segment
+        if (timeSegment && timeSegment.value) {
           console.log(
             `Uploading time segment: ${timeSegment.value} at ${timeSegmentKey}`
           );

@@ -36,14 +36,28 @@ interface ScheduleTemplateProps {
 
 function generateTimeSegments(): string[] {
   const segments: string[] = [];
-  for (let hour = 0; hour < 24; hour++) {
-    for (let minute = 0; minute < 60; minute += 30) {
-      const time = `${hour.toString().padStart(2, "0")}:${minute
-        .toString()
-        .padStart(2, "0")}`;
-      segments.push(time);
+
+  segments.push("00:00");
+
+  let hour = 0;
+  let minute = 31;
+
+  while (hour < 24) {
+    const time = `${hour.toString().padStart(2, "0")}:${minute
+      .toString()
+      .padStart(2, "0")}`;
+    segments.push(time);
+
+    minute += 30;
+
+    if (minute >= 60) {
+      minute -= 60;
+      hour += 1;
     }
+
+    if (hour >= 24) break;
   }
+
   return segments;
 }
 
@@ -84,12 +98,6 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
   >(null);
   const [selectedUploadPlan, setSelectedUploadPlan] = useState<Option | null>(
     null
-  );
-  const [selectedUploadTime, setSelectedUploadTime] = useState<Option | null>(
-    null
-  );
-  const [availableTimeSegments, setAvailableTimeSegments] = useState<Option[]>(
-    []
   );
   const [isUploadingSchedule, setIsUploadingSchedule] =
     useState<boolean>(false);
@@ -308,59 +316,89 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
   const handleUploadPlanChange = (newValue: SingleValue<Option>) => {
     if (newValue) {
       setSelectedUploadPlan(newValue);
-      setSelectedUploadTime(null);
-
-      const selectedPlan = plans.find((plan) => plan?.id === newValue.value);
-
-      if (selectedPlan && selectedPlan.schedule) {
-        const availableTimes = Object.entries(selectedPlan.schedule)
-          .filter(([_, value]) => value !== null)
-          .map(([time, value]) => ({
-            value: time,
-            label: `${time} - ${(value as Option).label}`,
-          }));
-        setAvailableTimeSegments(availableTimes);
-      } else {
-        setAvailableTimeSegments([]);
-      }
-    }
-  };
-
-  const handleUploadTimeChange = (newValue: SingleValue<Option>) => {
-    if (newValue) {
-      setSelectedUploadTime(newValue);
     }
   };
 
   const handleUpload = async () => {
-    if (!selectedUploadPlan || !selectedUploadTime) {
-      emitToastMessage("Please select both a plan and a time segment", "error");
-      return;
-    }
+    const confirmResult = confirm(
+      `Are you sure you want to upload "${selectedUploadPlan?.label}" plan?`
+    );
+    if (!confirmResult) return;
 
-    const socket = getWebSocket();
-
-    const sendMessage = () => {
-      socket.send(
-        JSON.stringify({
-          event: "upload_request",
-          payload: {
-            DeviceID: params.deviceId,
-            email,
-            plan: selectedUploadPlan.label,
-            timeSegment: selectedUploadTime.value,
-            patternName: selectedUploadTime.label?.split("-")[1]?.trim(),
-          },
-        })
+    try {
+      const plan = plans.find(
+        (plan) => plan.name === selectedUploadPlan?.label
       );
-    };
-    setIsUploadingSchedule(true);
-    if (socket.readyState === WebSocket.OPEN) {
-      sendMessage();
-    } else {
-      socket.onopen = () => {
-        sendMessage();
+      console.log("The Selected Plan", plan.schedule);
+      if (!plan || !plan.schedule) {
+        console.error("Invalid plan or missing schedule");
+        return;
+      }
+
+      const socket = getWebSocket();
+
+      const sendMessage = (timeSegmentKey: string, timeSegment: any) => {
+        return new Promise<void>((resolve) => {
+          socket.send(
+            JSON.stringify({
+              event: "upload_request",
+              payload: {
+                DeviceID: params.deviceId,
+                email,
+                plan: plan.name,
+                timeSegment: timeSegmentKey,
+                patternName: timeSegment.label,
+              },
+            })
+          );
+
+          // Listen for the response before proceeding
+          socket.onmessage = (event: MessageEvent) => {
+            const feedback = JSON.parse(event.data);
+            if (feedback.event === "ping_received") return;
+            console.log(feedback, plan.name, timeSegmentKey);
+            if (
+              feedback?.event === "upload_feedback" &&
+              feedback.payload.Plan === plan.name &&
+              feedback.payload.Period === timeSegmentKey
+            ) {
+              console.log("Upload success for time segment:", feedback);
+              resolve();
+            }
+          };
+        });
       };
+
+      // Track the last valid time segment value
+      let lastValidSegment = null;
+
+      for (const timeSegmentKey of Object.keys(plan.schedule)) {
+        let timeSegment = plan.schedule[timeSegmentKey];
+
+        // Use the last valid segment if the current one is null or invalid
+        if (!timeSegment || !timeSegment.value) {
+          if (lastValidSegment) {
+            timeSegment = lastValidSegment;
+          }
+        } else {
+          lastValidSegment = timeSegment;
+        }
+
+        // Upload the time segment
+        if (timeSegment && timeSegment.value) {
+          console.log(
+            `Uploading time segment: ${timeSegment.value} at ${timeSegmentKey}`
+          );
+          await sendMessage(timeSegmentKey, timeSegment);
+        }
+      }
+
+      console.log(`All segments uploaded for plan: ${plan.name}`);
+    } catch (error: any) {
+      emitToastMessage(
+        error?.response?.data?.message || "Upload failed",
+        "error"
+      );
     }
   };
 
@@ -369,6 +407,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
       setSelectedDownloadPlan(newValue);
     }
   };
+
   const handleDownload = async () => {
     if (!selectedDownloadPlan) {
       emitToastMessage("Please select a plan", "error");
@@ -401,41 +440,16 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
     // Listen to feedback for uploading and downloading
     const handleDataFeedback = (event: MessageEvent) => {
       const feedback = JSON.parse(event.data);
-      if (feedback.event === "ping_received") return;
+      if (feedback.event !== "download_feedback") return;
+      console.log("Download Feedback", feedback);
 
-      console.log("Scheduling Feedback", feedback);
-
-      switch (feedback.event) {
-        case "upload_feedback":
-          if (feedback.payload.error) {
-            emitToastMessage("Could not upload schedule to device", "error");
-          } else {
-            setIsUploadingSchedule(false);
-            console.log("Downloaded schedule", feedback.payload);
-            emitToastMessage(
-              "Schedule uploaded to device successfully",
-              "success"
-            );
-          }
-          break;
-
-        case "download_feedback":
-          if (feedback.payload.error) {
-            emitToastMessage(
-              "Could not download schedule from device",
-              "error"
-            );
-          } else {
-            console.log("Downloaded schedule", feedback.payload);
-            emitToastMessage(
-              "Schedule downloaded from device successfully",
-              "success"
-            );
-          }
-          break;
-
-        default:
-          console.log("Unhandled Schedule event type:", feedback.event);
+      if (feedback.payload.error) {
+        emitToastMessage("Could not download schedule from device", "error");
+      } else {
+        emitToastMessage(
+          "Schedule downloaded from device successfully",
+          "success"
+        );
       }
     };
 
@@ -694,19 +708,11 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
               className="upload__select--field"
               placeholder="Select a plan to upload"
             />
-            {selectedUploadPlan && (
-              <Select
-                options={availableTimeSegments}
-                value={selectedUploadTime}
-                onChange={handleUploadTimeChange}
-                className="upload__select--field"
-                placeholder="Select a time segment"
-              />
-            )}
+
             <button
               onClick={handleUpload}
               className="upload__button"
-              disabled={!selectedUploadPlan || !selectedUploadTime}
+              disabled={!selectedUploadPlan}
             >
               {isUploadingSchedule ? "Loading..." : "Upload to Device"}
             </button>
