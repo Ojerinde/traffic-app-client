@@ -53,7 +53,9 @@ const Background = styled.div<{ $backgroundImage: string }>`
     background-repeat: no-repeat;
     height: 65vh;
   }
-
+  @media screen and (max-width: 1100px) {
+    height: 55vh;
+  }
   @media screen and (max-width: 900px) {
     height: 50vh;
   }
@@ -148,7 +150,7 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
   const [phaseName, setPhaseName] = useState<string>("");
   const params = useParams();
   const dispatch = useAppDispatch();
-
+  // console.log("Initial signals", initialSignals);
   useEffect(() => {
     setSignals(initialSignals);
   }, [initialSignals]);

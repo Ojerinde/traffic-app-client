@@ -65,6 +65,23 @@ const SignalLight = styled.div<{
   border-radius: 50%;
   cursor: ${({ editable, $manualMode }) =>
     editable || $manualMode ? "pointer" : "default"};
+
+  @media screen and (max-width: 1300px) {
+    margin: 1.4px;
+  }
+  @media screen and (max-width: 1100px) {
+    margin: 1.5px;
+    width: 1.8rem;
+    height: 1.8rem;
+  }
+  @media screen and (max-width: 900px) {
+    margin: 1.5px;
+  }
+  @media screen and (max-width: 400px) {
+    margin: 1.5px;
+    width: 1.5rem;
+    height: 1.5rem;
+  }
 `;
 
 const PedestrianSignalLight = styled.div<{

@@ -2,15 +2,14 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  @media screen and (max-width: 1400px) {
-  }
+
   @media screen and (max-width: 1000px) {
     flex-direction: column;
     margin-bottom: 8rem;
   }
   &__left {
     flex-basis: 50%;
-    @media screen and (max-width: 1250px) {
+    @media screen and (max-width: 1300px) {
       flex-basis: 58%;
     }
     @media screen and (max-width: 1000px) {
@@ -20,10 +19,10 @@
 
   &__right {
     flex-basis: 45%;
-    @media screen and (max-width: 1250px) {
+    @media screen and (max-width: 1300px) {
       flex-basis: 40%;
     }
-      @media screen and (max-width: 1000px) {
+    @media screen and (max-width: 1000px) {
       width: 100%;
       display: flex;
       justify-content: space-between;
