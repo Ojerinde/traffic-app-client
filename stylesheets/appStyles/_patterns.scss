@@ -6,6 +6,9 @@
   margin-bottom: 1rem;
   overflow-y: scroll;
   max-height: 35rem;
+  @media screen and (max-width: 900px) {
+    width: 100%;
+  }
 
   // For available phases when adding a new pattern
   &__availablePhases {

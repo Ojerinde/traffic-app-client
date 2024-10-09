@@ -15,11 +15,29 @@
     justify-content: space-between;
     align-items: flex-start;
 
+    @media screen and (max-width: 1000px) {
+      flex-direction: column;
+      margin-bottom: 8rem;
+    }
     &--left {
       flex-basis: 50%;
+      @media screen and (max-width: 1300px) {
+        flex-basis: 58%;
+      }
+      @media screen and (max-width: 1000px) {
+        width: 100%;
+      }
     }
+
     &--right {
-      flex-basis: 48%;
+      flex-basis: 45%;
+      @media screen and (max-width: 1300px) {
+        flex-basis: 40%;
+      }
+      @media screen and (max-width: 1000px) {
+        width: 100%;
+        margin-bottom: 8rem;
+      }
     }
   }
 }

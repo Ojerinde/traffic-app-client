@@ -314,9 +314,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
   }, []);
 
   const handleUploadPlanChange = (newValue: SingleValue<Option>) => {
-    if (newValue) {
-      setSelectedUploadPlan(newValue);
-    }
+    setSelectedUploadPlan(newValue);
   };
 
   const handleUpload = async () => {
@@ -337,7 +335,25 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
 
       const socket = getWebSocket();
 
-      const sendMessage = (timeSegmentKey: string, timeSegment: any) => {
+      const sendMessage = (
+        startSegmentKey: any,
+        endSegmentKey: any,
+        timeSegment: any
+      ) => {
+        const [startHours, startMinutes] = startSegmentKey
+          .split(":")
+          .map(Number);
+        const [endHours, endMinutes] = endSegmentKey.split(":").map(Number);
+
+        const startTime = `${String(startHours).padStart(2, "0")}:${String(
+          startMinutes
+        ).padStart(2, "0")}`;
+        let endTime = `${String(endHours).padStart(2, "0")}:${String(
+          endMinutes
+        ).padStart(2, "0")}`;
+        endTime = endTime === "00:00" ? "23:59" : endTime;
+        const timeSegmentString = `@${startTime}-${endTime}`;
+
         return new Promise<void>((resolve) => {
           socket.send(
             JSON.stringify({
@@ -346,21 +362,19 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
                 DeviceID: params.deviceId,
                 email,
                 plan: plan.name,
-                timeSegment: timeSegmentKey,
+                timeSegmentString,
                 patternName: timeSegment.label,
               },
             })
           );
 
-          // Listen for the response before proceeding
           socket.onmessage = (event: MessageEvent) => {
             const feedback = JSON.parse(event.data);
             if (feedback.event === "ping_received") return;
-            console.log(feedback, plan.name, timeSegmentKey);
             if (
               feedback?.event === "upload_feedback" &&
               feedback.payload.Plan === plan.name &&
-              feedback.payload.Period === timeSegmentKey
+              feedback.payload.Period === startSegmentKey
             ) {
               console.log("Upload success for time segment:", feedback);
               resolve();
@@ -369,36 +383,37 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
         });
       };
 
-      // Track the last valid time segment value
+      // Track the last valid time segment value and its key
       let lastValidSegment = null;
+      let lastStartKey = null;
 
       for (const timeSegmentKey of Object.keys(plan.schedule)) {
         let timeSegment = plan.schedule[timeSegmentKey];
 
-        // Use the last valid segment if the current one is null or invalid
-        if (!timeSegment || !timeSegment.value) {
-          if (lastValidSegment) {
-            timeSegment = lastValidSegment;
-          }
-        } else {
-          lastValidSegment = timeSegment;
-        }
-
-        // Upload the time segment
+        // If the current segment has a value, send the previous accumulated range and start a new one
         if (timeSegment && timeSegment.value) {
-          console.log(
-            `Uploading time segment: ${timeSegment.value} at ${timeSegmentKey}`
-          );
-          await sendMessage(timeSegmentKey, timeSegment);
+          // If there's a previous segment without values, send it
+          if (lastValidSegment && lastStartKey !== timeSegmentKey) {
+            console.log(
+              `Uploading accumulated time segment from ${lastStartKey} to ${timeSegmentKey}`
+            );
+            await sendMessage(lastStartKey, timeSegmentKey, lastValidSegment);
+          }
+
+          // Update the last valid segment and its start key
+          lastValidSegment = timeSegment;
+          lastStartKey = timeSegmentKey;
         }
+      }
+
+      // If there's any remaining segment that needs to be uploaded till the end of the day
+      if (lastValidSegment && lastStartKey) {
+        await sendMessage(lastStartKey, "23:59", lastValidSegment);
       }
 
       console.log(`All segments uploaded for plan: ${plan.name}`);
     } catch (error: any) {
-      emitToastMessage(
-        error?.response?.data?.message,
-        "error"
-      );
+      emitToastMessage(error?.response?.data?.message, "error");
     }
   };
 

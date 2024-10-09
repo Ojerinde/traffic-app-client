@@ -38,9 +38,8 @@ export interface IntersectionConfigItem {
 }
 
 const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
-  const { deviceAvailability, currentDeviceInfoData } = useAppSelector(
-    (state) => state.userDevice
-  );
+  const { deviceAvailability, currentDeviceInfoData, deviceActiveStateData } =
+    useAppSelector((state) => state.userDevice);
   const dispatch = useAppDispatch();
 
   getWebSocket();
@@ -164,6 +163,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
           break;
 
         case "sign_feedback":
+          if (deviceActiveStateData?.Auto === false) return;
           if (countdownInterval) {
             clearInterval(countdownInterval);
             countdownInterval = null;
@@ -184,6 +184,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
               feedback.payload.Countdown,
               feedback.payload.Phase
             );
+
             startCountdown(feedback.payload.Countdown, feedback.payload.Phase);
             dispatch(addCurrentDeviceSignalData(feedback.payload));
           }

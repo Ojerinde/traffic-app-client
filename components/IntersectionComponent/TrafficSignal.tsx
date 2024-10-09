@@ -77,6 +77,11 @@ const SignalLight = styled.div<{
   @media screen and (max-width: 900px) {
     margin: 1.5px;
   }
+  @media screen and (max-width: 500px) {
+    margin: 1.8px;
+    width: 1.95rem;
+    height: 1.95rem;
+  }
   @media screen and (max-width: 400px) {
     margin: 1.5px;
     width: 1.5rem;
@@ -102,6 +107,14 @@ const PedestrianSignalLight = styled.div<{
     orientation === "horizontal" ? "rotate(0deg)" : "rotate(0deg)"};
   cursor: ${({ editable, $manualMode }) =>
     editable || $manualMode ? "pointer" : "default"};
+  @media screen and (max-width: 500px) {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+  @media screen and (max-width: 400px) {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
 `;
 
 const SignalGroup = styled.div<{ orientation: "horizontal" | "vertical" }>`
