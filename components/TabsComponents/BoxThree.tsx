@@ -52,6 +52,8 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
     }
   };
 
+  const socket = getWebSocket();
+
   const handleUploadPlan = async (
     planId: string,
     planName: string,
@@ -70,8 +72,6 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
         console.error("Invalid plan or missing schedule");
         return;
       }
-
-      const socket = getWebSocket();
 
       const sendMessage = (timeSegmentKey: string, timeSegment: any) => {
         return new Promise<void>((resolve) => {
@@ -126,10 +126,7 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
 
       console.log(`All segments uploaded for plan: ${plan.name}`);
     } catch (error: any) {
-      emitToastMessage(
-        error?.response?.data?.message || "Upload failed",
-        "error"
-      );
+      emitToastMessage(error?.response?.data?.message, "error");
     }
   };
 
@@ -150,10 +147,7 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
       emitToastMessage("All plans uploaded successfully!", "success");
     } catch (error: any) {
       console.error("Error uploading all plans:", error);
-      emitToastMessage(
-        error?.response?.data?.message || "Failed to upload all plans",
-        "error"
-      );
+      emitToastMessage(error?.response?.data?.message, "error");
     }
   };
 

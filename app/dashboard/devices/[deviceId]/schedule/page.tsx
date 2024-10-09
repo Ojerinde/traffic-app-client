@@ -396,7 +396,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
       console.log(`All segments uploaded for plan: ${plan.name}`);
     } catch (error: any) {
       emitToastMessage(
-        error?.response?.data?.message || "Upload failed",
+        error?.response?.data?.message,
         "error"
       );
     }
@@ -408,12 +408,14 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
     }
   };
 
+  const socket = getWebSocket();
+
   const handleDownload = async () => {
     if (!selectedDownloadPlan) {
       emitToastMessage("Please select a plan", "error");
       return;
     }
-    const socket = getWebSocket();
+    // const socket = getWebSocket();
     const sendMessage = () => {
       socket.send(
         JSON.stringify({
