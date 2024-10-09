@@ -51,7 +51,6 @@ const LoginForm = () => {
     };
     try {
       const response = await HttpRequest.post("/auth/signin", reqObj);
-      console.log("login response", response);
       // Destructuring the response.data
       const {
         data: { user },

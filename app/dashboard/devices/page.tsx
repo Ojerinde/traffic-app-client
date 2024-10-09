@@ -33,7 +33,7 @@ const UserDevices = () => {
   if (isFetchingDevices) return <LoadingSpinner color="blue" height="big" />;
 
   return (
-    <aside>
+    <aside className="devices">
       <div className="devices-header">
         <h2 className="page-header">My Devices </h2>{" "}
         <button onClick={() => setShowAddDeviceModal(true)}>

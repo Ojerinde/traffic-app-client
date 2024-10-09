@@ -47,7 +47,18 @@ const Background = styled.div<{ $backgroundImage: string }>`
   box-shadow: rgba(0, 0, 0, 0.06) 0px 2px 4px 0px inset;
   background-size: cover;
   background-position: center;
+
+  @media screen and (max-width: 1300px) {
+    background-size: contain;
+    background-repeat: no-repeat;
+    height: 65vh;
+  }
+
+  @media screen and (max-width: 900px) {
+    height: 50vh;
+  }
 `;
+
 const PhaseContainer = styled.div`
   position: absolute;
   top: 1rem;
@@ -315,7 +326,6 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
 
     dispatch(setManualMode(false));
     dispatch(setSignalStringToAllRed());
-    // Listen for web socket feedback from the device in a useEffect
   };
 
   return (

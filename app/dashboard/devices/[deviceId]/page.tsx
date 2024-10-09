@@ -11,7 +11,7 @@ import {
   setSignalState,
   setSignalString,
 } from "@/store/signals/SignalConfigSlice";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { getWebSocket } from "../../websocket";
 import { emitToastMessage } from "@/utils/toastFunc";
 import { useDeviceStatus } from "@/hooks/useDeviceStatus";
