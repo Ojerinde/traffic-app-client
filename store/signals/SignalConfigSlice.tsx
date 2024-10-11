@@ -1,3 +1,4 @@
+import { Signal } from "@/components/IntersectionComponent/Intersection";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface SignalState {
@@ -19,6 +20,7 @@ interface SignalConfigState {
     showDuration: boolean;
   };
   manualMode: boolean;
+  landingPageSignals: Signal[];
 }
 
 const initializeSignals = (
@@ -48,9 +50,9 @@ const initializeSignals = (
 };
 
 const initialConfig: SignalConfigState = {
-  signals: initializeSignals("*#"),
+  signals: initializeSignals("*NRRRRRRERRRRRRSRRRRRRWRRRRRR#"),
   warning: null,
-  signalString: "*#",
+  signalString: "*NRRRRRRERRRRRRSRRRRRRWRRRRRR#",
   allowConflictingConfig: false,
   isIntersectionConfigurable: false,
   createdPatternPhasePreviewing: {
@@ -58,6 +60,7 @@ const initialConfig: SignalConfigState = {
     showDuration: false,
   },
   manualMode: false,
+  landingPageSignals: [],
 };
 
 const signalConfigSlice = createSlice({
@@ -99,6 +102,20 @@ const signalConfigSlice = createSlice({
     setManualMode(state, action: PayloadAction<boolean>) {
       state.manualMode = action.payload;
     },
+    setLandingPageInitialSignals(state, action: PayloadAction<any>) {
+      state.landingPageSignals = action.payload;
+    },
+    setLandingPageSignals(state, action: PayloadAction<any>) {
+      const { direction, signalType, color } = action.payload;
+      state.landingPageSignals = state.landingPageSignals.map((signal) =>
+        signal.direction === direction
+          ? {
+              ...signal,
+              [signalType]: color,
+            }
+          : signal
+      );
+    },
   },
 });
 
@@ -113,5 +130,7 @@ export const {
   previewCreatedPatternPhase,
   closePreviewCreatedPatternPhase,
   setManualMode,
+  setLandingPageSignals,
+  setLandingPageInitialSignals,
 } = signalConfigSlice.actions;
 export default signalConfigSlice.reducer;

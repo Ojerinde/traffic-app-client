@@ -51,8 +51,8 @@ const SignalLight = styled.div<{
   editable: boolean;
   $manualMode: boolean;
 }>`
-  width: 1.6rem;
-  height: 1.6rem;
+  width: 1.5rem;
+  height: 1.5rem;
   background-color: ${({ color }) =>
     color === "R"
       ? "red"
@@ -61,31 +61,32 @@ const SignalLight = styled.div<{
       : color === "G"
       ? "green"
       : "grey"};
-  margin: 1px;
+  margin: 1.1px;
   border-radius: 50%;
   cursor: ${({ editable, $manualMode }) =>
     editable || $manualMode ? "pointer" : "default"};
-
   @media screen and (max-width: 1300px) {
-    margin: 1.4px;
+    margin: 1.5px;
   }
   @media screen and (max-width: 1100px) {
     margin: 1.5px;
-    width: 1.8rem;
-    height: 1.8rem;
+    width: 1.6rem;
+    height: 1.6rem;
   }
   @media screen and (max-width: 900px) {
-    margin: 1.5px;
-  }
-  @media screen and (max-width: 500px) {
-    margin: 1.8px;
-    width: 1.95rem;
-    height: 1.95rem;
-  }
-  @media screen and (max-width: 400px) {
-    margin: 1.5px;
+    margin: 1.1px;
     width: 1.5rem;
     height: 1.5rem;
+  }
+  @media screen and (max-width: 500px) {
+    margin: 1.1px;
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+  @media screen and (max-width: 400px) {
+    margin: 1.1px;
+    width: 1.4rem;
+    height: 1.4rem;
   }
 `;
 
@@ -107,13 +108,22 @@ const PedestrianSignalLight = styled.div<{
     orientation === "horizontal" ? "rotate(0deg)" : "rotate(0deg)"};
   cursor: ${({ editable, $manualMode }) =>
     editable || $manualMode ? "pointer" : "default"};
+
+  @media screen and (max-width: 1100px) {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+  @media screen and (max-width: 900px) {
+    width: 0.9rem;
+    height: 0.9rem;
+  }
   @media screen and (max-width: 500px) {
-    width: 1.6rem;
-    height: 1.6rem;
+    width: 1.1rem;
+    height: 1.1rem;
   }
   @media screen and (max-width: 400px) {
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 1rem;
+    height: 1rem;
   }
 `;
 

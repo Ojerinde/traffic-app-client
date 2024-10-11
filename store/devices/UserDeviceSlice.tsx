@@ -151,6 +151,19 @@ export const getUserDeviceInfoData = createAsyncThunk(
     }
   }
 );
+export const getUserDeviceStateData = createAsyncThunk(
+  "userDevice/getUserDeviceStateData",
+  async (deviceId: string) => {
+    try {
+      const {
+        data: { data },
+      } = await HttpRequest.get(`/state/${deviceId}`);
+      return data;
+    } catch (error: any) {
+      emitToastMessage(error?.response.data.message, "error");
+    }
+  }
+);
 
 const UserDeviceSlice = createSlice({
   name: "userDevice",
@@ -246,6 +259,9 @@ const UserDeviceSlice = createSlice({
       })
       .addCase(getUserDeviceInfoData.fulfilled, (state, action) => {
         state.currentDeviceInfoData = action.payload;
+      })
+      .addCase(getUserDeviceStateData.fulfilled, (state, action) => {
+        state.deviceActiveStateData = action.payload;
       });
   },
 });
