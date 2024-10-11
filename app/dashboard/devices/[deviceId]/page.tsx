@@ -163,8 +163,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
           break;
 
         case "sign_feedback":
-          if (deviceActiveStateData?.Auto === false)
-            return emitToastMessage("Auto status is set to false", "success");
+          if (deviceActiveStateData?.Auto === false) return;
           if (countdownInterval) {
             clearInterval(countdownInterval);
             countdownInterval = null;
