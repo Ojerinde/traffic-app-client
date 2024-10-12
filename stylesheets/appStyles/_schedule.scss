@@ -39,10 +39,18 @@
 
   &__select-field {
     width: 200px;
-    z-index: 50;
+    z-index: 15;
     font-size: 1.5rem;
+
     @media screen and (max-width: 1000px) {
       width: 100%;
+
+      &-1 {
+        z-index: 20;
+      }
+      &-2 {
+        z-index: 15;
+      }
     }
   }
 
@@ -99,7 +107,7 @@
     padding: 0.3rem;
     background-color: #fff;
     width: 200px;
-    z-index: 500;
+    z-index: 50;
 
     &--field {
       font-size: 1.2rem;

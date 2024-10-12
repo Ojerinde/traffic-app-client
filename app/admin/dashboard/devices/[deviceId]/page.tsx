@@ -3,7 +3,7 @@ interface DeviceDetailsProps {
 }
 const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
   console.log("Device ID", params);
-  return <div>Rest</div>;
+  return <div>deviceActiveProgDataceActiveProgData</div>;
 };
 
 export default DeviceDetails;

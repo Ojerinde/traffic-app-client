@@ -8,8 +8,9 @@ import "react-toastify/dist/ReactToastify.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Biometric Attendance System",
-  description: "Fingerprint based attendance system",
+  title: "Traffic Monitoring System",
+  description:
+    "This is a web appication for remote configuration and monitoring of traffic system",
 };
 
 export default function RootLayout({

@@ -486,7 +486,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
             options={dayTypeOptions}
             value={dayType}
             onChange={handleDayTypeChange}
-            className="schedule__select-field"
+            className="schedule__select-field schedule__select-field-1"
           />
           <Select
             options={plans?.map((plan) => ({
@@ -495,7 +495,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
             }))}
             value={selectedPlan}
             onChange={handlePlanChange}
-            className="schedule__select-field"
+            className="schedule__select-field schedule__select-field-2"
             placeholder="Select existing plan"
           />
           {dayType.value === "custom" && (

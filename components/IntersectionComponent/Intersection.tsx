@@ -108,6 +108,34 @@ const AddPhaseIcon = styled(motion.div)`
   border: none;
   cursor: pointer;
   border-radius: 50%;
+  @media screen and (max-width: 1300px) {
+    top: 44.6%;
+    left: 45.5%;
+  }
+  @media screen and (max-width: 1200px) {
+    top: 43.5%;
+    left: 45.3%;
+  }
+  @media screen and (max-width: 1100px) {
+    top: 43.3%;
+    left: 45%;
+  }
+  @media screen and (max-width: 900px) {
+    top: 42.9%;
+    left: 47%;
+  }
+  @media screen and (max-width: 500px) {
+    top: 43%;
+    left: 45%;
+  }
+  @media screen and (max-width: 400px) {
+    top: 42%;
+    left: 44%;
+  }
+  @media screen and (max-width: 300px) {
+    top: 42%;
+    left: 43%;
+  }
 `;
 
 const DurationDisplay = styled.div`
@@ -124,6 +152,7 @@ const DurationDisplay = styled.div`
   border-radius: 50%;
   font-size: 2rem;
 `;
+
 const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
   initialSignals,
   backgroundImage,

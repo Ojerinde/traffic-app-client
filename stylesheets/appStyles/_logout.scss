@@ -1,12 +1,10 @@
 .logout {
-  width: 40vw;
-  background-color: rgba($color-white, 0.8);
+  backdrop-filter: blur(0.9rem);
+  background-color: rgba($color-white, 1);
   text-align: center;
-  padding: 5rem;
+  padding: 8rem 10rem;
+  width: 55vw;
 
-  @media screen and (max-width: 1400px) {
-    width: 50vw;
-  }
   @media screen and (max-width: 1200px) {
     width: 60vw;
   }
