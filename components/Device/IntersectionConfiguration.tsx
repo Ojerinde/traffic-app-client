@@ -45,6 +45,7 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
   const [initialSignalStrings, setInitialSignlStrings] = useState("");
   const params = useParams();
   const email = GetItemFromLocalStorage("user")?.email;
+  console.log("Device Active data Intersection Box", deviceActiveStateData);
 
   useEffect(() => {
     setIsAutoMode(deviceActiveStateData.Auto);

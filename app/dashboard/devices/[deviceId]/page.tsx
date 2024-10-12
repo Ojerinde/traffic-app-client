@@ -135,7 +135,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
       if (feedback.event === "ping_received") return;
 
       console.log("Feedback", feedback);
-      console.log("Device Active data", deviceActiveStateData);
+      console.log("Device Active data Intersection", deviceActiveStateData);
 
       // I will Set the status to off anytme I fetch the state and the device power is off
       dispatch(
@@ -256,7 +256,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
         sendMessage();
       };
     }
-
+    console.log("Params", params.deviceId);
     dispatch(getUserDeviceStateData(params.deviceId));
 
     return () => {
