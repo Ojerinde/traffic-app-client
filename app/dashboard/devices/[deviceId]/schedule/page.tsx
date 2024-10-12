@@ -71,9 +71,6 @@ const dayTypeOptions: Option[] = [
   { value: "friday", label: "Friday" },
   { value: "saturday", label: "Saturday" },
   { value: "sunday", label: "Sunday" },
-  // { value: "weekdays", label: "Weekdays" },
-  // { value: "weekend", label: "Weekend" },
-  // { value: "allDays", label: "All Days" },
   { value: "custom", label: "Custom" },
 ];
 
@@ -458,7 +455,6 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
     const handleDataFeedback = (event: MessageEvent) => {
       const feedback = JSON.parse(event.data);
       if (feedback.event !== "download_feedback") return;
-      console.log("Download Feedback", feedback);
 
       if (feedback.payload.error) {
         emitToastMessage("Could not download schedule from device", "error");
@@ -467,6 +463,11 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
           "Schedule downloaded from device successfully",
           "success"
         );
+        console.log("Download Program", feedback.payload.Program);
+        const modifiedProgram = feedback.payload.Program.map((prog: any) => {
+          return "joel";
+        });
+        // Access the program property of the payload and use it to populate the
       }
     };
 
