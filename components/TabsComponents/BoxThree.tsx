@@ -4,6 +4,7 @@ import { getWebSocket } from "@/app/dashboard/websocket";
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
 import { getUserPlan } from "@/store/devices/UserDeviceSlice";
 import HttpRequest from "@/store/services/HttpRequest";
+import { closePreviewCreatedPatternPhase } from "@/store/signals/SignalConfigSlice";
 import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
 import { emitToastMessage } from "@/utils/toastFunc";
 import { useParams, usePathname, useRouter } from "next/navigation";
@@ -36,6 +37,7 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
 
   useEffect(() => {
     dispatch(getUserPlan(email));
+    dispatch(closePreviewCreatedPatternPhase());
   }, [dispatch]);
 
   const handleDeletePlan = async (planId: string, planName: string) => {
@@ -52,7 +54,7 @@ const BoxThree: React.FC<BoxThreeProps> = ({}) => {
     }
   };
 
-  const socket = getWebSocket();
+  getWebSocket();
 
   const handleUploadPlan = async (
     planId: string,

@@ -88,6 +88,11 @@ const SignalLight = styled.div<{
     width: 1.4rem;
     height: 1.4rem;
   }
+  @media screen and (max-width: 300px) {
+    margin: 0.8px;
+    width: 1.1rem;
+    height: 1.1rem;
+  }
 `;
 
 const PedestrianSignalLight = styled.div<{
@@ -124,6 +129,11 @@ const PedestrianSignalLight = styled.div<{
   @media screen and (max-width: 400px) {
     width: 1rem;
     height: 1rem;
+  }
+  @media screen and (max-width: 300px) {
+    width: 0.7rem;
+    height: 0.7rem;
+    font-size: 0.8rem;
   }
 `;
 

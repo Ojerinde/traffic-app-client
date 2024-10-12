@@ -22,6 +22,7 @@ import {
   getUserDeviceInfoData,
   updateDeviceAvailability,
   addCurrentDeviceStateData,
+  getUserDeviceStateData,
 } from "@/store/devices/UserDeviceSlice";
 
 interface DeviceDetailsProps {
@@ -254,6 +255,8 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
         sendMessage();
       };
     }
+
+    dispatch(getUserDeviceStateData(params.deviceId));
 
     return () => {
       if (socket) {

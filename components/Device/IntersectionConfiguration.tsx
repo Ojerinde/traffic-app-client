@@ -170,7 +170,6 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
     const initialStrings = encodeSignals();
     setInitialSignlStrings(initialStrings);
   }, []);
-  console.log("Initial Strings", initialSignalStrings);
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {

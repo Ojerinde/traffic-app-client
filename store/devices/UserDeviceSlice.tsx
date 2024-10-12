@@ -158,6 +158,7 @@ export const getUserDeviceStateData = createAsyncThunk(
       const {
         data: { data },
       } = await HttpRequest.get(`/state/${deviceId}`);
+      console.log("Stet fetched", data);
       return data;
     } catch (error: any) {
       emitToastMessage(error?.response.data.message, "error");
