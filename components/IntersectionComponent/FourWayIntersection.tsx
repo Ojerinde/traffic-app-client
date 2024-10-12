@@ -155,6 +155,7 @@ const FourWayIntersection = ({ editable }: { editable: boolean }) => {
   const [screenWidth, setScreenWidth] = useState<number | undefined>(undefined);
   useEffect(() => {
     if (typeof window !== "undefined") {
+      setScreenWidth(window.innerWidth);
       const handleResize = () => setScreenWidth(window.innerWidth);
       window.addEventListener("resize", handleResize);
 
