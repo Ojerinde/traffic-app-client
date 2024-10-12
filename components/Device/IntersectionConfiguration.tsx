@@ -48,7 +48,7 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
 
   useEffect(() => {
     setIsAutoMode(deviceActiveStateData.Auto);
-    if (!isAutoMode) {
+    if (!deviceActiveStateData.Auto) {
       dispatch(setManualMode(true));
       setShowManualMoreConfig(true);
     }

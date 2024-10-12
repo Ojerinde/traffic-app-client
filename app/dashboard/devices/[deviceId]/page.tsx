@@ -135,6 +135,8 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
       if (feedback.event === "ping_received") return;
 
       console.log("Feedback", feedback);
+      console.log("Device Active data", deviceActiveStateData);
+
       // I will Set the status to off anytme I fetch the state and the device power is off
       dispatch(
         updateDeviceAvailability({
@@ -158,7 +160,6 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
             );
             emitToastMessage("Could not fetch device info data", "error");
           } else {
-            console.log("Got info message", feedback.payload);
             dispatch(addCurrentDeviceInfoData(feedback.payload));
           }
           break;
