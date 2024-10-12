@@ -41,6 +41,7 @@ export interface IntersectionConfigItem {
 const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
   const { deviceAvailability, currentDeviceInfoData, deviceActiveStateData } =
     useAppSelector((state) => state.userDevice);
+
   const dispatch = useAppDispatch();
 
   getWebSocket();
@@ -60,6 +61,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
 
   useEffect(() => {
     dispatch(setIsIntersectionConfigurable(false));
+    dispatch(getUserDeviceStateData(params.deviceId));
   }, [dispatch, isIntersectionConfigurable]);
 
   // Fetch Device Config Data
@@ -194,20 +196,21 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
 
         case "state_feedback":
           if (feedback.payload.error) {
-            dispatch(
-              addCurrentDeviceStateData({
-                DeviceID: "",
-                Auto: false,
-                Power: false,
-                Manual: false,
-                Next: false,
-                Hold: false,
-                Reset: false,
-                Restart: false,
-              })
-            );
-            emitToastMessage("Could not fetch device state data", "error");
+            // dispatch(
+            //   addCurrentDeviceStateData({
+            //     DeviceID: "",
+            //     Auto: false,
+            //     Power: false,
+            //     Manual: false,
+            //     Next: false,
+            //     Hold: false,
+            //     Reset: false,
+            //     Restart: false,
+            //   })
+            // );
+            // emitToastMessage("Could not fetch device state data", "error");
           } else {
+            console.log("State feddback", feedback.payload);
             dispatch(addCurrentDeviceStateData(feedback.payload));
           }
           break;
@@ -231,7 +234,6 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
   // Fetch Intersection Config Data
   useEffect(() => {
     if (!currentDeviceInfoData?.Rtc) {
-      console.log("Fetching Device Info Data since it is not available");
       dispatch(getUserDeviceInfoData(params.deviceId));
     }
 
