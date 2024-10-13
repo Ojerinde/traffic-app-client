@@ -10,7 +10,6 @@ import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
 import {
   closePreviewCreatedPatternPhase,
   setManualMode,
-  setSignalStringToAllRed,
 } from "@/store/signals/SignalConfigSlice";
 import { getWebSocket } from "@/app/dashboard/websocket";
 import HttpRequest from "@/store/services/HttpRequest";
@@ -101,13 +100,13 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
       sendMessage();
       setTimeout(() => {
         dispatch(getUserDeviceStateData(deviceId));
-      }, 1000);
+      }, 500);
     } else {
       socket.onopen = () => {
         sendMessage();
         setTimeout(() => {
           dispatch(getUserDeviceStateData(deviceId));
-        }, 1000);
+        }, 500);
       };
     }
     // Update the time since one of the button has been clicked again

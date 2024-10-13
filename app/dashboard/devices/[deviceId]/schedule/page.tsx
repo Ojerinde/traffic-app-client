@@ -80,10 +80,23 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
   const dispatch = useAppDispatch();
   const email = GetItemFromLocalStorage("user")?.email;
 
-  const patternsOptions: Option[] = patterns?.map((pattern) => ({
-    value: pattern?.name?.toLowerCase(),
-    label: pattern?.name,
-  }));
+  const patternsOptions: Option[] = [{ value: "none", label: "None" }].concat(
+    patterns
+      ?.map((pattern) => ({
+        value: pattern?.name?.toLowerCase(),
+        label: pattern?.name,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label)) || []
+  );
+
+  const plansOptions: Option[] = [{ value: "none", label: "None" }].concat(
+    plans
+      ?.map((plan) => ({
+        value: plan?.name,
+        label: plan?.name,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label)) || []
+  );
 
   const [schedule, setSchedule] = useState<ScheduleData>({});
   const [dayType, setDayType] = useState<Option>(dayTypeOptions[0]);
@@ -93,14 +106,8 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
   const [rightBoxContent, setRightBoxContent] = useState<
     "patterns" | "upload" | "download" | null
   >(null);
-  const [selectedUploadPlan, setSelectedUploadPlan] = useState<Option | null>(
-    null
-  );
   const [isUploadingSchedule, setIsUploadingSchedule] =
     useState<boolean>(false);
-
-  const [selectedDownloadPlan, setSelectedDownloadPlan] =
-    useState<Option | null>(null);
 
   const [selectedPattern, setSelectedPattern] = useState<any>(null);
   const [updatedPatternPhases, setUpdatedPatternPhases] = useState<any[]>([]);
@@ -122,12 +129,19 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
     const pattern = patterns.find(
       (pattern) => pattern?.name.toLowerCase() === patternName
     );
-    setSelectedPattern(pattern);
-    setRightBoxContent("patterns");
-    setUpdatedPatternPhases(pattern.configuredPhases);
-    pattern?.configuredPhases.forEach((phase: any) => {
-      dispatch(addOrUpdatePhaseConfig(phase));
-    });
+    if (pattern) {
+      setSelectedPattern(pattern);
+      setRightBoxContent("patterns");
+      setUpdatedPatternPhases(pattern.configuredPhases);
+      pattern?.configuredPhases.forEach((phase: any) => {
+        dispatch(addOrUpdatePhaseConfig(phase));
+      });
+    } else {
+      setSelectedPattern(null);
+      setRightBoxContent(null);
+      setUpdatedPatternPhases([]);
+      dispatch(clearPhaseConfig());
+    }
   };
 
   const handleAvailablePhaseSelect = (phase: any) => {
@@ -246,19 +260,12 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
     [patterns, patternsOptions]
   );
 
-  const handleDayTypeChange = (newValue: SingleValue<Option>) => {
-    if (newValue) {
-      setDayType(newValue);
-      if (newValue.value !== "custom") {
-        setCustomDate(null);
-      }
-    }
-  };
-
   const handlePlanChange = (newValue: SingleValue<Option>) => {
     if (newValue) {
       setSelectedPlan(newValue);
-      const plan = plans.find((plan) => plan?.name === newValue.value);
+      const plan = plans.find(
+        (plan) => plan?.name.toLowerCase() === newValue.value.toLowerCase()
+      );
 
       if (plan) {
         const fullSchedule: ScheduleData = {};
@@ -267,11 +274,55 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
         });
 
         setSchedule(fullSchedule);
+      } else {
+        const emptySchedule: ScheduleData = {};
+        timeSegments.forEach((time) => {
+          emptySchedule[time] = null;
+        });
+
+        setSchedule(emptySchedule);
+      }
+    }
+  };
+
+  const handleDayTypeChange = (newValue: SingleValue<Option>) => {
+    if (newValue) {
+      setDayType(newValue);
+
+      const plan = plans.find(
+        (plan) => plan?.name.toLowerCase() === newValue.value.toLowerCase()
+      );
+
+      if (plan) {
+        handlePlanChange(newValue);
+        setSelectedPattern(null);
+        setRightBoxContent(null);
+        setUpdatedPatternPhases([]);
+        dispatch(clearPhaseConfig());
+      } else {
+        const emptySchedule: ScheduleData = {};
+        timeSegments.forEach((time) => {
+          emptySchedule[time] = null;
+        });
+
+        setSchedule(emptySchedule);
+        setSelectedPlan(null);
+      }
+
+      if (newValue.value !== "custom") {
+        setCustomDate(null);
       }
     }
   };
 
   const saveSchedule = async () => {
+    if (schedule["00:00"] === null || schedule["00:00"]?.label === "None") {
+      emitToastMessage(
+        "A plan must have a pattern for the first time segment",
+        "error"
+      );
+      return;
+    }
     const existingPlan = plans?.find(
       (plan) => plan.name.toUpperCase() === dayType.value.toUpperCase()
     );
@@ -310,26 +361,53 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
     }
   }, []);
 
-  const handleUploadPlanChange = (newValue: SingleValue<Option>) => {
-    setSelectedUploadPlan(newValue);
-  };
-
   const handleUpload = async () => {
-    const confirmResult = confirm(
-      `Are you sure you want to upload "${selectedUploadPlan?.label}" plan?`
-    );
-    if (!confirmResult) return;
+    // Ensure the datyTpe and existing plan are selected and the same
+    if (dayType.value.toLowerCase() !== selectedPlan?.value.toLowerCase()) {
+      emitToastMessage(
+        "Day type and selected existing plan must be the same",
+        "error"
+      );
+      return;
+    }
+    //
 
     try {
       const plan = plans.find(
-        (plan) => plan.name === selectedUploadPlan?.label
+        (plan) => plan.name.toLowerCase() === dayType.value.toLowerCase()
       );
-      console.log("The Selected Plan", plan.schedule);
-      if (!plan || !plan.schedule) {
-        console.error("Invalid plan or missing schedule");
-        return;
+      console.log(
+        "The Selected Plan",
+        plan.schedule,
+        plan?.schedule["00:00"]?.label
+      );
+
+      // Compare the pattern of plan.schedule and schedule to see if there's any difference, if there is difference, trigger an error for the user to save the schedule
+      if (plan) {
+        for (const timeSegmentKey of Object.keys(schedule)) {
+          const timeSegment = schedule[timeSegmentKey];
+          if (plan.schedule[timeSegmentKey]?.label !== timeSegment?.label) {
+            emitToastMessage(
+              `There's a difference between the current schedule and the selected plan at ${timeSegmentKey}, save the schedule before uploading.`,
+              "error"
+            );
+            return;
+          }
+        }
       }
 
+      if (!plan || !plan.schedule) {
+        console.error("Invalid plan or missing schedule");
+        return emitToastMessage(
+          "This is a new plan, you have to save it prior to uploading",
+          "error"
+        );
+      }
+      // Final confirmation before uploading
+      const confirmResult = confirm(
+        `Are you sure you want to upload "${dayType.value}" plan?`
+      );
+      if (!confirmResult) return emitToastMessage("Upload cancelled", "error");
       const socket = getWebSocket();
 
       const sendMessage = (
@@ -414,19 +492,9 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
     }
   };
 
-  const handleDownloadPlanChange = (newValue: SingleValue<Option>) => {
-    if (newValue) {
-      setSelectedDownloadPlan(newValue);
-    }
-  };
-
   const socket = getWebSocket();
 
   const handleDownload = async () => {
-    if (!selectedDownloadPlan) {
-      emitToastMessage("Please select a plan", "error");
-      return;
-    }
     // const socket = getWebSocket();
     const sendMessage = () => {
       socket.send(
@@ -434,7 +502,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
           event: "download_request",
           payload: {
             DeviceID: params.deviceId,
-            plan: selectedDownloadPlan?.label,
+            plan: "joel",
             email,
           },
         })
@@ -489,10 +557,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
             className="schedule__select-field schedule__select-field-1"
           />
           <Select
-            options={plans?.map((plan) => ({
-              value: plan?.name,
-              label: plan?.name,
-            }))}
+            options={plansOptions}
             value={selectedPlan}
             onChange={handlePlanChange}
             className="schedule__select-field schedule__select-field-2"
@@ -550,13 +615,19 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
           </button>
 
           <button
-            onClick={() => setRightBoxContent("upload")}
+            onClick={() => {
+              handleUpload();
+              // setRightBoxContent("upload");
+            }}
             className="schedule__button"
           >
             Upload to Device
           </button>
           <button
-            onClick={() => setRightBoxContent("download")}
+            onClick={() => {
+              handleDownload();
+              // setRightBoxContent("download");
+            }}
             className="schedule__button"
           >
             Download from Device
@@ -695,7 +766,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
             </div>
           </>
         )}
-        {rightBoxContent === "download" && (
+        {/* {rightBoxContent === "download" && (
           <div className="upload">
             <h3>Download Plan from Device</h3>
             <Select
@@ -712,8 +783,8 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
               Download from Device
             </button>
           </div>
-        )}
-        {rightBoxContent === "upload" && (
+        )} */}
+        {/* {rightBoxContent === "upload" && (
           <div className="upload">
             <h3>Upload Plan to Device</h3>
             <Select
@@ -735,7 +806,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
               {isUploadingSchedule ? "Loading..." : "Upload to Device"}
             </button>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );
