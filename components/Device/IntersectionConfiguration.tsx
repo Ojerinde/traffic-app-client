@@ -37,21 +37,17 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
   const dispatch = useAppDispatch();
   const { deviceActiveStateData } = useAppSelector((state) => state.userDevice);
   const { landingPageSignals } = useAppSelector((state) => state.signalConfig);
-
+  console.log("Device", deviceActiveStateData);
   const [showManualMoreConfig, setShowManualMoreConfig] =
     useState<boolean>(false);
   // State to track the current mode (Auto or Manual)
-  const [isAutoMode, setIsAutoMode] = useState(deviceActiveStateData.Auto);
   const [initialSignalStrings, setInitialSignlStrings] = useState("");
   const params = useParams();
   const email = GetItemFromLocalStorage("user")?.email;
 
   useEffect(() => {
-    setIsAutoMode(deviceActiveStateData.Auto);
-    if (!deviceActiveStateData.Auto) {
-      dispatch(setManualMode(true));
-      setShowManualMoreConfig(true);
-    }
+    dispatch(setManualMode(!deviceActiveStateData?.Auto));
+    setShowManualMoreConfig(!deviceActiveStateData?.Auto);
   }, [deviceActiveStateData]);
 
   const handleRequest = async (action: string) => {
@@ -78,13 +74,14 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
       }
     }
     if (action === "Manual") {
+      console.log("Manual action triggered");
       dispatch(setManualMode(true));
-      setIsAutoMode(false);
       setShowManualMoreConfig(true);
       dispatch(closePreviewCreatedPatternPhase());
     }
+
     if (action === "Auto") {
-      setIsAutoMode(true);
+      console.log("Auto action triggered");
       dispatch(setManualMode(false));
       setShowManualMoreConfig(false);
     }
@@ -102,9 +99,15 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
 
     if (socket.readyState === WebSocket.OPEN) {
       sendMessage();
+      setTimeout(() => {
+        dispatch(getUserDeviceStateData(deviceId));
+      }, 1000);
     } else {
       socket.onopen = () => {
         sendMessage();
+        setTimeout(() => {
+          dispatch(getUserDeviceStateData(deviceId));
+        }, 1000);
       };
     }
     // Update the time since one of the button has been clicked again
@@ -112,7 +115,6 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
       isPasswordVerified: true,
       time: Date.now(),
     });
-    dispatch(getUserDeviceStateData(deviceId));
     return () => {
       if (socket) {
         socket.close();
@@ -283,11 +285,14 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
         <div className="intersectionConfiguration__commands">
           <button
             onClick={() => {
-              const action = isAutoMode ? "Manual" : "Auto";
+              const action =
+                deviceActiveStateData?.Auto === true ? "Manual" : "Auto";
               handleRequest(action);
             }}
           >
-            {isAutoMode ? "Switch to Manual" : "Switch to Auto"}
+            {deviceActiveStateData?.Auto === true
+              ? "Switch to Manual"
+              : "Switch to Auto"}
           </button>
           <button onClick={() => handleRequest("Hold")}>Hold</button>
           <button onClick={() => handleRequest("Next")}>Next</button>
