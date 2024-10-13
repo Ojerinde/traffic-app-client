@@ -192,7 +192,7 @@ const UserDeviceSlice = createSlice({
     removePhaseConfig: (state, action) => {
       const phaseIdToRemove = action.payload;
       state.configuredPhases = state.configuredPhases.filter(
-        (phase) => phase.phaseId !== phaseIdToRemove
+        (phase) => phase.id !== phaseIdToRemove
       );
       emitToastMessage(
         "Phase configuration has been removed successfully.",

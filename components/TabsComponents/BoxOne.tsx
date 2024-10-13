@@ -65,6 +65,7 @@ const BoxOne: React.FC<BoxOneProps> = ({}) => {
   useEffect(() => {
     dispatch(getUserPhase(email));
     dispatch(setIsIntersectionConfigurable(true));
+    dispatch(closePreviewCreatedPatternPhase());
   }, [dispatch]);
 
   return (

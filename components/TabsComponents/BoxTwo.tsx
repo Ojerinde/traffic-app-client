@@ -119,6 +119,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
       );
       emitToastMessage(data.message, "success");
       dispatch(getUserPattern(email));
+      setUpdatedPatternPhases([]);
     } catch (error: any) {
       emitToastMessage(error?.response.data.message, "error");
     }
@@ -164,9 +165,9 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
       return [...prev, newPhaseInstance];
     });
   };
+
   const handleRemovePhaseFromSelectedPhases = (phaseId: string) => {
     setSelectedPhases((prev) => prev.filter((phase) => phase.id !== phaseId));
-
     dispatch(removePhaseConfig(phaseId));
   };
 
@@ -286,7 +287,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
     },
   });
 
-  // Formik for handling duration modification for phasesin the available pattern
+  // Formik for handling duration modification for phases in the available pattern
   const createdPhaseFormik = useFormik({
     enableReinitialize: true,
     initialValues: {
@@ -330,6 +331,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
     setShowAllAvailablePhases(false);
     setShowOtherPatternConfig(false);
     setSelectedPhases([]);
+    dispatch(clearPhaseConfig());
   };
 
   const formik = useFormik({
@@ -350,7 +352,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
         (blinkEnabled, schema) =>
           blinkEnabled
             ? schema
-                .min(1, "Blink time must be at least 1")
+                .min(0, "Blink time must be at least 0")
                 .max(5, "Blink time must be at most 5")
                 .required("Blink time is required")
             : schema.notRequired()
@@ -360,7 +362,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
         (blinkEnabled, schema) =>
           blinkEnabled
             ? schema
-                .min(1, "Blink time must be at least 1")
+                .min(0, "Blink time must be at least 0")
                 .max(5, "Blink time must be at most 5")
                 .required("Blink time is required")
             : schema.notRequired()
@@ -370,7 +372,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
         (amberEnabled, schema) =>
           amberEnabled
             ? schema
-                .min(1, "Amber duration must be at least 1")
+                .min(0, "Amber duration must be at least 0")
                 .max(5, "Amber duration must be at most 5")
                 .required("Amber duration is required")
             : schema.notRequired()
@@ -380,7 +382,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
         (amberEnabled, schema) =>
           amberEnabled
             ? schema
-                .min(1, "Amber duration must be at least 1")
+                .min(0, "Amber duration must be at least 0")
                 .max(5, "Amber duration must be at most 5")
                 .required("Amber duration is required")
             : schema.notRequired()
@@ -402,7 +404,6 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
 
         emitToastMessage(data.message, "success");
         dispatch(getUserPattern(email));
-        dispatch(clearPhaseConfig());
         handleCancel();
       } catch (error: any) {
         emitToastMessage(
@@ -627,6 +628,18 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
             Add a new Pattern
           </button>
         )}
+        {showOtherPatternConfig && (
+          <>
+            <button
+              onClick={() => {
+                setShowOtherPatternConfig(false);
+                setShowAllAvailablePhases(true);
+              }}
+            >
+              Back
+            </button>
+          </>
+        )}
         {(showAllAvailablePhases || showOtherPatternConfig) && (
           <button onClick={handleCancel}>Cancel</button>
         )}
@@ -696,6 +709,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                                           value={phaseFormik.values.duration}
                                           onChange={phaseFormik.handleChange}
                                           onBlur={phaseFormik.handleBlur}
+                                          autoFocus
                                         />
                                         <button
                                           type="submit"
@@ -705,6 +719,15 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                                           }
                                         >
                                           Save
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setPhaseToConfigure(null);
+                                            phaseFormik.resetForm();
+                                          }}
+                                        >
+                                          Cancel
                                         </button>
                                       </>
                                     ) : (
@@ -799,13 +822,25 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
               {formik.values.blinkEnabled && (
                 <>
                   <div className="patterns__selected--item">
-                    <label>Blink Time (Red to Green)</label>
+                    <label htmlFor="blinkTimeRedToGreen">
+                      Blink Time (Red to Green)
+                    </label>
                     <input
                       type="number"
                       name="blinkTimeRedToGreen"
+                      id="blinkTimeRedToGreen"
                       value={formik.values.blinkTimeRedToGreen}
-                      onChange={formik.handleChange}
+                      onChange={(e) => {
+                        const value = Math.max(
+                          0,
+                          Math.min(5, Number(e.target.value))
+                        );
+                        formik.setFieldValue("blinkTimeRedToGreen", value);
+                      }}
                       onBlur={formik.handleBlur}
+                      autoFocus
+                      min={0}
+                      max={5}
                     />
                     {formik.touched.blinkTimeRedToGreen &&
                       formik.errors.blinkTimeRedToGreen && (
@@ -814,13 +849,24 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                   </div>
 
                   <div className="patterns__selected--item">
-                    <label>Blink Time (Green to Red)</label>
+                    <label htmlFor="blinkTimeGreenToRed">
+                      Blink Time (Green to Red)
+                    </label>
                     <input
                       type="number"
                       name="blinkTimeGreenToRed"
+                      id="blinkTimeGreenToRed"
                       value={formik.values.blinkTimeGreenToRed}
-                      onChange={formik.handleChange}
+                      onChange={(e) => {
+                        const value = Math.max(
+                          0,
+                          Math.min(5, Number(e.target.value))
+                        );
+                        formik.setFieldValue("blinkTimeGreenToRed", value);
+                      }}
                       onBlur={formik.handleBlur}
+                      min={0}
+                      max={5}
                     />
                     {formik.touched.blinkTimeGreenToRed &&
                       formik.errors.blinkTimeGreenToRed && (
@@ -846,13 +892,24 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
               {formik.values.amberEnabled && (
                 <>
                   <div className="patterns__selected--item">
-                    <label>Amber Duration (Red to Green)</label>
+                    <label htmlFor="amberDurationRedToGreen">
+                      Amber Duration (Red to Green)
+                    </label>
                     <input
                       type="number"
                       name="amberDurationRedToGreen"
+                      id="amberDurationRedToGreen"
                       value={formik.values.amberDurationRedToGreen}
-                      onChange={formik.handleChange}
+                      onChange={(e) => {
+                        const value = Math.max(
+                          0,
+                          Math.min(5, Number(e.target.value))
+                        );
+                        formik.setFieldValue("amberDurationRedToGreen", value);
+                      }}
                       onBlur={formik.handleBlur}
+                      min={0}
+                      max={5}
                     />
                     {formik.touched.amberDurationRedToGreen &&
                       formik.errors.amberDurationRedToGreen && (
@@ -861,13 +918,24 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                   </div>
 
                   <div className="patterns__selected--item">
-                    <label>Amber Duration (Green to Red)</label>
+                    <label htmlFor="amberDurationGreenToRed">
+                      Amber Duration (Green to Red)
+                    </label>
                     <input
                       type="number"
                       name="amberDurationGreenToRed"
+                      id="amberDurationGreenToRed"
                       value={formik.values.amberDurationGreenToRed}
-                      onChange={formik.handleChange}
+                      onChange={(e) => {
+                        const value = Math.max(
+                          0,
+                          Math.min(5, Number(e.target.value))
+                        );
+                        formik.setFieldValue("amberDurationGreenToRed", value);
+                      }}
                       onBlur={formik.handleBlur}
+                      min={0}
+                      max={5}
                     />
                     {formik.touched.amberDurationGreenToRed &&
                       formik.errors.amberDurationGreenToRed && (
@@ -890,7 +958,12 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
               {formik.touched.patternName && formik.errors.patternName && (
                 <div>{formik.errors.patternName}</div>
               )}
-              <button type="submit" disabled={!formik.isValid || !formik.dirty}>
+              <button
+                type="submit"
+                disabled={
+                  !formik.isValid || !formik.dirty || formik.isSubmitting
+                }
+              >
                 Create pattern
               </button>
             </div>
@@ -1032,6 +1105,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                       onClick={() => {
                         handleActionClick("delete");
                         handleDeletePattern(pattern.name);
+                        handleActionClick("more");
                       }}
                     >
                       <FaTrashAlt />
@@ -1082,6 +1156,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                                               id="duration"
                                               name="duration"
                                               type="number"
+                                              autoFocus
                                               value={
                                                 createdPhaseFormik.values
                                                   .duration
@@ -1102,6 +1177,17 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                                               }
                                             >
                                               Save
+                                            </button>
+                                            <button
+                                              type="button"
+                                              onClick={() => {
+                                                setAlreadyCreatedPatternPhaseToConfigure(
+                                                  null
+                                                );
+                                                createdPhaseFormik.resetForm();
+                                              }}
+                                            >
+                                              Cancel
                                             </button>
                                           </>
                                         ) : (

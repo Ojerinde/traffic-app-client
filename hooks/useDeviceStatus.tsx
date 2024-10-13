@@ -22,12 +22,6 @@ export const useDeviceStatus = () => {
         const existingStatus = prevStatuses.find((s) => s.id === id);
         if (existingStatus) {
           if (existingStatus.status !== status) {
-            emitToastMessage(
-              `Device ID: ${id} changed status to ${
-                status === true ? "Online" : "Offline"
-              }`,
-              "success"
-            );
           }
           return prevStatuses.map((s) => (s.id === id ? { ...s, status } : s));
         } else {

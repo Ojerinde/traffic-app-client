@@ -56,7 +56,7 @@ const Background = styled.div<{ $backgroundImage: string }>`
   }
 `;
 
-const PhaseContainer = styled.div`
+const PhaseContainer = styled.form`
   position: absolute;
   top: 1rem;
   right: 1rem;
@@ -336,6 +336,7 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
             placeholder="Enter phase name"
             value={phaseName}
             onChange={(e) => setPhaseName(e.target.value)}
+            autoFocus={true}
           />
           <AddPhaseButton onClick={handleAddPhase}>
             {isCreatingPhase ? "Creating..." : "Create"}

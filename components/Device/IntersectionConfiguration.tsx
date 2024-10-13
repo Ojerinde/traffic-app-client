@@ -46,8 +46,6 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
   const params = useParams();
   const email = GetItemFromLocalStorage("user")?.email;
 
-  console.log("Device Active data Intersection Box", deviceActiveStateData);
-
   useEffect(() => {
     setIsAutoMode(deviceActiveStateData.Auto);
     if (!deviceActiveStateData.Auto) {
@@ -186,7 +184,7 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
         (blinkEnabled, schema) =>
           blinkEnabled
             ? schema
-                .min(1, "Blink time must be at least 1")
+                .min(0, "Blink time must be at least 0")
                 .max(5, "Blink time must be at most 5")
                 .required("Blink time is required")
             : schema.notRequired()
@@ -197,7 +195,7 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
         (amberEnabled, schema) =>
           amberEnabled
             ? schema
-                .min(1, "Amber duration must be at least 1")
+                .min(0, "Amber duration must be at least 0")
                 .max(5, "Amber duration must be at most 5")
                 .required("Amber duration is required")
             : schema.notRequired()
@@ -325,8 +323,17 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
                           type="number"
                           name="blinkTimeGreenToRed"
                           value={formik.values.blinkTimeGreenToRed}
-                          onChange={formik.handleChange}
+                          min={0}
+                          max={5}
+                          onChange={(e) => {
+                            const value = Math.max(
+                              0,
+                              Math.min(5, Number(e.target.value))
+                            );
+                            formik.setFieldValue("blinkTimeGreenToRed", value);
+                          }}
                           onBlur={formik.handleBlur}
+                          autoFocus
                         />
                         {formik.touched.blinkTimeGreenToRed &&
                           formik.errors.blinkTimeGreenToRed && (
@@ -357,7 +364,18 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
                           type="number"
                           name="amberDurationGreenToRed"
                           value={formik.values.amberDurationGreenToRed}
-                          onChange={formik.handleChange}
+                          min={0}
+                          max={5}
+                          onChange={(e) => {
+                            const value = Math.max(
+                              0,
+                              Math.min(5, Number(e.target.value))
+                            );
+                            formik.setFieldValue(
+                              "amberDurationGreenToRed",
+                              value
+                            );
+                          }}
                           onBlur={formik.handleBlur}
                         />
                         {formik.touched.amberDurationGreenToRed &&
@@ -370,7 +388,6 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
                 </div>
               </div>
             )}
-
             <Button type="submit">Send Signal</Button>
           </form>
         )}
