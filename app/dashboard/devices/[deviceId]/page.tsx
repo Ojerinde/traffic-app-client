@@ -59,9 +59,9 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
     (state) => state.signalConfig
   );
 
-  useEffect(() => {
-    dispatch(getUserDeviceStateData(params.deviceId));
-  }, [dispatch, params.deviceId]);
+  // useEffect(() => {
+  //   dispatch(getUserDeviceStateData(params.deviceId));
+  // }, [dispatch, params.deviceId]);
 
   useEffect(() => {
     dispatch(setIsIntersectionConfigurable(false));
@@ -208,19 +208,19 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
 
         case "state_feedback":
           if (feedback.payload.error) {
-            // dispatch(
-            //   addCurrentDeviceStateData({
-            //     DeviceID: "",
-            //     Auto: false,
-            //     Power: false,
-            //     Manual: false,
-            //     Next: false,
-            //     Hold: false,
-            //     Reset: false,
-            //     Restart: false,
-            //   })
-            // );
-            // emitToastMessage("Could not fetch device state data", "error");
+            dispatch(
+              addCurrentDeviceStateData({
+                DeviceID: "",
+                Auto: false,
+                Power: false,
+                Manual: false,
+                Next: false,
+                Hold: false,
+                Reset: false,
+                Restart: false,
+              })
+            );
+            emitToastMessage("Could not fetch device state data", "error");
           } else {
             console.log("State feddback", feedback.payload);
             dispatch(addCurrentDeviceStateData(feedback.payload));
@@ -241,7 +241,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
       socket?.removeEventListener("message", handleDataFeedback);
       dispatch(closePreviewCreatedPatternPhase());
     };
-  }, [dispatch]);
+  }, [dispatch, deviceActiveStateData]);
 
   // Fetch Intersection Config Data
   useEffect(() => {
