@@ -11,7 +11,7 @@ import {
   setSignalState,
   setSignalString,
 } from "@/store/signals/SignalConfigSlice";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { getWebSocket } from "../../websocket";
 import { emitToastMessage } from "@/utils/toastFunc";
 import { useDeviceStatus } from "@/hooks/useDeviceStatus";
@@ -41,6 +41,9 @@ export interface IntersectionConfigItem {
 const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
   const { deviceAvailability, currentDeviceInfoData, deviceActiveStateData } =
     useAppSelector((state) => state.userDevice);
+  const [showAutoMode, setShowAutoMode] = useState<boolean>(
+    deviceActiveStateData?.Auto
+  );
 
   const dispatch = useAppDispatch();
 
@@ -59,9 +62,9 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
     (state) => state.signalConfig
   );
 
-  // useEffect(() => {
-  //   dispatch(getUserDeviceStateData(params.deviceId));
-  // }, [dispatch, params.deviceId]);
+  useEffect(() => {
+    setShowAutoMode(deviceActiveStateData?.Auto);
+  }, [deviceActiveStateData]);
 
   useEffect(() => {
     dispatch(setIsIntersectionConfigurable(false));
@@ -70,7 +73,8 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
 
   console.log(
     "Device Active data Intersection Page A-1",
-    deviceActiveStateData
+    deviceActiveStateData,
+    showAutoMode
   );
 
   // Fetch Device Config Data
@@ -179,7 +183,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
           break;
 
         case "sign_feedback":
-          if (deviceActiveStateData?.Auto === false) return;
+          if (!showAutoMode) return;
           if (countdownInterval) {
             clearInterval(countdownInterval);
             countdownInterval = null;
