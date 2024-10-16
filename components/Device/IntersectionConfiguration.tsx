@@ -9,6 +9,7 @@ import IntersectionConfigurationItem from "./IntersectionConfigurationItem";
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
 import {
   closePreviewCreatedPatternPhase,
+  setIsIntersectionConfigurable,
   setManualMode,
 } from "@/store/signals/SignalConfigSlice";
 import { getWebSocket } from "@/app/dashboard/websocket";
@@ -266,6 +267,7 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
           onClick={() => {
             router.push(`${pathname}/intersection_configuration`);
             dispatch(setManualMode(false));
+            dispatch(setIsIntersectionConfigurable(true));
           }}
         >
           Configure
