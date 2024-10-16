@@ -49,6 +49,8 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
     setShowManualMoreConfig(!deviceActiveStateData?.Auto);
   }, [deviceActiveStateData]);
 
+  console.log("Device Active data Intersection Page B", deviceActiveStateData);
+
   const handleRequest = async (action: string) => {
     const isPasswordVerified = GetItemFromLocalStorage("isPasswordVerified");
 

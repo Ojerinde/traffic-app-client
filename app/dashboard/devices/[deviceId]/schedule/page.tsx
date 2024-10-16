@@ -261,6 +261,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
   );
 
   const handlePlanChange = (newValue: SingleValue<Option>) => {
+    console.log("New value", newValue);
     if (newValue) {
       setSelectedPlan(newValue);
       const plan = plans.find(
@@ -284,6 +285,13 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
       }
     }
   };
+
+  useEffect(() => {
+    handlePlanChange({
+      value: dayType.value.toUpperCase(),
+      label: dayType.label.toUpperCase(),
+    });
+  }, []);
 
   const handleDayTypeChange = (newValue: SingleValue<Option>) => {
     if (newValue) {
@@ -466,7 +474,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
         let timeSegment = plan.schedule[timeSegmentKey];
 
         // If the current segment has a value, send the previous accumulated range and start a new one
-        if (timeSegment && timeSegment.value) {
+        if (timeSegment && timeSegment.value && timeSegment.value !== "None") {
           // If there's a previous segment without values, send it
           if (lastValidSegment && lastStartKey !== timeSegmentKey) {
             console.log(
