@@ -60,9 +60,17 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
   );
 
   useEffect(() => {
+    dispatch(getUserDeviceStateData(params.deviceId));
+  }, [dispatch, params.deviceId]);
+
+  useEffect(() => {
     dispatch(setIsIntersectionConfigurable(false));
     dispatch(getUserDeviceStateData(params.deviceId));
   }, [dispatch, isIntersectionConfigurable]);
+  console.log(
+    "Device Active data Intersection Page A-1",
+    deviceActiveStateData
+  );
 
   // Fetch Device Config Data
   useEffect(() => {

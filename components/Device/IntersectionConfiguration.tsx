@@ -36,7 +36,6 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
   const dispatch = useAppDispatch();
   const { deviceActiveStateData } = useAppSelector((state) => state.userDevice);
   const { landingPageSignals } = useAppSelector((state) => state.signalConfig);
-  console.log("Device", deviceActiveStateData);
   const [showManualMoreConfig, setShowManualMoreConfig] =
     useState<boolean>(false);
   // State to track the current mode (Auto or Manual)
