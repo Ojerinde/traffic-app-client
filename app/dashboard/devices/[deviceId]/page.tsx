@@ -67,6 +67,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
     dispatch(setIsIntersectionConfigurable(false));
     dispatch(getUserDeviceStateData(params.deviceId));
   }, [dispatch, isIntersectionConfigurable]);
+
   console.log(
     "Device Active data Intersection Page A-1",
     deviceActiveStateData
