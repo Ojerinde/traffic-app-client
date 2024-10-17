@@ -38,6 +38,20 @@ export interface IntersectionConfigItem {
   value: string;
 }
 
+function formatUnixTimestamp(unixTimestamp: any) {
+  const date = new Date(unixTimestamp * 1000);
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+
+  return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+}
+
 const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
   const { deviceAvailability, currentDeviceInfoData, deviceActiveStateData } =
     useAppSelector((state) => state.userDevice);
@@ -291,12 +305,12 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
     {
       iconName: "calendar",
       label: "Date",
-      value: formatRtcDate(currentDeviceInfoData?.Rtc),
+      value: formatRtcDate(formatUnixTimestamp(currentDeviceInfoData?.Rtc)),
     },
     {
       iconName: "clock",
       label: "Time",
-      value: formatRtcTime(currentDeviceInfoData?.Rtc),
+      value: formatRtcTime(formatUnixTimestamp(currentDeviceInfoData?.Rtc)),
     },
     {
       iconName: "temp",
