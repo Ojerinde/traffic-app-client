@@ -270,6 +270,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
         })
       );
     };
+
     const sendInfoMessage = () => {
       socket.send(
         JSON.stringify({
