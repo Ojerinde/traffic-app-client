@@ -49,12 +49,9 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
     setShowManualMoreConfig(!deviceActiveStateData?.Auto);
   }, [deviceActiveStateData]);
 
-  console.log("Device Active data Intersection Page B", deviceActiveStateData);
-
   const handleRequest = async (action: string) => {
     const isPasswordVerified = GetItemFromLocalStorage("isPasswordVerified");
-
-    if (!isPasswordVerified || Date.now() - isPasswordVerified.time > 60000) {
+    if (!isPasswordVerified || Date.now() - isPasswordVerified.time > 180000) {
       const password = prompt("Please enter your password to proceed");
 
       if (!password) return;
@@ -75,14 +72,12 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
       }
     }
     if (action === "Manual") {
-      console.log("Manual action triggered");
       dispatch(setManualMode(true));
       setShowManualMoreConfig(true);
       dispatch(closePreviewCreatedPatternPhase());
     }
 
     if (action === "Auto") {
-      console.log("Auto action triggered");
       dispatch(setManualMode(false));
       setShowManualMoreConfig(false);
     }

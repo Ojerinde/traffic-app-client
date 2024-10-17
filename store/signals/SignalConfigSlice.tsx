@@ -21,6 +21,7 @@ interface SignalConfigState {
   };
   manualMode: boolean;
   landingPageSignals: Signal[];
+  countDownColor: "red" | "yellow" | "green";
 }
 
 const initializeSignals = (
@@ -61,6 +62,7 @@ const initialConfig: SignalConfigState = {
   },
   manualMode: false,
   landingPageSignals: [],
+  countDownColor: "green",
 };
 
 const signalConfigSlice = createSlice({
@@ -116,6 +118,12 @@ const signalConfigSlice = createSlice({
           : signal
       );
     },
+    updateCountDownColor(
+      state,
+      action: PayloadAction<"red" | "yellow" | "green">
+    ) {
+      state.countDownColor = action.payload;
+    },
   },
 });
 
@@ -132,5 +140,6 @@ export const {
   setManualMode,
   setLandingPageSignals,
   setLandingPageInitialSignals,
+  updateCountDownColor,
 } = signalConfigSlice.actions;
 export default signalConfigSlice.reducer;

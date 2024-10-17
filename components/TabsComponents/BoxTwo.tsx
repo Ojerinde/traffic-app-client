@@ -8,6 +8,7 @@ import {
   setIsIntersectionConfigurable,
   setSignalState,
   setSignalString,
+  updateCountDownColor,
 } from "@/store/signals/SignalConfigSlice";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import HttpRequest from "@/store/services/HttpRequest";
@@ -447,13 +448,6 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
         let timeLeft =
           initialTimeLeft !== null ? initialTimeLeft : currentPhase.duration;
 
-        console.log(
-          "Start Playing",
-          pattern.configuredPhases,
-          currentPhase,
-          timeLeft
-        );
-
         const showPhase = (
           phase: any,
           time: number,
@@ -470,9 +464,8 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
         };
 
         const blinkPhase = (phase: any, blinkTime: number) => {
-          console.log("Blink Phase", phase, blinkTime);
           return new Promise<void>((resolve) => {
-            let blinkCount = blinkTime * 2; // Two blinks per second
+            let blinkCount = blinkTime * 2;
             const blinkInterval = setInterval(() => {
               showPhase(phase, timeLeft, blinkCount % 2 === 0);
               blinkCount--;
@@ -485,7 +478,6 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
         };
 
         const showAmber = (phase: any, amberDuration: number) => {
-          console.log("Show Amber", phase, amberDuration);
           return new Promise<void>((resolve) => {
             dispatch(
               previewCreatedPatternPhase({
@@ -501,6 +493,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
 
         const runPhase = async () => {
           showPhase(currentPhase, timeLeft);
+          dispatch(updateCountDownColor("green"));
 
           const id = setInterval(async () => {
             timeLeft -= 1;
@@ -511,10 +504,12 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
               setRemainingTime(null);
 
               if (pattern.blinkEnabled && pattern.blinkTimeGreenToRed > 0) {
+                dispatch(updateCountDownColor("red"));
                 await blinkPhase(currentPhase, pattern.blinkTimeGreenToRed);
               }
 
               if (pattern.amberEnabled && pattern.amberDurationGreenToRed > 0) {
+                dispatch(updateCountDownColor("yellow"));
                 await showAmber(currentPhase, pattern.amberDurationGreenToRed);
               }
 

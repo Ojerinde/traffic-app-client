@@ -246,7 +246,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
     // Fetch Device State Data
     const socket = getWebSocket();
 
-    const sendMessage = () => {
+    const sendStateMessage = () => {
       socket.send(
         JSON.stringify({
           event: "state_request",
@@ -256,16 +256,29 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
         })
       );
     };
+    const sendInfoMessage = () => {
+      socket.send(
+        JSON.stringify({
+          event: "info_request",
+          payload: {
+            DeviceID: params.deviceId,
+          },
+        })
+      );
+    };
 
     if (socket.readyState === WebSocket.OPEN) {
-      sendMessage();
+      sendStateMessage();
+      sendInfoMessage();
     } else {
       socket.onopen = () => {
-        sendMessage();
+        sendStateMessage();
+        sendInfoMessage();
       };
     }
     console.log("Params", params.deviceId);
     dispatch(getUserDeviceStateData(params.deviceId));
+    dispatch(getUserDeviceInfoData(params.deviceId));
 
     return () => {
       if (socket) {

@@ -354,6 +354,10 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
       dispatch(getUserPlan(email));
       setSchedule({});
       setSelectedPattern(null);
+      handlePlanChange({
+        value: dayType.value.toUpperCase(),
+        label: dayType.label.toUpperCase(),
+      });
     } catch (error: any) {
       emitToastMessage(
         error?.response?.data?.message || "An error occurred",
@@ -493,7 +497,10 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
       if (lastValidSegment && lastStartKey) {
         await sendMessage(lastStartKey, "23:59", lastValidSegment);
       }
-
+      emitToastMessage(
+        `All segments uploaded for plan: ${plan.name}`,
+        "success"
+      );
       console.log(`All segments uploaded for plan: ${plan.name}`);
     } catch (error: any) {
       emitToastMessage(error?.response?.data?.message, "error");

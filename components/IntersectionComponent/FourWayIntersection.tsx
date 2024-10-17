@@ -93,7 +93,10 @@ const pedestrianPositions = {
     300: { first: { top: -12, left: -14 }, second: { top: 80, left: -14 } },
   },
   S: {
-    1400: { first: { top: -25, left: -94 }, second: { top: -25, left: 72.8 } },
+    1400: {
+      first: { top: -25, left: -93.5 },
+      second: { top: -25, left: 72.8 },
+    },
     1300: { first: { top: -25, left: -99 }, second: { top: -25, left: 78 } },
     1200: { first: { top: -25, left: -80 }, second: { top: -25, left: 60 } },
     1100: { first: { top: -23, left: -80 }, second: { top: -23, left: 68 } },
@@ -107,7 +110,7 @@ const pedestrianPositions = {
     300: { first: { top: -15, left: -52 }, second: { top: -15, left: 40 } },
   },
   W: {
-    1400: { first: { top: 70.5, left: 25 }, second: { top: -95, left: 25 } },
+    1400: { first: { top: 70, left: 25 }, second: { top: -95, left: 25 } },
     1300: { first: { top: 75, left: 25 }, second: { top: -100, left: 25 } },
     1200: { first: { top: 62, left: 25 }, second: { top: -82, left: 25 } },
     1100: { first: { top: 62, left: 23 }, second: { top: -80, left: 23 } },
@@ -150,6 +153,7 @@ const FourWayIntersection = ({ editable }: { editable: boolean }) => {
     signals: trafficSignals,
     createdPatternPhasePreviewing,
     manualMode,
+    countDownColor,
   } = useAppSelector((state) => state.signalConfig);
 
   const [screenWidth, setScreenWidth] = useState<number | undefined>(undefined);
@@ -193,6 +197,7 @@ const FourWayIntersection = ({ editable }: { editable: boolean }) => {
         initialSignals={signalsArray}
         backgroundImage="/images/cross.png"
         editable={editable}
+        countDownColor={countDownColor}
         manualMode={manualMode}
         createdPatternPhasePreviewing={createdPatternPhasePreviewing}
       />

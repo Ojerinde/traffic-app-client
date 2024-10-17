@@ -60,7 +60,7 @@ const SignalLight = styled.div<{
       ? "orange"
       : color === "G"
       ? "green"
-      : "grey"};
+      : "rgb(83,92,91)"};
   margin: 1.1px;
   border-radius: 50%;
   cursor: ${({ $editable, $manualMode }) =>
@@ -223,7 +223,7 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
                     ? "red"
                     : pedestrian === "G"
                     ? "green"
-                    : "grey",
+                    : "rgb(83,92,91)",
                 padding: ".4rem",
                 borderRadius: "50%",
               }}
@@ -250,7 +250,7 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
                     ? "red"
                     : pedestrian === "G"
                     ? "green"
-                    : "grey",
+                    : "rgb(83,92,91)",
                 padding: ".4rem",
                 borderRadius: "50%",
               }}
@@ -328,7 +328,7 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
                     ? "red"
                     : pedestrian === "G"
                     ? "green"
-                    : "grey",
+                    : "rgb(83,92,91)",
                 padding: ".4rem",
                 borderRadius: "50%",
               }}
@@ -355,7 +355,7 @@ const TrafficSignal: React.FC<TrafficSignalProps> = ({
                     ? "red"
                     : pedestrian === "G"
                     ? "green"
-                    : "grey",
+                    : "rgb(83,92,91)",
                 padding: ".4rem",
                 borderRadius: "50%",
               }}

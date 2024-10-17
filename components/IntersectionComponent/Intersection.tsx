@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import TrafficSignal from "./TrafficSignal";
 import { IoMdAddCircle } from "react-icons/io";
-import { IoCheckmarkDoneCircleSharp } from "react-icons/io5";
 import { motion } from "framer-motion";
 import HttpRequest from "@/store/services/HttpRequest";
 import { GetItemFromLocalStorage } from "@/utils/localStorageFunc";
@@ -15,7 +14,6 @@ import {
   setLandingPageSignals,
   SignalState,
 } from "@/store/signals/SignalConfigSlice";
-import { useParams } from "next/navigation";
 
 export interface Signal extends SignalState {
   direction: "N" | "E" | "S" | "W";
@@ -35,6 +33,7 @@ interface IntersectionDisplayProps {
     showDuration: boolean;
   };
   manualMode: boolean;
+  countDownColor: "red" | "green" | "yellow";
 }
 
 const Background = styled.div<{ $backgroundImage: string }>`
@@ -102,9 +101,10 @@ const AddPhaseButton = styled.button`
 `;
 const AddPhaseIcon = styled(motion.div)`
   position: absolute;
-  top: 44.4%;
+  top: 44.1%;
   left: 45%;
-  color: black;
+  background-color: rgb(83, 92, 91);
+  color: white;
   border: none;
   cursor: pointer;
   border-radius: 50%;
@@ -137,13 +137,25 @@ const AddPhaseIcon = styled(motion.div)`
     left: 43%;
   }
 `;
-
-const DurationDisplay = styled.div`
+const DurationDisplay = styled.div<{
+  $countDownColor: "red" | "green" | "yellow";
+}>`
   position: absolute;
-  top: 44.4%;
+  top: 44.1%;
   left: 45%;
-  background-color: rgba(0, 0, 0, 0.9);
-  color: white;
+  background-color: ${({ $countDownColor }) =>
+    $countDownColor === "red" ||
+    $countDownColor === "green" ||
+    $countDownColor === "yellow"
+      ? "white"
+      : "rgb(83, 92, 91)"};
+  font-weight: bolder;
+  color: ${({ $countDownColor }) =>
+    $countDownColor === "red"
+      ? "red"
+      : $countDownColor === "green"
+      ? "green"
+      : "yellow"};
   width: 5.2rem;
   height: 5.2rem;
   display: flex;
@@ -186,6 +198,7 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
   backgroundImage,
   editable,
   manualMode,
+  countDownColor,
   createdPatternPhasePreviewing,
 }) => {
   const [signals, setSignals] = useState<Signal[]>(initialSignals);
@@ -311,21 +324,21 @@ const IntersectionDisplay: React.FC<IntersectionDisplayProps> = ({
       {editable && !createdPatternPhasePreviewing.showDuration && (
         <AddPhaseIcon
           whileHover={{ scale: 1.2 }}
-          whileTap={{ scale: 0.9 }}
+          whileTap={{ scale: 1 }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
           onClick={() => setShowInputModal((prev) => !prev)}
         >
           {!showInputModal ? (
-            <IoMdAddCircle size={52} />
+            <IoMdAddCircle size={53} />
           ) : (
-            <MdCancel size={52} />
+            <MdCancel size={53} />
           )}
         </AddPhaseIcon>
       )}
 
       {createdPatternPhasePreviewing.showDuration &&
         createdPatternPhasePreviewing.duration !== null && (
-          <DurationDisplay>
+          <DurationDisplay $countDownColor={countDownColor}>
             {createdPatternPhasePreviewing.duration}s
           </DurationDisplay>
         )}
