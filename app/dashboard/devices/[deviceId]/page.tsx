@@ -269,16 +269,16 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
 
     if (socket.readyState === WebSocket.OPEN) {
       sendStateMessage();
-      sendInfoMessage();
+      // sendInfoMessage();
     } else {
       socket.onopen = () => {
         sendStateMessage();
-        sendInfoMessage();
+        // sendInfoMessage();
       };
     }
     console.log("Params", params.deviceId);
     dispatch(getUserDeviceStateData(params.deviceId));
-    dispatch(getUserDeviceInfoData(params.deviceId));
+    // dispatch(getUserDeviceInfoData(params.deviceId));
 
     return () => {
       if (socket) {
