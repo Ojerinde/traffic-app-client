@@ -39,10 +39,8 @@ export interface IntersectionConfigItem {
 }
 
 function formatUnixTimestamp(unixTimestamp: number) {
-  // Create a Date object from the Unix timestamp (in seconds)
   const date = new Date(unixTimestamp * 1000);
 
-  // Subtract one hour from the date
   date.setHours(date.getHours() - 1);
 
   const day = String(date.getDate()).padStart(2, "0");

@@ -99,6 +99,8 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
   const dispatch = useAppDispatch();
   const email = GetItemFromLocalStorage("user")?.email;
 
+  console.log(plans);
+
   const patternsOptions: Option[] =
     patterns
       ?.map((pattern) => ({
@@ -124,6 +126,8 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
     "patterns" | "upload" | "download" | null
   >(null);
   const [isUploadingSchedule, setIsUploadingSchedule] =
+    useState<boolean>(false);
+  const [isDownloadingSchedule, setIsDownloadingSchedule] =
     useState<boolean>(false);
 
   const [selectedPattern, setSelectedPattern] = useState<any>(null);
@@ -283,6 +287,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
   );
 
   const handlePlanChange = (newValue: SingleValue<Option>) => {
+    console.log("New Value", newValue);
     if (newValue) {
       setSelectedPlan(newValue);
       const plan = plans.find(
@@ -323,7 +328,10 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
       );
 
       if (plan) {
-        handlePlanChange(newValue);
+        handlePlanChange({
+          value: newValue.value.toUpperCase(),
+          label: newValue.label.toUpperCase(),
+        });
         setSelectedPattern(null);
         setRightBoxContent(null);
         setUpdatedPatternPhases([]);
@@ -442,7 +450,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
       );
       if (!confirmResult) return emitToastMessage("Upload cancelled", "error");
       const socket = getWebSocket();
-
+      setIsUploadingSchedule(true);
       const sendMessage = (
         startSegmentKey: any,
         endSegmentKey: any,
@@ -522,6 +530,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
         `All segments uploaded for plan: ${plan.name}`,
         "success"
       );
+      setIsUploadingSchedule(false);
       console.log(`All segments uploaded for plan: ${plan.name}`);
     } catch (error: any) {
       emitToastMessage(error?.response?.data?.message, "error");
@@ -532,6 +541,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
 
   const handleDownload = async () => {
     getWebSocket();
+    setIsDownloadingSchedule(true);
     const sendMessage = () => {
       socket.send(
         JSON.stringify({
@@ -636,22 +646,23 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
     const handleDataFeedback = async (event: MessageEvent) => {
       const feedback = JSON.parse(event.data);
       if (feedback.event !== "download_feedback") return;
+      setIsDownloadingSchedule(false);
 
       if (feedback.payload.error) {
         emitToastMessage("Could not download schedule from device", "error");
       } else {
         emitToastMessage(
-          "Schedule downloaded from device successfully",
+          "Schedule downloaded from hardware successfully! Saving...",
           "success"
         );
         const numToDay: { [key: number]: string } = {
-          0: "Sunday",
-          1: "Monday",
-          2: "Tuesday",
-          3: "Wednesday",
-          4: "Thursday",
-          5: "Friday",
-          6: "Saturday",
+          0: "MONDAY",
+          1: "TUESDAY",
+          2: "WEDNESDAY",
+          3: "THURSDAY",
+          4: "FRIDAY",
+          5: "SATURDAY",
+          6: "SUNDAY",
         };
         const Plan = numToDay[feedback.payload.Plan];
 
@@ -659,19 +670,30 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
           period: prog.period.slice(0, 5),
           ...parsePattern(prog.pattern),
         }));
-        console.log(patterns);
 
         const newPlan = {
           id: Date.now().toString(),
           email,
           data: patterns,
-          dayType: Plan,
+          dayType: Plan.toLowerCase(),
           name: Plan.toUpperCase(),
         };
-        console.log(newPlan);
+        console.log("New Plans", newPlan);
 
-        const { data } = await HttpRequest.put("/plans", newPlan);
-        console.log(data);
+        try {
+          const {
+            data: { message, plan },
+          } = await HttpRequest.put("/plans", newPlan);
+          dispatch(getUserPlan(email));
+          dispatch(getUserPattern(email));
+          handlePlanChange({
+            value: plan.dayType.toUpperCase(),
+            label: plan.dayType.toUpperCase(),
+          });
+          emitToastMessage(message, "success");
+        } catch (error) {
+          emitToastMessage("Could not save downloaded schedule", "error");
+        }
       }
     };
 
@@ -758,7 +780,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
             }}
             className="schedule__button"
           >
-            Upload to Device
+            {isUploadingSchedule ? "Uploading" : " Upload to Device"}
           </button>
           <button
             onClick={() => {
@@ -766,7 +788,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
             }}
             className="schedule__button"
           >
-            Download from Device
+            {isDownloadingSchedule ? "Downloading" : "Download from Device"}
           </button>
         </div>
       </div>
