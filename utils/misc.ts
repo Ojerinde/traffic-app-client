@@ -24,26 +24,38 @@ export function generatePhaseString(phaseData: PhaseData): string {
 export const formatRtcDate = (rtc: string | undefined) => {
   if (!rtc) return "Nill";
 
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
   const [day, month, yearTime] = rtc.split("-");
   const [year, time] = yearTime.split(" ");
 
-  const date = new Date(`${year}-${month}-${day}T${time}`);
+  const date = new Date(`${year}-${month}-${day}T${time}Z`);
 
-  const formattedDate = date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString("en-US", {
+    timeZone,
     year: "numeric",
     month: "numeric",
     day: "numeric",
     weekday: "long",
   });
-
-  return formattedDate;
 };
 
 export const formatRtcTime = (rtc: string | undefined) => {
   if (!rtc) return "Nill";
+
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
   const [day, month, yearTime] = rtc.split("-");
   const [year, time] = yearTime.split(" ");
-  return new Date(`${year}-${month}-${day}T${time}`).toLocaleTimeString();
+
+  const date = new Date(`${year}-${month}-${day}T${time}Z`);
+
+  return date.toLocaleTimeString("en-US", {
+    timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 };
 
 export const getDeviceStatus = (statuses: any, deviceId: string) => {
