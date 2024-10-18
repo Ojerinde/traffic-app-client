@@ -510,15 +510,13 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
   const socket = getWebSocket();
 
   const handleDownload = async () => {
-    // const socket = getWebSocket();
+    getWebSocket();
     const sendMessage = () => {
       socket.send(
         JSON.stringify({
           event: "download_request",
           payload: {
             DeviceID: params.deviceId,
-            plan: "joel",
-            email,
           },
         })
       );
@@ -632,7 +630,6 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
           <button
             onClick={() => {
               handleUpload();
-              // setRightBoxContent("upload");
             }}
             className="schedule__button"
           >
@@ -641,7 +638,6 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
           <button
             onClick={() => {
               handleDownload();
-              // setRightBoxContent("download");
             }}
             className="schedule__button"
           >
@@ -781,47 +777,6 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
             </div>
           </>
         )}
-        {/* {rightBoxContent === "download" && (
-          <div className="upload">
-            <h3>Download Plan from Device</h3>
-            <Select
-              options={plans?.map((plan) => ({
-                value: plan?.id,
-                label: plan?.name,
-              }))}
-              value={selectedDownloadPlan}
-              onChange={handleDownloadPlanChange}
-              className="upload__select--field"
-              placeholder="Select a plan to download"
-            />
-            <button onClick={handleDownload} className="upload__button">
-              Download from Device
-            </button>
-          </div>
-        )} */}
-        {/* {rightBoxContent === "upload" && (
-          <div className="upload">
-            <h3>Upload Plan to Device</h3>
-            <Select
-              options={plans?.map((plan) => ({
-                value: plan?.id,
-                label: plan?.name,
-              }))}
-              value={selectedUploadPlan}
-              onChange={handleUploadPlanChange}
-              className="upload__select--field"
-              placeholder="Select a plan to upload"
-            />
-
-            <button
-              onClick={handleUpload}
-              className="upload__button"
-              disabled={!selectedUploadPlan}
-            >
-              {isUploadingSchedule ? "Loading..." : "Upload to Device"}
-            </button>
-          </div>
-        )} */}
       </div>
     </div>
   );
