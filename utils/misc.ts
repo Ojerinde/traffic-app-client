@@ -29,7 +29,7 @@ export const formatRtcDate = (rtc: string | undefined) => {
   const [day, month, yearTime] = rtc.split("-");
   const [year, time] = yearTime.split(" ");
 
-  const date = new Date(`${year}-${month}-${day}T${time}Z`);
+  const date = new Date(`${year}-${month}-${day}T${time}`);
 
   return date.toLocaleDateString("en-US", {
     timeZone,
@@ -48,7 +48,8 @@ export const formatRtcTime = (rtc: string | undefined) => {
   const [day, month, yearTime] = rtc.split("-");
   const [year, time] = yearTime.split(" ");
 
-  const date = new Date(`${year}-${month}-${day}T${time}Z`);
+  // Remove 'Z' from the date string creation
+  const date = new Date(`${year}-${month}-${day}T${time}`);
 
   return date.toLocaleTimeString("en-US", {
     timeZone,

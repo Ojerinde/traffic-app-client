@@ -34,6 +34,25 @@ interface ScheduleTemplateProps {
   params: any;
 }
 
+interface Pattern {
+  name: string;
+  config: {
+    amberDurationGreenToRed: number;
+    amberDurationRedToGreen: number;
+    amberEnabled: boolean;
+    blinkEnabled: boolean;
+    blinkTimeGreenToRed: number;
+    blinkTimeRedToGreen: number;
+    configuredPhases: Array<{
+      name: string;
+      phaseId: string;
+      signalString: string;
+      duration: number;
+      id: number;
+    }>;
+  };
+}
+
 function generateTimeSegments(): string[] {
   const segments: string[] = [];
 
@@ -79,10 +98,6 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
     useAppSelector((state) => state.userDevice);
   const dispatch = useAppDispatch();
   const email = GetItemFromLocalStorage("user")?.email;
-
-  console.log("Plans", plans);
-  console.log("Patterns", patterns);
-  console.log("Phases", phases);
 
   const patternsOptions: Option[] =
     patterns
@@ -268,7 +283,6 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
   );
 
   const handlePlanChange = (newValue: SingleValue<Option>) => {
-    console.log("New value", newValue);
     if (newValue) {
       setSelectedPlan(newValue);
       const plan = plans.find(
@@ -538,10 +552,88 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
     }
   };
 
+  function generatePatternName(config: Pattern["config"]): string {
+    const parts: string[] = [];
+
+    if (config.blinkEnabled) {
+      parts.push(
+        `Blink${config.blinkTimeGreenToRed}${config.blinkTimeRedToGreen}`
+      );
+    }
+
+    if (config.amberEnabled) {
+      parts.push(
+        `Amber${config.amberDurationGreenToRed}${config.amberDurationRedToGreen}`
+      );
+    }
+
+    if (config.configuredPhases[0]?.duration >= 20) {
+      parts.push("Peak");
+    } else if (config.configuredPhases[0]?.duration >= 10) {
+      parts.push("Noon");
+    } else {
+      parts.push("OffPeak");
+    }
+
+    return parts.join("_") || "Default";
+  }
+
+  function parsePattern(patternArray: string[]): Pattern {
+    const config = {
+      amberDurationGreenToRed: 3,
+      amberDurationRedToGreen: 3,
+      amberEnabled: false,
+      blinkEnabled: false,
+      blinkTimeGreenToRed: 2,
+      blinkTimeRedToGreen: 1,
+      configuredPhases: [] as Pattern["config"]["configuredPhases"],
+    };
+
+    let currentPhaseIndex = 0;
+
+    patternArray.forEach((line, index) => {
+      const pattern = line.trim();
+      const match = pattern.match(/\*(\d+|X)\*(.*?)#/);
+      if (!match) return;
+
+      const [_, duration, signalString] = match;
+
+      if (duration === "X") {
+        config.blinkEnabled = true;
+      }
+
+      if (duration !== "X" && signalString.includes("A")) {
+        config.amberEnabled = true;
+      }
+
+      if (
+        duration !== "X" &&
+        !signalString.includes("X") &&
+        !signalString.includes("A")
+      ) {
+        config.configuredPhases.push({
+          name: `Phase${currentPhaseIndex + 1}`,
+          phaseId: String(currentPhaseIndex),
+          signalString: `*${signalString}#`,
+          duration: parseInt(duration) || 0,
+          id: currentPhaseIndex,
+        });
+        currentPhaseIndex++;
+      }
+    });
+
+    const pattern: Pattern = {
+      name: generatePatternName(config),
+      config,
+    };
+
+    return pattern;
+  }
+
   useEffect(() => {
     const socket = getWebSocket();
-    // Listen to feedback for uploading and downloading
-    const handleDataFeedback = (event: MessageEvent) => {
+
+    const handleDataFeedback = async (event: MessageEvent) => {
       const feedback = JSON.parse(event.data);
       if (feedback.event !== "download_feedback") return;
 
@@ -552,9 +644,34 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
           "Schedule downloaded from device successfully",
           "success"
         );
-        console.log("Download Program", feedback.payload.Program);
-        const modifiedProgram = feedback.payload.Program.map((prog: any) => {});
-        // Access the program property of the payload and use it to populate the
+        const numToDay: { [key: number]: string } = {
+          0: "Sunday",
+          1: "Monday",
+          2: "Tuesday",
+          3: "Wednesday",
+          4: "Thursday",
+          5: "Friday",
+          6: "Saturday",
+        };
+        const Plan = numToDay[feedback.payload.Plan];
+
+        const patterns = feedback.payload.Program.map((prog: any) => ({
+          period: prog.period.slice(0, 5),
+          ...parsePattern(prog.pattern),
+        }));
+        console.log(patterns);
+
+        const newPlan = {
+          id: Date.now().toString(),
+          email,
+          data: patterns,
+          dayType: Plan,
+          name: Plan.toUpperCase(),
+        };
+        console.log(newPlan);
+
+        const { data } = await HttpRequest.put("/plans", newPlan);
+        console.log(data);
       }
     };
 
