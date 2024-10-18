@@ -80,23 +80,25 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
   const dispatch = useAppDispatch();
   const email = GetItemFromLocalStorage("user")?.email;
 
-  const patternsOptions: Option[] = [{ value: "none", label: "None" }].concat(
+  console.log("Plans", plans);
+  console.log("Patterns", patterns);
+  console.log("Phases", phases);
+
+  const patternsOptions: Option[] =
     patterns
       ?.map((pattern) => ({
         value: pattern?.name?.toLowerCase(),
         label: pattern?.name,
       }))
-      .sort((a, b) => a.label.localeCompare(b.label)) || []
-  );
+      .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
-  const plansOptions: Option[] = [{ value: "none", label: "None" }].concat(
+  const plansOptions: Option[] =
     plans
       ?.map((plan) => ({
         value: plan?.name,
         label: plan?.name,
       }))
-      .sort((a, b) => a.label.localeCompare(b.label)) || []
-  );
+      .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
   const [schedule, setSchedule] = useState<ScheduleData>({});
   const [dayType, setDayType] = useState<Option>(dayTypeOptions[0]);
@@ -126,9 +128,19 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
   const handleSelectPattern = (patternName: string) => {
     dispatch(clearPhaseConfig());
 
+    // If no patternName or invalid pattern, reset everything to null
+    if (!patternName) {
+      setSelectedPattern(null);
+      setRightBoxContent(null);
+      setUpdatedPatternPhases([]);
+      dispatch(clearPhaseConfig());
+      return;
+    }
+
     const pattern = patterns.find(
       (pattern) => pattern?.name.toLowerCase() === patternName
     );
+
     if (pattern) {
       setSelectedPattern(pattern);
       setRightBoxContent("patterns");
@@ -136,11 +148,6 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
       pattern?.configuredPhases.forEach((phase: any) => {
         dispatch(addOrUpdatePhaseConfig(phase));
       });
-    } else {
-      setSelectedPattern(null);
-      setRightBoxContent(null);
-      setUpdatedPatternPhases([]);
-      dispatch(clearPhaseConfig());
     }
   };
 
@@ -517,6 +524,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
           event: "download_request",
           payload: {
             DeviceID: params.deviceId,
+            Plan: dayType.value.toUpperCase(),
           },
         })
       );
@@ -545,9 +553,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
           "success"
         );
         console.log("Download Program", feedback.payload.Program);
-        const modifiedProgram = feedback.payload.Program.map((prog: any) => {
-          return "joel";
-        });
+        const modifiedProgram = feedback.payload.Program.map((prog: any) => {});
         // Access the program property of the payload and use it to populate the
       }
     };
@@ -607,6 +613,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
                           typeof newValue === "string"
                             ? newValue
                             : newValue?.value || "";
+
                         handleChange(time, selectedValue);
                         handleSelectPattern(selectedValue);
                       }}
@@ -615,6 +622,7 @@ const ScheduleTemplate: React.FC<ScheduleTemplateProps> = ({ params }) => {
                       className="schedule__select--field"
                       placeholder="Select pattern"
                       isSearchable
+                      isClearable
                     />
                   </td>
                 </tr>
