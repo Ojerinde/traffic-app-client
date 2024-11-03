@@ -155,7 +155,7 @@ const DurationDisplay = styled.div<{
       ? "red"
       : $countDownColor === "green"
       ? "green"
-      : "yellow"};
+      : "rgb(207, 193, 6)"};
   width: 5.2rem;
   height: 5.2rem;
   display: flex;
