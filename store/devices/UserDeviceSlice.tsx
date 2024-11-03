@@ -2,6 +2,10 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import HttpRequest from "../services/HttpRequest";
 import { emitToastMessage } from "@/utils/toastFunc";
 
+interface DirectionData {
+  Bat: string;
+  Temp: string;
+}
 interface InitialStateTypes {
   devices: any[];
   phases: any[];
@@ -14,8 +18,10 @@ interface InitialStateTypes {
   isFetchingPatterns: boolean;
   isFetchingPlans: boolean;
   currentDeviceInfoData: {
-    Bat: string;
-    Temp: string;
+    North: DirectionData;
+    East: DirectionData;
+    West: DirectionData;
+    South: DirectionData;
     Rtc: string;
     Plan: string;
     Period: string;
@@ -54,8 +60,10 @@ const initialState: InitialStateTypes = {
   isFetchingPatterns: false,
   isFetchingPlans: false,
   currentDeviceInfoData: {
-    Bat: "",
-    Temp: "",
+    North: { Bat: "", Temp: "" },
+    East: { Bat: "", Temp: "" },
+    West: { Bat: "", Temp: "" },
+    South: { Bat: "", Temp: "" },
     Rtc: "",
     Plan: "",
     Period: "",

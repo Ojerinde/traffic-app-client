@@ -278,7 +278,7 @@ const IntersectionConfiguration: React.FC<DeviceConfigurationProps> = ({
       </ul>
 
       <div>
-        <h2>Intersection Commands Control</h2>
+        <h2>Commands Control</h2>
         <div className="intersectionConfiguration__commands">
           <button
             onClick={() => {

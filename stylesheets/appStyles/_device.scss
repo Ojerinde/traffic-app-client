@@ -210,3 +210,28 @@
     }
   }
 }
+
+.device-table {
+  table {
+    margin-top: 0.5rem;
+    width: 100%;
+    border-collapse: collapse;
+
+    th,
+    td {
+      border: 1px solid grey;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: $color-yellow;
+      color: white;
+      font-weight: bold;
+      font-size: 1.4rem;
+    }
+    td {
+      font-size: 1.2rem;
+    }
+  }
+}

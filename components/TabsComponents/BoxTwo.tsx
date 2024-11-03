@@ -473,7 +473,7 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
                 clearInterval(blinkInterval);
                 resolve();
               }
-            }, 1000); // 1000ms for each blink state
+            }, 500); // 500ms for each blink state
           });
         };
 

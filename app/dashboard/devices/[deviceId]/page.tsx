@@ -173,8 +173,10 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
           if (feedback.payload.error) {
             dispatch(
               addCurrentDeviceInfoData({
-                Bat: "",
-                Temp: "",
+                North: { Bat: "", Temp: "" },
+                East: { Bat: "", Temp: "" },
+                West: { Bat: "", Temp: "" },
+                South: { Bat: "", Temp: "" },
                 Rtc: "",
                 Plan: "",
                 Period: "",
@@ -232,7 +234,6 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
             );
             emitToastMessage("Could not fetch device state data", "error");
           } else {
-            console.log("State feddback", feedback.payload);
             dispatch(addCurrentDeviceStateData(feedback.payload));
           }
           break;
@@ -316,20 +317,6 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
       value: formatRtcTime(formatUnixTimestamp(+currentDeviceInfoData?.Rtc)),
     },
     {
-      iconName: "temp",
-      label: "Enclosure Temp.",
-      value: currentDeviceInfoData?.Temp
-        ? `${currentDeviceInfoData.Temp}°C`
-        : "Nill",
-    },
-    {
-      iconName: "battery-charging",
-      label: "Battery Status",
-      value: currentDeviceInfoData?.Bat
-        ? `${currentDeviceInfoData.Bat}V`
-        : "Nill",
-    },
-    {
       iconName: "wifi",
       label: "WiFi Status",
       value: icon,
@@ -337,7 +324,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
   ];
   const intersectionConfigItems: IntersectionConfigItem[] = [
     {
-      label: "Intersection Name",
+      label: "Name",
       value: currentDeviceInfoData?.JunctionId || "Nill",
     },
     {
@@ -349,7 +336,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
       value: currentDeviceInfoData?.Period || "Nill",
     },
   ];
-
+  const directions = ["North", "East", "West", "South"] as const;
   return (
     <section className="device">
       <div className="device__left">
@@ -358,6 +345,55 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({ params }) => {
       <div className="device__right">
         <div className="device__right--top">
           <DeviceConfiguration deviceConfigItems={deviceConfigItems} />
+          <div className="device-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Parameters/Device ID</th>
+                  {directions.map(
+                    (dir) =>
+                      currentDeviceInfoData[dir] && <th key={dir}>{dir}</th>
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Battery [V]</td>
+                  {directions.map(
+                    (dir) =>
+                      currentDeviceInfoData[dir] && (
+                        <td
+                          key={`${dir}-battery`}
+                          className={
+                            currentDeviceInfoData[dir].Bat === "0" ? "red" : ""
+                          }
+                        >
+                          {currentDeviceInfoData[dir]?.Bat ?? "0"}
+                        </td>
+                      )
+                  )}
+                </tr>
+                <tr>
+                  <td>Temperature [°C]</td>
+                  {directions.map(
+                    (dir) =>
+                      currentDeviceInfoData[dir] && (
+                        <td
+                          key={`${dir}-temperature`}
+                          className={
+                            currentDeviceInfoData[dir].Temp === "0"
+                              ? "blue"
+                              : ""
+                          }
+                        >
+                          {currentDeviceInfoData[dir]?.Temp ?? "0"}
+                        </td>
+                      )
+                  )}
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
         <div className="device__right--bottom">
           <IntersectionConfiguration
