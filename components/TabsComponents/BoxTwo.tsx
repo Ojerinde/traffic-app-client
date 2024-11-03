@@ -994,7 +994,11 @@ const BoxTwo: React.FC<BoxTwoProps> = ({}) => {
             {patternsToShow?.map((pattern, index) => (
               <li className="patterns__list" key={index}>
                 <div className="patterns__list--item">
-                  <h3>{pattern.name}</h3>
+                  <h3>
+                    {pattern?.name.length > 17
+                      ? `${pattern?.name.slice(0, 17)}...`
+                      : pattern?.name}
+                  </h3>
                   <div>
                     {/* Show More (Ellipsis) Button */}
                     {showPatternPhases === index ? (
